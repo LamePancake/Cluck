@@ -74,7 +74,8 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
-    <None Include="Cluck" />
+    <Compile Include="Cluck.cs" />
+    <Compile Include="TextureComponent.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />
