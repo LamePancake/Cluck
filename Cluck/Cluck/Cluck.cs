@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -22,6 +23,8 @@ namespace Cluck
         private Model leftArm;
         private BasicEffect effect;
         private Texture2D armsDiffuse;
+        private List<GameEntity> world;
+        private AISystem aiSystem;
 
         public Cluck()
         {
@@ -40,6 +43,13 @@ namespace Cluck
             // TODO: Add your initialization logic here
 
             base.Initialize();
+
+            world = new List<GameEntity>();
+            aiSystem = new AISystem(this);
+
+            TestEntity testEntity = new TestEntity();
+
+            world.Add(testEntity);
 
             //Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4.0f,
             //        (float)this.Window.ClientBounds.Width / (float)this.Window.ClientBounds.Height, 1f, 10f);
@@ -84,6 +94,7 @@ namespace Cluck
                 this.Exit();
 
             // TODO: Add your update logic here
+            aiSystem.UpdateWorld(world);
 
             base.Update(gameTime);
         }
