@@ -20,8 +20,13 @@ namespace Cluck
         SpriteBatch spriteBatch;
 
         private Model leftArm;
-        private BasicEffect effect;
+        private SpriteFont timerFont;
+        private TimeSpan timer;
+        private Boolean timeStart;
+        private string time;
         private Texture2D armsDiffuse;
+        private KeyboardState oldKeyState;
+        private KeyboardState curKeyState;
 
         private const float CAMERA_FOVX = 85.0f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -65,6 +70,9 @@ namespace Cluck
             windowWidth = GraphicsDevice.DisplayMode.Width / 2;
             windowHeight = GraphicsDevice.DisplayMode.Height / 2;
 
+            timer = new TimeSpan(0, 2, 0);
+            timeStart = false;
+
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
                 CAMERA_ACCELERATION_X,
@@ -99,10 +107,13 @@ namespace Cluck
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
+            timerFont = Content.Load<SpriteFont>("MessageFont");
             // TODO: use this.Content to load your game content here
             armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
+
+            time = timer.ToString();
         }
 
         /// <summary>
@@ -114,6 +125,14 @@ namespace Cluck
             // TODO: Unload any non ContentManager content here
         }
 
+        //
+        // Adds time on to TimeSpan timer
+        //
+        private void AddTime(TimeSpan addition)
+        {
+            timer += addition;
+        }
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
@@ -121,6 +140,7 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
+            curKeyState = Keyboard.GetState();
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -129,7 +149,27 @@ namespace Cluck
                 this.Exit();
 
             // TODO: Add your update logic here
+            if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
+            {
+                if(!timeStart)
+                {
+                    timeStart = true;
+                }
+                else
+                {
+                    timeStart = false;
+                }
+            }
 
+
+            if (timer > TimeSpan.Zero && timeStart)
+            {
+                timer -= gameTime.ElapsedGameTime;
+            }
+
+            time = timer.ToString();
+
+            oldKeyState = curKeyState;
             base.Update(gameTime);
         }
 
@@ -162,7 +202,16 @@ namespace Cluck
                 mm.Draw();
             }
 
+            spriteBatch.Begin();
+            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.End();
+
             base.Draw(gameTime);
+        }
+
+        private void drawTimer()
+        {
+
         }
     }
 }
