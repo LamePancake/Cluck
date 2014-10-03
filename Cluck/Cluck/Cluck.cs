@@ -125,6 +125,14 @@ namespace Cluck
             // TODO: Unload any non ContentManager content here
         }
 
+        //
+        // Adds time on to TimeSpan timer
+        //
+        private void AddTime(TimeSpan addition)
+        {
+            timer += addition;
+        }
+
         /// <summary>
         /// Allows the game to run logic such as updating the world,
         /// checking for collisions, gathering input, and playing audio.
