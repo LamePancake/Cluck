@@ -140,21 +140,35 @@ namespace Cluck
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
+            GameEntity chickenEntity2 = new GameEntity();
             TestEntity testEntity = new TestEntity();
 
             Renderable fenceRenderable = new Renderable(fence);
             Renderable groundRenderable = new Renderable(ground);
+
+            KinematicComponent chickinematics = new KinematicComponent(new Vector3(600, 600, 000), 0.5f, 2f);
             Renderable chickenRenderable = new Renderable(chicken);
-            KinematicComponent chickinematics = new KinematicComponent(new Vector3(200,200,200), 5, 10);
+
+            KinematicComponent chickinematics2 = new KinematicComponent(new Vector3(0, 0, 0), 0.5f, 2f);
+            SteeringComponent chickenSteering2 = new SteeringComponent(chickinematics.position);
+            Renderable chickenRenderable2 = new Renderable(chicken);
+
+            SteeringComponent chickenSteering = new SteeringComponent(chickinematics2.position);
 
             fenceEntity.AddComponent(fenceRenderable);
             groundEntity.AddComponent(groundRenderable);
             chickenEntity.AddComponent(chickenRenderable);
             chickenEntity.AddComponent(chickinematics);
+            chickenEntity.AddComponent(chickenSteering);
+
+            chickenEntity2.AddComponent(chickenRenderable2);
+            chickenEntity2.AddComponent(chickinematics2);
+            chickenEntity2.AddComponent(chickenSteering2);
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
+            world.Add(chickenEntity2);
 
             world.Add(testEntity);
         }
@@ -220,7 +234,7 @@ namespace Cluck
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
 
             oldKeyState = curKeyState;
             base.Update(gameTime);
