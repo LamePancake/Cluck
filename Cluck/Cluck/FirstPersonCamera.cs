@@ -40,7 +40,7 @@ namespace Cluck
         private const float DEFAULT_VELOCITY_Y = 1.0f;
         private const float DEFAULT_VELOCITY_Z = 1.0f;
         private const float DEFAULT_RUNNING_MULTIPLIER = 2.0f;
-        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.5f;
+        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.75f;
         private const float DEFAULT_MOUSE_SMOOTHING_SENSITIVITY = 0.5f;
         private const float DEFAULT_SPEED_ROTATION = 0.3f;
         private const float HEIGHT_MULTIPLIER_CROUCHING = 0.5f;
@@ -98,7 +98,9 @@ namespace Cluck
             acceleration = new Vector3(DEFAULT_ACCELERATION_X, DEFAULT_ACCELERATION_Y, DEFAULT_ACCELERATION_Z);
             velocityWalking = new Vector3(DEFAULT_VELOCITY_X, DEFAULT_VELOCITY_Y, DEFAULT_VELOCITY_Z);
             velocityRunning = velocityWalking * DEFAULT_RUNNING_MULTIPLIER;
+            
             velocityCrouching = velocityWalking * DEFAULT_CROUCHING_MULTIPLIER;
+
             velocity = velocityWalking;
             orientation = Quaternion.Identity;
             viewMatrix = Matrix.Identity;
@@ -234,10 +236,10 @@ namespace Cluck
 
         public override void Update(GameTime gameTime)
         {
-            base.Update(gameTime);
-
             Input i = inputManager.Update(Game.Window.ClientBounds);
             UpdateCamera(gameTime, i);
+
+            base.Update(gameTime);
         }
 
         /// <summary>
@@ -250,7 +252,7 @@ namespace Cluck
         /// <param name="yOffset">How far to position the weapon up or down.</param>
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix WeaponWorldMatrix(float xOffset, float yOffset, float zOffset)
+        public Matrix ArmWorldMatrix(float xOffset, float yOffset, float zOffset)
         {
             Vector3 weaponPos = eye;
 
@@ -274,7 +276,7 @@ namespace Cluck
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
         /// <param name="scale">How much to scale the weapon.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix WeaponWorldMatrix(float xOffset, float yOffset, float zOffset, float scale)
+        public Matrix ArmWorldMatrix(float xOffset, float yOffset, float zOffset, float scale)
         {
             Vector3 weaponPos = eye;
 
@@ -375,10 +377,8 @@ namespace Cluck
             float elapsedTimeSec = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 direction = new Vector3();
 
-            if (i.IsSprinting())
+            if (i.IsSprinting() && posture != Posture.Crouching)
                 velocity = velocityRunning;
-            //else if (i.IsCrouching())
-                //velocity = velocityCrouching;
             else
                 velocity = velocityWalking;
 
@@ -706,6 +706,15 @@ namespace Cluck
         public Vector3 ZAxis
         {
             get { return zAxis; }
+        }
+
+        public bool isJumping()
+        {
+            if (posture == Posture.Jumping || posture == Posture.Rising)
+            {
+                return true;
+            }
+            return false;
         }
 
     #endregion
