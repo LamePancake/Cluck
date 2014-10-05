@@ -79,10 +79,6 @@ namespace Cluck
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera);
 
-            TestEntity testEntity = new TestEntity();
-
-            world.Add(testEntity);
-
             base.Initialize();
 
             windowWidth = GraphicsDevice.DisplayMode.Width / 2;
@@ -144,18 +140,23 @@ namespace Cluck
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
+            TestEntity testEntity = new TestEntity();
 
             Renderable fenceRenderable = new Renderable(fence);
             Renderable groundRenderable = new Renderable(ground);
             Renderable chickenRenderable = new Renderable(chicken);
+            KinematicComponent chickinematics = new KinematicComponent(new Vector3(100,100,100), 15);
 
             fenceEntity.AddComponent(fenceRenderable);
             groundEntity.AddComponent(groundRenderable);
             chickenEntity.AddComponent(chickenRenderable);
+            chickenEntity.AddComponent(chickinematics);
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
+
+            world.Add(testEntity);
         }
 
         /// <summary>
