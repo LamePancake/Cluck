@@ -88,6 +88,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Cluck.cs" />
+    <Compile Include="Renderable.cs" />
+    <Compile Include="RenderSystem.cs" />
     <Compile Include="TextureComponent.cs" />
   </ItemGroup>
   <ItemGroup>
