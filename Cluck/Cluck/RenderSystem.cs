@@ -25,14 +25,14 @@ namespace Cluck
                 
                 if (entity.HasComponent(myFlag) && !entity.HasComponent((int)component_flags.kinematic))
                 {
-                    renderable = (Renderable)entity.GetComponent(myFlag);
+                    renderable = entity.GetComponent<Renderable>();
                     Render(renderable);
                 }
                 else if (entity.HasComponent((int)component_flags.kinematic) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    KinematicComponent kinematic = (KinematicComponent)entity.GetComponent((int)component_flags.kinematic);
+                    KinematicComponent kinematic = entity.GetComponent <KinematicComponent>();
 
-                    renderable = (Renderable)entity.GetComponent(myFlag);
+                    renderable = entity.GetComponent<Renderable>();
                     
                     renderable.SetMatrix(Matrix.CreateTranslation(kinematic.position));
 

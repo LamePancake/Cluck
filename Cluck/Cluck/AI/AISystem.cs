@@ -21,16 +21,16 @@ namespace Cluck.AI
             {
                 if (entity.HasComponent(myFlag))
                 {
-                    AIThinking thinking = (AIThinking)entity.GetComponent((int)component_flags.aiThinking);
+                    AIThinking thinking = entity.GetComponent<AIThinking>();
                     thinking.Update();
                 }
 
                 if (entity.HasComponent((int)component_flags.kinematic) && entity.HasComponent((int)component_flags.aiSteering))
                 {
                     Console.WriteLine("Booo");
-                    KinematicComponent kinematics = (KinematicComponent)entity.GetComponent((int)component_flags.kinematic);
+                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
 
-                    SteeringComponent steering = (SteeringComponent)entity.GetComponent((int)component_flags.aiSteering);
+                    SteeringComponent steering = entity.GetComponent<SteeringComponent>();
 
                     SteeringOutput output = steeringBehaviours.Seek(steering.GetTarget(), kinematics);
 
