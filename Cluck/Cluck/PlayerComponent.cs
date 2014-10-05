@@ -27,21 +27,17 @@ namespace Cluck
         private Matrix[] leftArmMatrix;
         private Matrix[] rightArmMatrix;
 
-        private const float ARM_SCALE = 0.2f;
-        private const float ARM_X_OFFSET = 3.0f;//0.45f;
-        private const float ARM_Y_OFFSET = -13.5f;//-0.75
-        private const float ARM_Z_OFFSET = 9.0f;//1.65f;
-        private const float LEFT_ARM_X_OFFSET = -3.0f;
+        private const float ARM_SCALE = 0.03f;
+        private const float ARM_X_OFFSET = 0.8f;//0.45f;
+        private const float ARM_Y_OFFSET = -0.6f;//-13.5f;//-0.75;
+        private const float ARM_Z_OFFSET = 1.55f;//9.0f;//1.65f;
+        private const float LEFT_ARM_X_OFFSET = -0.8f;
 
-        private const float MIN_ARM_X_OFFSET = 1.0f;
-        private const float MIN_LEFT_ARM_X_OFFSET = -1.0f;
-
-        private const float MAX_ARM_Y_OFFSET = -18.5f;
+        private const float MIN_ARM_X_OFFSET = 0.5f;
+        private const float MIN_LEFT_ARM_X_OFFSET = -0.5f;
 
         float leftXOffset;
         float rightXOffset;
-
-        float yOffset;
 
         bool clap = false;
 
@@ -55,7 +51,6 @@ namespace Cluck
             rightArmWorldMatrix = Matrix.Identity;
             leftXOffset = LEFT_ARM_X_OFFSET;
             rightXOffset = ARM_X_OFFSET;
-            yOffset = ARM_Y_OFFSET;
         }
 
         /// <summary>
@@ -83,8 +78,8 @@ namespace Cluck
             {
                 if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET && rightXOffset >= MIN_ARM_X_OFFSET)
                 {
-                    leftXOffset += 0.2f;
-                    rightXOffset -= 0.2f;
+                    leftXOffset += 0.05f;
+                    rightXOffset -= 0.05f;
                 }
                 else
                 {
@@ -95,26 +90,14 @@ namespace Cluck
             {
                 if (leftXOffset > LEFT_ARM_X_OFFSET && rightXOffset < ARM_X_OFFSET)
                 {
-                    leftXOffset -= 0.2f;
-                    rightXOffset += 0.2f;
+                    leftXOffset -= 0.05f;
+                    rightXOffset += 0.05f;
                 }
-            }
-
-            if (camera.isJumping())
-            {
-                if (yOffset > MAX_ARM_Y_OFFSET)
-                {
-                    yOffset -= 0.5f;
-                }
-            }
-            else if (yOffset < ARM_Y_OFFSET)
-            {
-                yOffset += 0.5f;
             }
 
             leftArmMatrix = new Matrix[leftArm.Bones.Count];
             leftArm.CopyAbsoluteBoneTransformsTo(leftArmMatrix);
-            leftArmWorldMatrix = camera.ArmWorldMatrix(rightXOffset, yOffset, ARM_Z_OFFSET, ARM_SCALE);
+            leftArmWorldMatrix = camera.ArmWorldMatrix(rightXOffset, ARM_Y_OFFSET, ARM_Z_OFFSET, ARM_SCALE);
 
             foreach (ModelMesh mm in leftArm.Meshes)
             {
@@ -124,17 +107,19 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
+                    be.TextureEnabled = true;
                     be.EnableDefaultLighting();
                     be.World = leftArmMatrix[mm.ParentBone.Index] * leftArmWorldMatrix;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
+                    be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
 
             rightArmMatrix = new Matrix[rightArm.Bones.Count];
             rightArm.CopyAbsoluteBoneTransformsTo(rightArmMatrix);
-            rightArmWorldMatrix = camera.ArmWorldMatrix(leftXOffset, yOffset, ARM_Z_OFFSET, ARM_SCALE);
+            rightArmWorldMatrix = camera.ArmWorldMatrix(leftXOffset, ARM_Y_OFFSET, ARM_Z_OFFSET, ARM_SCALE);
             foreach (ModelMesh mm in rightArm.Meshes)
             {
                 foreach (ModelMeshPart mmp in mm.MeshParts)
