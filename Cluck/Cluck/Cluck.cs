@@ -19,7 +19,10 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Model ground;
+        private Model fence;
         private Model leftArm;
+        private Model rightArm;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -30,7 +33,7 @@ namespace Cluck
 
         private const float CAMERA_FOVX = 85.0f;
         private const float CAMERA_ZNEAR = 0.01f;
-        private const float CAMERA_ZFAR = 1024.0f * 2.0f;
+        private const float CAMERA_ZFAR = 2048.0f * 2.0f;
         private const float CAMERA_PLAYER_EYE_HEIGHT = 110.0f;
         private const float CAMERA_ACCELERATION_X = 900.0f;
         private const float CAMERA_ACCELERATION_Y = 900.0f;
@@ -42,6 +45,7 @@ namespace Cluck
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 2.0f;
 
         private FirstPersonCamera camera;
+        private PlayerComponent playerComponent;
 
         private int windowWidth;
         private int windowHeight;
@@ -112,8 +116,14 @@ namespace Cluck
             armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
+            rightArm = Content.Load<Model>(@"Models\arm_right");
+
+            fence = Content.Load<Model>(@"Models\fence_bounds");
+            ground = Content.Load<Model>(@"Models\ground");
 
             time = timer.ToString();
+
+            playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
         }
 
         /// <summary>
@@ -161,6 +171,12 @@ namespace Cluck
                 }
             }
 
+            bool isCatch = false;
+            if ((Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState) || GamePad.GetState(PlayerIndex.One).Buttons.X == ButtonState.Pressed)
+            {
+                isCatch = true;
+            }
+            playerComponent.Update(gameTime, isCatch);
 
             if (timer > TimeSpan.Zero && timeStart)
             {
@@ -168,6 +184,8 @@ namespace Cluck
             }
 
             time = timer.ToString();
+
+            KeepCameraInBounds();
 
             oldKeyState = curKeyState;
             base.Update(gameTime);
@@ -180,13 +198,14 @@ namespace Cluck
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
+            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             // TODO: Add your drawing code here
             //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            Matrix[] armMatrix = new Matrix[leftArm.Bones.Count];
-            leftArm.CopyAbsoluteBoneTransformsTo(armMatrix);
-            foreach (ModelMesh mm in leftArm.Meshes)
+            Matrix[] groundMatrix = new Matrix[ground.Bones.Count];
+            ground.CopyAbsoluteBoneTransformsTo(groundMatrix);
+            foreach (ModelMesh mm in ground.Meshes)
             {
                 foreach (ModelMeshPart mmp in mm.MeshParts)
                 {
@@ -194,15 +213,37 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
-                    be.TextureEnabled = true;
+                    //be.TextureEnabled = true;
                     be.EnableDefaultLighting();
-                    be.World = armMatrix[mm.ParentBone.Index] * Matrix.CreateRotationY(0) * Matrix.CreateTranslation(0, 0, 0);
+                    be.World = groundMatrix[mm.ParentBone.Index] * Matrix.CreateTranslation(0, -1, 0);
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
-                    be.Texture = armsDiffuse;
+                    //be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
+
+            Matrix[] fenceMatrix = new Matrix[fence.Bones.Count];
+            fence.CopyAbsoluteBoneTransformsTo(fenceMatrix);
+            foreach (ModelMesh mm in fence.Meshes)
+            {
+                foreach (ModelMeshPart mmp in mm.MeshParts)
+                {
+                    //mmp.VertexBuffer;
+                }
+                foreach (BasicEffect be in mm.Effects)
+                {
+                    //be.TextureEnabled = true;
+                    be.EnableDefaultLighting();
+                    be.World = fenceMatrix[mm.ParentBone.Index];
+                    be.View = camera.ViewMatrix;
+                    be.Projection = camera.ProjectionMatrix;
+                    //be.Texture = armsDiffuse;
+                }
+                mm.Draw();
+            }
+
+            playerComponent.Draw(gameTime);
 
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
@@ -214,6 +255,31 @@ namespace Cluck
         private void drawTimer()
         {
 
+        }
+
+        private void KeepCameraInBounds()
+        {
+            Vector3 newPos = camera.Position;
+
+            if (camera.Position.X < -1024.0f)
+                newPos.X = -1024.0f;
+
+            if (camera.Position.X > 1024.0f)
+                newPos.X = 1024.0f;
+
+            if (camera.Position.Y > 1024.0f)
+                newPos.Y = 1024.0f;
+
+            if (camera.Position.Y < -1.0f)
+                newPos.Y = -1.0f;
+
+            if (camera.Position.Z < -1024.0f)
+                newPos.Z = -1024.0f;
+
+            if (camera.Position.Z > 1024.0f)
+                newPos.Z = 1024.0f;
+
+            camera.Position = newPos;
         }
     }
 }
