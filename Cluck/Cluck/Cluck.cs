@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -50,6 +51,9 @@ namespace Cluck
         private int windowWidth;
         private int windowHeight;
 
+        private List<GameEntity> world;
+        private AISystem aiSystem;
+
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -68,6 +72,13 @@ namespace Cluck
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            world = new List<GameEntity>();
+            aiSystem = new AISystem();
+
+            TestEntity testEntity = new TestEntity();
+
+            world.Add(testEntity);
 
             base.Initialize();
 
@@ -186,6 +197,8 @@ namespace Cluck
             time = timer.ToString();
 
             KeepCameraInBounds();
+
+            aiSystem.Update(world);
 
             oldKeyState = curKeyState;
             base.Update(gameTime);

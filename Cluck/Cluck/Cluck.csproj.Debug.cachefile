@@ -4,3 +4,10 @@ Content\Models\chicken.xnb
 Content\Models\fence.xnb
 Content\Textures\arms_diffuse.xnb
 Content\Textures\arms_normals.xnb
+Content\Models\chicken_pen.xnb
+Content\Models\fence_bounds.xnb
+Content\Models\ground.xnb
+Content\Textures\wood_diffuse.xnb
+Content\Textures\chicken_diffuse.xnb
+Content\Textures\chicken_normals.xnb
+Content\MessageFont.xnb
