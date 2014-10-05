@@ -15,7 +15,7 @@ namespace Cluck.AI
             steeringBehaviours = new SteeringBehaviours();
         }
 
-        public void Update(List<GameEntity> world)
+        public void Update(List<GameEntity> world, float deltaTime, Vector3 target)
         {
             foreach (GameEntity entity in world)
             {
@@ -29,9 +29,21 @@ namespace Cluck.AI
                 {
                     KinematicComponent kinematics = (KinematicComponent)entity.GetComponent((int)component_flags.kinematic);
 
-                    Vector3 target = new Vector3(0,0,50);
-
                     SteeringOutput output = steeringBehaviours.Seek(target, kinematics);
+
+                    kinematics.velocity += (output.linear * deltaTime);
+
+                    Vector3 vel = kinematics.velocity * deltaTime;
+
+                    if (vel.Length() > kinematics.maxSpeed)
+                    {
+                        vel.Normalize();
+                        vel *= kinematics.maxSpeed;
+                    }
+
+                    kinematics.velocity = vel;
+
+                    kinematics.position += kinematics.velocity;
 
 
                 }

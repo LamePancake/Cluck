@@ -145,7 +145,7 @@ namespace Cluck
             Renderable fenceRenderable = new Renderable(fence);
             Renderable groundRenderable = new Renderable(ground);
             Renderable chickenRenderable = new Renderable(chicken);
-            KinematicComponent chickinematics = new KinematicComponent(new Vector3(100,100,100), 15);
+            KinematicComponent chickinematics = new KinematicComponent(new Vector3(200,200,200), 5, 10);
 
             fenceEntity.AddComponent(fenceRenderable);
             groundEntity.AddComponent(groundRenderable);
@@ -220,7 +220,7 @@ namespace Cluck
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world);
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
 
             oldKeyState = curKeyState;
             base.Update(gameTime);

@@ -10,6 +10,8 @@ namespace Cluck
     {
         public Vector3 position;
         public float maxAcceleration;
+        public Vector3 velocity;
+        public float maxSpeed;
 
         public KinematicComponent() : base((int)component_flags.kinematic)
         {
@@ -17,11 +19,13 @@ namespace Cluck
             maxAcceleration = 0;
         }
 
-        public KinematicComponent(Vector3 pos, float maxAccel)
+        public KinematicComponent(Vector3 pos, float maxAccel, float maximumSpeed)
             : base((int)component_flags.kinematic)
         {
             position = pos;
             maxAcceleration = maxAccel;
+            maxSpeed = maximumSpeed;
+            velocity = Vector3.One;
         }
     }
 }
