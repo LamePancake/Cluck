@@ -20,10 +20,15 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Boolean collided;
+        private Renderable chickenRenderable;
+        private Renderable chickenRenderable2;
+
         private Model ground;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
+        private Model chicken;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -53,6 +58,7 @@ namespace Cluck
 
         private List<GameEntity> world;
         private AISystem aiSystem;
+        private RenderSystem renderSystem;
 
         public Cluck()
         {
@@ -72,13 +78,10 @@ namespace Cluck
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-
+            collided = false;
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-
-            TestEntity testEntity = new TestEntity();
-
-            world.Add(testEntity);
+            renderSystem = new RenderSystem(camera);
 
             base.Initialize();
 
@@ -132,9 +135,48 @@ namespace Cluck
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
+            chicken = Content.Load<Model>(@"Models\chicken");
+
             time = timer.ToString();
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
+
+            GameEntity fenceEntity = new GameEntity();
+            GameEntity groundEntity = new GameEntity();
+            GameEntity chickenEntity = new GameEntity();
+            GameEntity chickenEntity2 = new GameEntity();
+            TestEntity testEntity = new TestEntity();
+
+            Renderable fenceRenderable = new Renderable(fence);
+            Renderable groundRenderable = new Renderable(ground);
+
+            KinematicComponent chickinematics = new KinematicComponent(new Vector3(600, 600, 000), 0.5f, 2f);
+            //SHANE CHANGE THE BELOW VARIABLE TO DECLARE IN THIS METHOD, I MOVED DECLARATION TO ABOVE AS A QUICK HACK FOR ACCESS
+            chickenRenderable = new Renderable(chicken);
+
+            KinematicComponent chickinematics2 = new KinematicComponent(new Vector3(0, 0, 0), 0.5f, 2f);
+            SteeringComponent chickenSteering2 = new SteeringComponent(chickinematics.position);
+            //SHANE CHANGE THE BELOW VARIABLE TO DECLARE IN THIS METHOD, I MOVED DECLARATION TO ABOVE AS A QUICK HACK FOR ACCESS
+            chickenRenderable2 = new Renderable(chicken);
+
+            SteeringComponent chickenSteering = new SteeringComponent(chickinematics2.position);
+
+            fenceEntity.AddComponent(fenceRenderable);
+            groundEntity.AddComponent(groundRenderable);
+            chickenEntity.AddComponent(chickenRenderable);
+            chickenEntity.AddComponent(chickinematics);
+            chickenEntity.AddComponent(chickenSteering);
+
+            chickenEntity2.AddComponent(chickenRenderable2);
+            chickenEntity2.AddComponent(chickinematics2);
+            chickenEntity2.AddComponent(chickenSteering2);
+
+            world.Add(fenceEntity);
+            world.Add(groundEntity);
+            world.Add(chickenEntity);
+            world.Add(chickenEntity2);
+
+            world.Add(testEntity);
         }
 
         /// <summary>
@@ -166,13 +208,13 @@ namespace Cluck
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            if(Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
             // TODO: Add your update logic here
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
             {
-                if(!timeStart)
+                if (!timeStart)
                 {
                     timeStart = true;
                 }
@@ -198,8 +240,8 @@ namespace Cluck
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world);
-
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+            CheckForCollisions(ref chickenRenderable, ref chickenRenderable2);
             oldKeyState = curKeyState;
             base.Update(gameTime);
         }
@@ -210,51 +252,20 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            if (!collided)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Red);
+            }
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             // TODO: Add your drawing code here
             //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            Matrix[] groundMatrix = new Matrix[ground.Bones.Count];
-            ground.CopyAbsoluteBoneTransformsTo(groundMatrix);
-            foreach (ModelMesh mm in ground.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = groundMatrix[mm.ParentBone.Index] * Matrix.CreateTranslation(0, -1, 0);
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
-
-            Matrix[] fenceMatrix = new Matrix[fence.Bones.Count];
-            fence.CopyAbsoluteBoneTransformsTo(fenceMatrix);
-            foreach (ModelMesh mm in fence.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = fenceMatrix[mm.ParentBone.Index];
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
+            renderSystem.Update(world);
 
             playerComponent.Draw(gameTime);
 
@@ -263,6 +274,34 @@ namespace Cluck
             spriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        //Checks for collision between two renderables
+        //Also creates the collision spheres from each mesh from renderables
+        private void CheckForCollisions(ref Renderable c1, ref Renderable c2)
+        {
+            for (int i = 0; i < c1.GetModel().Meshes.Count; i++)
+            {
+                // Check whether the bounding boxes of the two cubes intersect.
+                BoundingSphere c1BoundingSphere = c1.GetModel().Meshes[i].BoundingSphere;
+                c1BoundingSphere.Center += new Vector3(c1.GetMatrix().M41, c1.GetMatrix().M42, c1.GetMatrix().M43);
+
+                for (int j = 0; j < c2.GetModel().Meshes.Count; j++)
+                {
+                    BoundingSphere c2BoundingSphere = c2.GetModel().Meshes[j].BoundingSphere;
+                    c2BoundingSphere.Center += new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+
+                    if (c1BoundingSphere.Intersects(c2BoundingSphere))
+                    {
+                        collided = true;
+                        return;
+                    }
+                    else
+                    {
+                        collided = false;
+                    }
+                }
+            }
         }
 
         private void drawTimer()
