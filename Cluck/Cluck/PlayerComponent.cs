@@ -143,10 +143,12 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
+                    be.TextureEnabled = true;
                     be.EnableDefaultLighting();
                     be.World = rightArmMatrix[mm.ParentBone.Index] * rightArmWorldMatrix;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
+                    be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
