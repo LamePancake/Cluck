@@ -25,14 +25,17 @@ namespace Cluck.AI
                     thinking.Update();
                 }
 
-                if (entity.HasComponent((int)component_flags.kinematic) && entity.HasComponent((int)component_flags.aiSteering))
+                if (entity.HasComponent((int)component_flags.kinematic) 
+                    && entity.HasComponent((int)component_flags.aiSteering)
+                    && entity.HasComponent((int)component_flags.position))
                 {
-                    Console.WriteLine("Booo");
                     KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
 
                     SteeringComponent steering = entity.GetComponent<SteeringComponent>();
 
-                    SteeringOutput output = steeringBehaviours.Seek(steering.GetTarget(), kinematics);
+                    PositionComponent position = entity.GetComponent<PositionComponent>();
+
+                    SteeringOutput output = steeringBehaviours.Seek(steering.GetTarget(), position.GetPosition(), kinematics);
 
                     kinematics.velocity += (output.linear * deltaTime);
 
@@ -46,7 +49,7 @@ namespace Cluck.AI
 
                     kinematics.velocity = vel;
 
-                    kinematics.position += kinematics.velocity;
+                    position.SetPosition(position.GetPosition() + kinematics.velocity);
 
 
                 }

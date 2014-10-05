@@ -15,11 +15,11 @@ namespace Cluck.AI
     class SteeringBehaviours
     {
 
-        public SteeringOutput Seek(Vector3 target, KinematicComponent agent)
+        public SteeringOutput Seek(Vector3 target, Vector3 agentPos, KinematicComponent agent)
 	    {
 		    SteeringOutput steering = new SteeringOutput();
 
-            Vector3 toTarget = target - agent.position;
+            Vector3 toTarget = target - agentPos;
 
 		    steering.linear = toTarget;
 

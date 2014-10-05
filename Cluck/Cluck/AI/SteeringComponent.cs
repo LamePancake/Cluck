@@ -8,16 +8,16 @@ namespace Cluck.AI
 {
     class SteeringComponent : Component
     {
-        private Vector3 target;
+        private PositionComponent target;
 
-        public SteeringComponent(Vector3 targetPos) : base((int)component_flags.aiSteering)
+        public SteeringComponent(PositionComponent targetPos) : base((int)component_flags.aiSteering)
         {
             target = targetPos;
         }
 
         public Vector3 GetTarget()
         {
-            return target;
+            return target.GetPosition();
         }
     }
 }

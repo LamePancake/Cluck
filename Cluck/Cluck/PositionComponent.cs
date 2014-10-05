@@ -17,17 +17,17 @@ namespace Cluck
             orient = orientation;
         }
 
-        public Vector3 getPosition()
+        public Vector3 GetPosition()
         {
             return pos;
         }
 
-        public Vector3 getOrientation()
+        public Vector3 GetOrientation()
         {
             return orient;
         }
 
-        public void setPosition(Vector3 newPos)
+        public void SetPosition(Vector3 newPos)
         {
             if (newPos == null)
                 throw new ArgumentNullException("PlayerComponent.setPosition: newPos cannot be null");

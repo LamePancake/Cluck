@@ -145,25 +145,30 @@ namespace Cluck
 
             Renderable fenceRenderable = new Renderable(fence);
             Renderable groundRenderable = new Renderable(ground);
-
-            KinematicComponent chickinematics = new KinematicComponent(new Vector3(600, 600, 000), 0.5f, 2f);
             Renderable chickenRenderable = new Renderable(chicken);
-
-            KinematicComponent chickinematics2 = new KinematicComponent(new Vector3(0, 0, 0), 0.5f, 2f);
-            SteeringComponent chickenSteering2 = new SteeringComponent(chickinematics.position);
             Renderable chickenRenderable2 = new Renderable(chicken);
 
-            SteeringComponent chickenSteering = new SteeringComponent(chickinematics2.position);
+            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f);
+
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), new Vector3(0, 0, 0));
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), new Vector3(0, 0, 0));
+
+            SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
+            SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
             fenceEntity.AddComponent(fenceRenderable);
             groundEntity.AddComponent(groundRenderable);
+
             chickenEntity.AddComponent(chickenRenderable);
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
+            chickenEntity.AddComponent(chicken1pos);
 
             chickenEntity2.AddComponent(chickenRenderable2);
             chickenEntity2.AddComponent(chickinematics2);
             chickenEntity2.AddComponent(chickenSteering2);
+            chickenEntity2.AddComponent(chicken2pos);
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
