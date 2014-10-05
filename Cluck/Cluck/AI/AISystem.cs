@@ -9,7 +9,7 @@ namespace Cluck.AI
     class AISystem : GameSystem
     {
 
-        public AISystem(Game game) : base(game, (int)component_flags.aiThinking)
+        public AISystem() : base((int)component_flags.aiThinking)
         {
 
         }
@@ -20,18 +20,8 @@ namespace Cluck.AI
             {
                 if (entity.HasComponent(myFlag))
                 {
-                    Console.WriteLine("YUP");
-                }
-            }
-        }
-
-        public void UpdateWorld(List<GameEntity> world)
-        {
-            foreach (GameEntity entity in world)
-            {
-                if (entity.HasComponent(myFlag))
-                {
-                    Console.WriteLine("YUP");
+                    AIThinking thinking = (AIThinking)entity.GetComponent(myFlag);
+                    thinking.Update();
                 }
             }
         }

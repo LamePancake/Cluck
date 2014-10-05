@@ -45,7 +45,7 @@ namespace Cluck
             base.Initialize();
 
             world = new List<GameEntity>();
-            aiSystem = new AISystem(this);
+            aiSystem = new AISystem();
 
             TestEntity testEntity = new TestEntity();
 
@@ -94,7 +94,7 @@ namespace Cluck
                 this.Exit();
 
             // TODO: Add your update logic here
-            aiSystem.UpdateWorld(world);
+            aiSystem.Update(world);
 
             base.Update(gameTime);
         }

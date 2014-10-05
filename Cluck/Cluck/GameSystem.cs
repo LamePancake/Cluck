@@ -6,11 +6,11 @@ using Microsoft.Xna.Framework;
 
 namespace Cluck
 {
-    class GameSystem : GameComponent
+    class GameSystem
     {
         protected int myFlag;
 
-        public GameSystem(Game game, int flag) : base(game)
+        public GameSystem(int flag)
         {
             myFlag = flag;
         }

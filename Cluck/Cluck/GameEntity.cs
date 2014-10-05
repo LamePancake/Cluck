@@ -36,5 +36,20 @@ namespace Cluck
         {
             return (componentFlags & cFlag) == cFlag; 
         }
+
+        public Component GetComponent(int cFlag)
+        {
+            Component selected = null;
+
+            foreach (Component component in components)
+            {
+                if (component.GetFlag() == cFlag)
+                {
+                    selected = component;
+                }
+            }
+
+            return selected;
+        }
     }
 }
