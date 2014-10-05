@@ -72,9 +72,19 @@
     <Reference Include="System.Net" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AI\AISystem.cs" />
+    <Compile Include="AI\AIThinking.cs" />
+    <Compile Include="AI\State.cs" />
+    <Compile Include="AI\TestEntity.cs" />
+    <Compile Include="AI\TestEntityStates.cs" />
+    <Compile Include="Component.cs" />
+    <Compile Include="ComponentID.cs" />
     <Compile Include="FirstPersonCamera.cs" />
+    <Compile Include="GameEntity.cs" />
+    <Compile Include="GameSystem.cs" />
     <Compile Include="Input.cs" />
     <Compile Include="InputManager.cs" />
+    <Compile Include="PhysicSystem.cs" />
     <Compile Include="PlayerComponent.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Program.cs" />
