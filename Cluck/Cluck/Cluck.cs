@@ -148,11 +148,11 @@ namespace Cluck
             Renderable chickenRenderable = new Renderable(chicken);
             Renderable chickenRenderable2 = new Renderable(chicken);
 
-            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f);
-            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f);
+            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f, 15, 5);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f, 30, 15);
 
-            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), new Vector3(0, 0, 0));
-            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), new Vector3(0, 0, 0));
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), 0);
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), 0);
 
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
