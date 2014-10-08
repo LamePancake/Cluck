@@ -39,10 +39,12 @@ namespace Cluck
 
         public T GetComponent<T>() where T: Component
         {
+            T temp = null;
             foreach(Component c in components)
             {
-                if (c is T)
-                    return (T)c;
+                temp = c as T;
+                if(temp != null)
+                    return temp;
             }
             return null;
         }
