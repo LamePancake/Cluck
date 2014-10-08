@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -23,6 +24,7 @@ namespace Cluck
         private Model fence;
         private Model leftArm;
         private Model rightArm;
+        private Model chicken;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -50,6 +52,10 @@ namespace Cluck
         private int windowWidth;
         private int windowHeight;
 
+        private List<GameEntity> world;
+        private AISystem aiSystem;
+        private RenderSystem renderSystem;
+
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -68,6 +74,10 @@ namespace Cluck
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+
+            world = new List<GameEntity>();
+            aiSystem = new AISystem();
+            renderSystem = new RenderSystem(camera);
 
             base.Initialize();
 
@@ -121,9 +131,51 @@ namespace Cluck
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
+            chicken = Content.Load<Model>(@"Models\chicken");
+
             time = timer.ToString();
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
+
+            GameEntity fenceEntity = new GameEntity();
+            GameEntity groundEntity = new GameEntity();
+            GameEntity chickenEntity = new GameEntity();
+            GameEntity chickenEntity2 = new GameEntity();
+            TestEntity testEntity = new TestEntity();
+
+            Renderable fenceRenderable = new Renderable(fence);
+            Renderable groundRenderable = new Renderable(ground);
+            Renderable chickenRenderable = new Renderable(chicken);
+            Renderable chickenRenderable2 = new Renderable(chicken);
+
+            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f);
+
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), new Vector3(0, 0, 0));
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), new Vector3(0, 0, 0));
+
+            SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
+            SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
+
+            fenceEntity.AddComponent(fenceRenderable);
+            groundEntity.AddComponent(groundRenderable);
+
+            chickenEntity.AddComponent(chickenRenderable);
+            chickenEntity.AddComponent(chickinematics);
+            chickenEntity.AddComponent(chickenSteering);
+            chickenEntity.AddComponent(chicken1pos);
+
+            chickenEntity2.AddComponent(chickenRenderable2);
+            chickenEntity2.AddComponent(chickinematics2);
+            chickenEntity2.AddComponent(chickenSteering2);
+            chickenEntity2.AddComponent(chicken2pos);
+
+            world.Add(fenceEntity);
+            world.Add(groundEntity);
+            world.Add(chickenEntity);
+            world.Add(chickenEntity2);
+
+            world.Add(testEntity);
         }
 
         /// <summary>
@@ -187,6 +239,8 @@ namespace Cluck
 
             KeepCameraInBounds();
 
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+
             oldKeyState = curKeyState;
             base.Update(gameTime);
         }
@@ -203,45 +257,7 @@ namespace Cluck
             // TODO: Add your drawing code here
             //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            Matrix[] groundMatrix = new Matrix[ground.Bones.Count];
-            ground.CopyAbsoluteBoneTransformsTo(groundMatrix);
-            foreach (ModelMesh mm in ground.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = groundMatrix[mm.ParentBone.Index] * Matrix.CreateTranslation(0, -1, 0);
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
-
-            Matrix[] fenceMatrix = new Matrix[fence.Bones.Count];
-            fence.CopyAbsoluteBoneTransformsTo(fenceMatrix);
-            foreach (ModelMesh mm in fence.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = fenceMatrix[mm.ParentBone.Index];
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
+            renderSystem.Update(world);
 
             playerComponent.Draw(gameTime);
 
