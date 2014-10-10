@@ -9,9 +9,10 @@ namespace Cluck
     class PositionComponent : Component
     {
         private Vector3 pos;
-        private Vector3 orient;
+        private float orient;
 
-        public PositionComponent(Vector3 position, Vector3 orientation) : base((int)component_flags.position)
+
+        public PositionComponent(Vector3 position, float orientation) : base((int)component_flags.position)
         {
             pos = position;
             orient = orientation;
@@ -22,7 +23,7 @@ namespace Cluck
             return pos;
         }
 
-        public Vector3 GetOrientation()
+        public float GetOrientation()
         {
             return orient;
         }
@@ -34,8 +35,6 @@ namespace Cluck
             pos = newPos;
         }
 
-        //public void setOrientation(Vector3 3)
-
-        
+        //public void setOrientation(Vector3 newOrientation)
     }
 }

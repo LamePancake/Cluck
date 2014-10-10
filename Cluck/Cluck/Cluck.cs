@@ -17,14 +17,19 @@ namespace Cluck
     /// </summary>
     public class Cluck : Microsoft.Xna.Framework.Game
     {
+        public const Int32 INIT_WORLD_SIZE = 1024;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Boolean collided;
         private Model ground;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
         private Model chicken;
+        private Renderable chickenRenderable;
+        private Renderable chickenRenderable2;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -55,6 +60,7 @@ namespace Cluck
         private List<GameEntity> world;
         private AISystem aiSystem;
         private RenderSystem renderSystem;
+        private PhysicsSystem physicsSystem;
 
         public Cluck()
         {
@@ -73,7 +79,14 @@ namespace Cluck
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // Create the world
+            world = new List<GameEntity>(INIT_WORLD_SIZE);
+
+            aiSystem = new AISystem();
+            renderSystem = new RenderSystem(camera);
+            physicsSystem = new PhysicsSystem();
+
+            collided = false;
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
@@ -136,46 +149,38 @@ namespace Cluck
             time = timer.ToString();
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
-
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
-            TestEntity testEntity = new TestEntity();
+            chickenRenderable = new Renderable(chicken);
+            chickenRenderable2 = new Renderable(chicken);
 
-            Renderable fenceRenderable = new Renderable(fence);
-            Renderable groundRenderable = new Renderable(ground);
-            Renderable chickenRenderable = new Renderable(chicken);
-            Renderable chickenRenderable2 = new Renderable(chicken);
-
-            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f);
-            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f);
-
-            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), new Vector3(0, 0, 0));
-            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), new Vector3(0, 0, 0));
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), 0);
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), 0);
 
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
-            fenceEntity.AddComponent(fenceRenderable);
-            groundEntity.AddComponent(groundRenderable);
+            fenceEntity.AddComponent(new Renderable(fence));
+            groundEntity.AddComponent(new Renderable(ground));
 
             chickenEntity.AddComponent(chickenRenderable);
-            chickenEntity.AddComponent(chickinematics);
+            chickenEntity.AddComponent(new KinematicComponent(0.5f, 5f, 15, 5));
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
+            chickenEntity.AddComponent(new CollidableComponent());
 
             chickenEntity2.AddComponent(chickenRenderable2);
-            chickenEntity2.AddComponent(chickinematics2);
+            chickenEntity2.AddComponent(new KinematicComponent(0.5f, 5f, 30, 15));
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
+            chickenEntity2.AddComponent(new CollidableComponent());
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
-            world.Add(chickenEntity2);
-
-            world.Add(testEntity);
+            world.Add(chickenEntity2); 
         }
 
         /// <summary>
@@ -207,13 +212,13 @@ namespace Cluck
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            if(Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
             // TODO: Add your update logic here
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
             {
-                if(!timeStart)
+                if (!timeStart)
                 {
                     timeStart = true;
                 }
@@ -240,8 +245,9 @@ namespace Cluck
             KeepCameraInBounds();
 
             aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-
+            physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
             oldKeyState = curKeyState;
+
             base.Update(gameTime);
         }
 
@@ -251,7 +257,14 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            if (!collided)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Red);
+            }
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             // TODO: Add your drawing code here
@@ -267,6 +280,8 @@ namespace Cluck
 
             base.Draw(gameTime);
         }
+
+        
 
         private void drawTimer()
         {
