@@ -151,7 +151,7 @@ namespace Cluck
             
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
-GameEntity fenceEntity = new GameEntity();
+            GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
@@ -204,7 +204,8 @@ GameEntity fenceEntity = new GameEntity();
                 {
                     part.Effect = SkySphereEffect;
                 }
-            }        }
+            }        
+        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload

@@ -27,24 +27,6 @@ namespace Cluck
         private Matrix[] leftArmMatrix;
         private Matrix[] rightArmMatrix;
 
-        private const float ARM_SCALE = 0.2f;
-        private const float ARM_X_OFFSET = 3.0f;//0.45f;
-        private const float ARM_Y_OFFSET = -13.5f;//-0.75
-        private const float ARM_Z_OFFSET = 9.0f;//1.65f;
-        private const float LEFT_ARM_X_OFFSET = -3.0f;
-
-        private const float MIN_ARM_X_OFFSET = 1.0f;
-        private const float MIN_LEFT_ARM_X_OFFSET = -1.0f;
-
-        private const float MAX_ARM_Y_OFFSET = -18.5f;
-
-        float leftXOffset;
-        float rightXOffset;
-
-        float yOffset;
-
-        bool clap = false;
-
         public PlayerComponent(FirstPersonCamera c, Model la, Model ra, Texture2D ad)
             : base((int)component_flags.player)
         {
@@ -54,9 +36,6 @@ namespace Cluck
             armsDiffuse = ad;
             leftArmWorldMatrix = Matrix.Identity;
             rightArmWorldMatrix = Matrix.Identity;
-            leftXOffset = LEFT_ARM_X_OFFSET;
-            rightXOffset = ARM_X_OFFSET;
-            yOffset = ARM_Y_OFFSET;
         }
 
         /// <summary>
@@ -74,45 +53,10 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         public void Update(GameTime gameTime, bool isCatch)
         {
-            if(isCatch)
-                clap = true;
         }
 
         public void Draw(GameTime gameTime)
         {
-            if (clap)
-            {
-                if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET && rightXOffset >= MIN_ARM_X_OFFSET)
-                {
-                    leftXOffset += 0.2f;
-                    rightXOffset -= 0.2f;
-                }
-                else
-                {
-                    clap = false;
-                }
-            }
-            else
-            {
-                if (leftXOffset > LEFT_ARM_X_OFFSET && rightXOffset < ARM_X_OFFSET)
-                {
-                    leftXOffset -= 0.2f;
-                    rightXOffset += 0.2f;
-                }
-            }
-
-            if (camera.isJumping())
-            {
-                if (yOffset > MAX_ARM_Y_OFFSET)
-                {
-                    yOffset -= 0.5f;
-                }
-            }
-            else if (yOffset < ARM_Y_OFFSET)
-            {
-                yOffset += 0.5f;
-            }
-
             leftArmMatrix = new Matrix[leftArm.Bones.Count];
             leftArm.CopyAbsoluteBoneTransformsTo(leftArmMatrix);
             leftArmWorldMatrix = camera.GetRightArmWorldMatrix();
@@ -125,10 +69,12 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
+                    be.TextureEnabled = true;
                     be.EnableDefaultLighting();
                     be.World = leftArmMatrix[mm.ParentBone.Index] * leftArmWorldMatrix;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
+                    be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
@@ -144,10 +90,12 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
+                    be.TextureEnabled = true ;
                     be.EnableDefaultLighting();
                     be.World = rightArmMatrix[mm.ParentBone.Index] * rightArmWorldMatrix;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
+                    be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
