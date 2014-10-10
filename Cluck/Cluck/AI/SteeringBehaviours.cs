@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Text;
-using Cluck.Debug;
 
 namespace Cluck.AI
 {
@@ -138,8 +137,6 @@ namespace Cluck.AI
             }
 
             float targetOrientation = (float)Math.Atan2(-direction.Z, direction.X) + facingOffset;
-
-            Console.WriteLine(targetOrientation);
 
             steering.angular = targetOrientation;
 

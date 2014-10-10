@@ -9,8 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
-using Cluck.Debug;
-
 
 namespace Cluck
 {
@@ -19,9 +17,12 @@ namespace Cluck
     /// </summary>
     public class Cluck : Microsoft.Xna.Framework.Game
     {
+        public const Int32 INIT_WORLD_SIZE = 1024;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Boolean collided;
         private Model ground;
         private Model fence;
         private Model leftArm;
@@ -57,6 +58,7 @@ namespace Cluck
         private List<GameEntity> world;
         private AISystem aiSystem;
         private RenderSystem renderSystem;
+        private PhysicsSystem physicsSystem;
 
         public Cluck()
         {
@@ -75,11 +77,18 @@ namespace Cluck
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // Create the world
+            world = new List<GameEntity>(INIT_WORLD_SIZE);
+
+            aiSystem = new AISystem();
+            renderSystem = new RenderSystem(camera);
+            physicsSystem = new PhysicsSystem();
+
+            collided = false;
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera, GraphicsDevice);
+            renderSystem = new RenderSystem(camera);
 
             base.Initialize();
 
@@ -136,23 +145,16 @@ namespace Cluck
             chicken = Content.Load<Model>(@"Models\chicken");
 
             time = timer.ToString();
+            
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
-
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
-            TestEntity testEntity = new TestEntity();
-
-            Renderable fenceRenderable = new Renderable(fence);
-            Renderable groundRenderable = new Renderable(ground);
-            Renderable chickenRenderable = new Renderable(chicken);
-            Renderable chickenRenderable2 = new Renderable(chicken);
 
             KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
             KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
-
             PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
             PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
 
@@ -161,28 +163,25 @@ namespace Cluck
 
             SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent();
 
-            DebugCircleComponent chickenWanderCircle = new DebugCircleComponent();
-
-            fenceEntity.AddComponent(fenceRenderable);
-            groundEntity.AddComponent(groundRenderable);
-
-            chickenEntity.AddComponent(chickenRenderable);
+            chickenEntity.AddComponent(new Renderable(chicken));
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
             chickenEntity.AddComponent(chickenSensory);
 
-            chickenEntity2.AddComponent(chickenRenderable2);
+            chickenEntity2.AddComponent(new Renderable(chicken));
             chickenEntity2.AddComponent(chickinematics2);
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
+            chickenEntity2.AddComponent(new CollidableComponent());
+
+            fenceEntity.AddComponent(new Renderable(fence));
+            groundEntity.AddComponent(new Renderable(ground));
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
-            //world.Add(chickenEntity2);
-
-            world.Add(testEntity);
+            world.Add(chickenEntity2);
         }
 
         /// <summary>
@@ -214,13 +213,13 @@ namespace Cluck
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            if(Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
             // TODO: Add your update logic here
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
             {
-                if(!timeStart)
+                if (!timeStart)
                 {
                     timeStart = true;
                 }
@@ -247,8 +246,9 @@ namespace Cluck
             KeepCameraInBounds();
 
             aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
-
+            physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
             oldKeyState = curKeyState;
+
             base.Update(gameTime);
         }
 
@@ -258,22 +258,28 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            if (!collided)
+            {
+                GraphicsDevice.Clear(Color.CornflowerBlue);
+            }
+            else
+            {
+                GraphicsDevice.Clear(Color.Red);
+            }
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             // TODO: Add your drawing code here
-            //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            renderSystem.Update(world);
-
+            renderSystem.Update(world, gameTime);
             playerComponent.Draw(gameTime);
-
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
+
+        
 
         private void drawTimer()
         {

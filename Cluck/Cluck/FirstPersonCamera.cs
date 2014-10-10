@@ -72,6 +72,7 @@ namespace Cluck
         private Matrix projMatrix;
 
         private Posture posture;
+        private Posture prevPosture;
         private float rotationSpeed;
 
         private InputManager inputManager;
@@ -374,6 +375,7 @@ namespace Cluck
 
         private void UpdateCamera(GameTime gameTime, Input i)
         {
+            prevPosture = posture;
             float elapsedTimeSec = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 direction = new Vector3();
 
@@ -710,7 +712,7 @@ namespace Cluck
 
         public bool isJumping()
         {
-            if (posture == Posture.Jumping || posture == Posture.Rising)
+            if (posture == Posture.Jumping || (posture == Posture.Rising && prevPosture != Posture.Crouching))
             {
                 return true;
             }

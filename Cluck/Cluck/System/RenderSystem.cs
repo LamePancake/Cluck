@@ -5,23 +5,20 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-using Cluck.Debug;
-
 namespace Cluck
 {
+    //TODO: Change gameTime to float and remove call to PlayerComponent.Draw
     class RenderSystem : GameSystem
     {
-        private FirstPersonCamera camera;
-        private DebugDraw debugDraw;
+        FirstPersonCamera camera;
 
-        public RenderSystem(FirstPersonCamera cam, GraphicsDevice graphics)
+        public RenderSystem(FirstPersonCamera cam)
             : base((int)component_flags.renderable)
         {
-            debugDraw = new DebugDraw(graphics);
             camera = cam;
         }
 
-        public void Update(List<GameEntity> world)
+        public void Update(List<GameEntity> world, GameTime gameTime)
         {
             foreach (GameEntity entity in world)
             {
@@ -37,21 +34,18 @@ namespace Cluck
                     PositionComponent position = entity.GetComponent <PositionComponent>();
 
                     renderable = entity.GetComponent<Renderable>();
-
+                    
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
 
                     Render(renderable);
                 }
-
-                if (entity.HasComponent((int)component_flags.debugCircle))
+                else if(entity.HasComponent((int)component_flags.player))
                 {
-                    DebugCircleComponent debug = entity.GetComponent<DebugCircleComponent>();
-                    debugDraw.DrawWireSphere(debug.GetBounding(), Color.OrangeRed);
+                    PlayerComponent player = entity.GetComponent<PlayerComponent>();
+                    player.Draw(gameTime);
                 }
-
-                
             }
         }
 

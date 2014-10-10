@@ -8,6 +8,7 @@ namespace Cluck
 {
     class KinematicComponent : Component
     {
+        public Vector3 position;
         public float maxAcceleration;
         public float maxSpeed;
         public float maxAngularAcceleration;
@@ -19,12 +20,7 @@ namespace Cluck
         public Vector3 heading;
         public Vector3 side;
 
-        public KinematicComponent() : base((int)component_flags.kinematic)
-        {
-            maxAcceleration = 0;
-        }
-
-        public KinematicComponent(float maxAccel, float maximumSpeed, float maximumRotation, float maxAngularAccel)
+        public KinematicComponent(float maxAccel, float maximumSpeed, float maximumRotation, float maxAngularAccel) 
             : base((int)component_flags.kinematic)
         {
             maxAcceleration = maxAccel;

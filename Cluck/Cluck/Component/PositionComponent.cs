@@ -35,6 +35,9 @@ namespace Cluck
             pos = newPos;
         }
 
-        //public void setOrientation(Vector3 newOrientation)
+        public void SetOrientation(float orientation)
+        {
+            orient = orientation;
+        }
     }
 }

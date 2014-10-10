@@ -15,7 +15,7 @@ namespace Cluck
     /// <summary>
     /// This is a game component that implements IUpdateable.
     /// </summary>
-    public class PlayerComponent
+    class PlayerComponent : Component
     {
         private Model leftArm;
         private Model rightArm;
@@ -46,6 +46,7 @@ namespace Cluck
         bool clap = false;
 
         public PlayerComponent(FirstPersonCamera c, Model la, Model ra, Texture2D ad)
+            : base((int)component_flags.player)
         {
             camera = c;
             leftArm = la;
