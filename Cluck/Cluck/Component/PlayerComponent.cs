@@ -115,7 +115,7 @@ namespace Cluck
 
             leftArmMatrix = new Matrix[leftArm.Bones.Count];
             leftArm.CopyAbsoluteBoneTransformsTo(leftArmMatrix);
-            leftArmWorldMatrix = camera.ArmWorldMatrix(rightXOffset, yOffset, ARM_Z_OFFSET, ARM_SCALE);
+            leftArmWorldMatrix = camera.GetRightArmWorldMatrix();
 
             foreach (ModelMesh mm in leftArm.Meshes)
             {
@@ -135,7 +135,7 @@ namespace Cluck
 
             rightArmMatrix = new Matrix[rightArm.Bones.Count];
             rightArm.CopyAbsoluteBoneTransformsTo(rightArmMatrix);
-            rightArmWorldMatrix = camera.ArmWorldMatrix(leftXOffset, yOffset, ARM_Z_OFFSET, ARM_SCALE);
+            rightArmWorldMatrix = camera.GetLeftArmWorldMatrix();
             foreach (ModelMesh mm in rightArm.Meshes)
             {
                 foreach (ModelMeshPart mmp in mm.MeshParts)

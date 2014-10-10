@@ -60,6 +60,9 @@ namespace Cluck
         private RenderSystem renderSystem;
         private PhysicsSystem physicsSystem;
 
+        Model SkySphere;
+        Effect SkySphereEffect;
+
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -148,7 +151,7 @@ namespace Cluck
             
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
-            GameEntity fenceEntity = new GameEntity();
+GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
@@ -182,7 +185,26 @@ namespace Cluck
             world.Add(groundEntity);
             world.Add(chickenEntity);
             world.Add(chickenEntity2);
-        }
+            SkySphereEffect = Content.Load<Effect>("SkySphere");
+            TextureCube SkyboxTexture =
+                Content.Load<TextureCube>(@"Textures\sky");
+            SkySphere = Content.Load<Model>(@"Models\SphereHighPoly");
+
+            // Set the parameters of the effect
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
+                SkyboxTexture);
+            // Set the Skysphere Effect to each part of the Skysphere model
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = SkySphereEffect;
+                }
+            }        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -229,13 +251,6 @@ namespace Cluck
                 }
             }
 
-            bool isCatch = false;
-            if ((Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState) || GamePad.GetState(PlayerIndex.One).Buttons.X == ButtonState.Pressed)
-            {
-                isCatch = true;
-            }
-            playerComponent.Update(gameTime, isCatch);
-
             if (timer > TimeSpan.Zero && timeStart)
             {
                 timer -= gameTime.ElapsedGameTime;
@@ -258,16 +273,18 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (!collided)
-            {
-                GraphicsDevice.Clear(Color.CornflowerBlue);
-            }
-            else
-            {
-                GraphicsDevice.Clear(Color.Red);
-            }
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            // Draw the sphere model that the effect projects onto
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                mesh.Draw();
+            }
 
+            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;           
             // TODO: Add your drawing code here
 
             renderSystem.Update(world, gameTime);
