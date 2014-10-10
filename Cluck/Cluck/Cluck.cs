@@ -161,7 +161,8 @@ namespace Cluck
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
-            SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent();
+            SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chicken1pos, chickinematics);
+            SensoryMemoryComponent chicken2Sensory = new SensoryMemoryComponent(chicken2pos, chickinematics2);
 
             chickenEntity.AddComponent(new Renderable(chicken));
             chickenEntity.AddComponent(chickinematics);
@@ -174,6 +175,7 @@ namespace Cluck
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
             chickenEntity2.AddComponent(new CollidableComponent());
+            chickenEntity2.AddComponent(chickenSteering2);
 
             fenceEntity.AddComponent(new Renderable(fence));
             groundEntity.AddComponent(new Renderable(ground));
