@@ -9,8 +9,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
-using Cluck.Debug;
-
 
 namespace Cluck
 {
@@ -30,8 +28,6 @@ namespace Cluck
         private Model leftArm;
         private Model rightArm;
         private Model chicken;
-        private Renderable chickenRenderable;
-        private Renderable chickenRenderable2;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -92,7 +88,7 @@ namespace Cluck
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera, GraphicsDevice);
+            renderSystem = new RenderSystem(camera);
 
             base.Initialize();
 
@@ -149,14 +145,13 @@ namespace Cluck
             chicken = Content.Load<Model>(@"Models\chicken");
 
             time = timer.ToString();
+            
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
-            chickenRenderable = new Renderable(chicken);
-            chickenRenderable2 = new Renderable(chicken);
 
             KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
             KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
@@ -166,23 +161,25 @@ namespace Cluck
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
-DebugCircleComponent chickenWanderCircle = new DebugCircleComponent();
-            chickenEntity.AddComponent(chickenRenderable);
-            chickenEntity.AddComponent(new KinematicComponent(0.5f, 5f, 15, 5));
+            chickenEntity.AddComponent(new Renderable(chicken));
+            chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
-            //chickenEntity.AddComponent(chickenWanderCircle);
-            chickenEntity2.AddComponent(chickenRenderable2);
-            chickenEntity2.AddComponent(new KinematicComponent(0.5f, 5f, 30, 15));
+
+            chickenEntity2.AddComponent(new Renderable(chicken));
+            chickenEntity2.AddComponent(chickinematics2);
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
             chickenEntity2.AddComponent(new CollidableComponent());
+
+            fenceEntity.AddComponent(new Renderable(fence));
+            groundEntity.AddComponent(new Renderable(ground));
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
             world.Add(chickenEntity2);
-            //world.Add(chickenEntity2);        }
+        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -269,12 +266,9 @@ DebugCircleComponent chickenWanderCircle = new DebugCircleComponent();
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
 
             // TODO: Add your drawing code here
-            //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            renderSystem.Update(world);
-
+            renderSystem.Update(world, gameTime);
             playerComponent.Draw(gameTime);
-
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
             spriteBatch.End();

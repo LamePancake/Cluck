@@ -12,8 +12,10 @@ namespace Cluck
         renderable = 0x00004,
         kinematic = 0x00008,
         aiSteering = 0x00010,
-        debugCircle = 0x00040,
-        collidable = 0x00080,
+        position = 0x00020,
+        collidable = 0x00040,
+        player = 0x00080,
+        /*
          = 0x00100,
          = 0x00200,
          = 0x00400,

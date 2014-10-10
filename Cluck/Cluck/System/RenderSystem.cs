@@ -7,6 +7,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Cluck
 {
+    //TODO: Change gameTime to float and remove call to PlayerComponent.Draw
     class RenderSystem : GameSystem
     {
         FirstPersonCamera camera;
@@ -17,7 +18,7 @@ namespace Cluck
             camera = cam;
         }
 
-        public void Update(List<GameEntity> world)
+        public void Update(List<GameEntity> world, GameTime gameTime)
         {
             foreach (GameEntity entity in world)
             {
@@ -37,6 +38,11 @@ namespace Cluck
                     renderable.SetMatrix(Matrix.CreateTranslation(position.GetPosition()));
 
                     Render(renderable);
+                }
+                else if(entity.HasComponent((int)component_flags.player))
+                {
+                    PlayerComponent player = entity.GetComponent<PlayerComponent>();
+                    player.Draw(gameTime);
                 }
             }
         }

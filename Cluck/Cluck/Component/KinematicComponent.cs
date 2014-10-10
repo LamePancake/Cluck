@@ -20,16 +20,9 @@ namespace Cluck
         public Vector3 heading;
         public Vector3 side;
 
-        public KinematicComponent() : base((int)component_flags.kinematic)
-        {
-            position = new Vector3(0, 0, 0);
-            maxAcceleration = 0;
-        }
-
-        public KinematicComponent(Vector3 pos, float maxAccel, float maximumSpeed, float maximumRotation, float maxAngularAccel) 
+        public KinematicComponent(float maxAccel, float maximumSpeed, float maximumRotation, float maxAngularAccel) 
             : base((int)component_flags.kinematic)
         {
-            position = pos;
             maxAcceleration = maxAccel;
             maxSpeed = maximumSpeed;
             maxRotation = maximumRotation;
