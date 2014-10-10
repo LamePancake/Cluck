@@ -161,10 +161,13 @@ namespace Cluck
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
+            SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent();
+
             chickenEntity.AddComponent(new Renderable(chicken));
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
+            chickenEntity.AddComponent(chickenSensory);
 
             chickenEntity2.AddComponent(new Renderable(chicken));
             chickenEntity2.AddComponent(chickinematics2);
@@ -242,7 +245,7 @@ namespace Cluck
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
             physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
             oldKeyState = curKeyState;
 
