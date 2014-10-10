@@ -16,6 +16,9 @@ namespace Cluck
         public float rotation;
         public Vector3 velocity;
 
+        public Vector3 heading;
+        public Vector3 side;
+
         public KinematicComponent() : base((int)component_flags.kinematic)
         {
             maxAcceleration = 0;
@@ -29,7 +32,9 @@ namespace Cluck
             maxRotation = maximumRotation;
             maxAngularAcceleration = maxAngularAccel;
             
-            velocity = Vector3.One;
+            velocity = Vector3.Zero;
+            heading = new Vector3(1,0,0);
+            side = Util.PerpInZPlane(heading);
             rotation = 0;
         }
     }

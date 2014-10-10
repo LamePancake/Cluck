@@ -81,6 +81,7 @@
     <Compile Include="AI\TestEntityStates.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentID.cs" />
+    <Compile Include="Debug\DebugSphereComponent.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="GameSystem.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="Renderable.cs" />
     <Compile Include="RenderSystem.cs" />
     <Compile Include="TextureComponent.cs" />
+    <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Game.ico" />

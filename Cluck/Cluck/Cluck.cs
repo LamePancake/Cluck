@@ -148,11 +148,11 @@ namespace Cluck
             Renderable chickenRenderable = new Renderable(chicken);
             Renderable chickenRenderable2 = new Renderable(chicken);
 
-            KinematicComponent chickinematics = new KinematicComponent(0.5f, 5f, 15, 5);
-            KinematicComponent chickinematics2 = new KinematicComponent(0.5f, 5f, 30, 15);
+            KinematicComponent chickinematics = new KinematicComponent(0.05f, 2f, (float)Math.PI/4, 0.1f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 2f, (float)Math.PI/4, 0.1f);
 
-            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), 0);
-            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), 0);
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
 
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
@@ -173,7 +173,7 @@ namespace Cluck
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
-            world.Add(chickenEntity2);
+            //world.Add(chickenEntity2);
 
             world.Add(testEntity);
         }

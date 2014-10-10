@@ -33,8 +33,10 @@ namespace Cluck
                     PositionComponent position = entity.GetComponent <PositionComponent>();
 
                     renderable = entity.GetComponent<Renderable>();
-                    
-                    renderable.SetMatrix(Matrix.CreateTranslation(position.GetPosition()));
+
+                    Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
+
+                    renderable.SetMatrix(final);
 
                     Render(renderable);
                 }

@@ -14,6 +14,17 @@ namespace Cluck.AI
 
     class SteeringBehaviours
     {
+        private Random randomGen;
+
+        public SteeringBehaviours()
+        {
+            randomGen = new Random();
+        }
+
+        private double RandomClamped()
+        {
+            return (randomGen.NextDouble() - randomGen.NextDouble());
+        }
 
         public SteeringOutput Seek(Vector3 target, Vector3 agentPos, KinematicComponent agent)
 	    {
@@ -31,17 +42,42 @@ namespace Cluck.AI
 		    return steering;
 	    }
 
+        public SteeringOutput Wander(PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering, double timeElapsed)
+        {
+            SteeringOutput steering = new SteeringOutput();
+
+            double jitterThisFrame = agentSteering.wanderJitter * timeElapsed;
+
+            agentSteering.wanderTarget += new Vector2((float)(RandomClamped() * jitterThisFrame), (float)(RandomClamped() * jitterThisFrame));
+
+	        agentSteering.wanderTarget.Normalize();
+
+	        agentSteering.wanderTarget *= agentSteering.wanderRadius;
+
+            Vector2 targetLocal = agentSteering.wanderTarget + new Vector2(agentSteering.wanderOffset, 0);
+
+            Vector3 targetLocal3 = new Vector3(targetLocal.X, 0, targetLocal.Y);
+
+            Vector3 targetWorld = Util.PointToWorldSpace(targetLocal3, agentkinematic.heading, agentkinematic.side, agentPos.GetPosition());
+
+            return Seek(targetWorld, agentPos.GetPosition(), agentkinematic);
+        }
+
+
         public SteeringOutput Align(float targetOrientation, PositionComponent agentPos, KinematicComponent agentKinematic)
 	    {
-		    float targetRadius = 10;
-		    float slowRadius = 30;
+            float targetRadius = 0.15f;
+            float slowRadius = (float)Math.PI/2;
 
-		    float timeToTarget = 0.1f;
+		    float timeToTarget = 1f;
 
 		    SteeringOutput steering = new SteeringOutput();
             float rotation = targetOrientation - agentPos.GetOrientation();
 
             //Map to range -pi, pi
+            float num2pi = (float)Math.Floor(rotation / (2 * Math.PI) + 0.5);
+            rotation = (float)(rotation - num2pi * (2 * Math.PI));
+
             if (rotation > Math.PI)
             {
                 rotation -= (float)(2*Math.PI);
@@ -59,7 +95,8 @@ namespace Cluck.AI
 		    {
 			    return steering;
 		    }
-		    else if (rotationSize > slowRadius)
+		    
+            if (rotationSize > slowRadius)
 		    {
                 targetRotation = agentKinematic.maxRotation;
 		    }
@@ -74,7 +111,9 @@ namespace Cluck.AI
 
 		    steering.angular /= timeToTarget;
 
-		    var angularAcceleration = Math.Abs(steering.angular);
+            Console.WriteLine("steering.angular1 " + steering.angular); 
+
+		    float angularAcceleration = Math.Abs(steering.angular);
 
             if (angularAcceleration > agentKinematic.maxAngularAcceleration)
 		    {
@@ -82,9 +121,35 @@ namespace Cluck.AI
                 steering.angular *= agentKinematic.maxAngularAcceleration;
 		    }
 
+            Console.WriteLine("steering.angular " + steering.angular); 
+
 		    steering.linear = new Vector3(0,0,0);
 
 		    return steering;
 	    }
+
+        public SteeringOutput Face(Vector3 target, PositionComponent agentPos)
+        {
+            float facingOffset = (float)Math.PI/2;
+
+            Vector3 direction = target - agentPos.GetPosition();
+            
+            var steering = new SteeringOutput();
+
+            if (direction.Length() == 0)
+            {
+                return steering;
+            }
+
+            float targetOrientation = (float)Math.Atan2(-direction.Z, direction.X) + facingOffset;
+
+            Console.WriteLine(targetOrientation);
+
+            steering.angular = targetOrientation;
+
+            steering.linear = new Vector3(0,0,0);
+
+            return steering;
+        }
     }
 }

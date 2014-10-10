@@ -35,22 +35,48 @@ namespace Cluck.AI
 
                     PositionComponent position = entity.GetComponent<PositionComponent>();
 
-                    SteeringOutput output = steeringBehaviours.Seek(steering.GetTarget(), position.GetPosition(), kinematics);
+                    SteeringOutput output = steeringBehaviours.Wander(position, kinematics, steering, deltaTime);
+                    SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);
 
+                    // update velocity and rotation
                     kinematics.velocity += (output.linear * deltaTime);
+                    //kinematics.rotation += (output.angular * deltaTime);
+                    
+                    // clamp rotation
+                    //float rot = kinematics.rotation;
 
-                    Vector3 vel = kinematics.velocity * deltaTime;
+                    /*float targetRotation = Math.Abs(rot);
 
+                    if (targetRotation > kinematics.maxRotation)
+                    {
+                        rot /= targetRotation;
+                        rot *= kinematics.maxRotation;
+
+                        kinematics.rotation = rot;
+                    }*/
+
+                    // clamp velocity
+                    Vector3 vel = kinematics.velocity;
+                    
                     if (vel.Length() > kinematics.maxSpeed)
                     {
                         vel.Normalize();
                         vel *= kinematics.maxSpeed;
+
+                        kinematics.velocity = vel;
                     }
 
-                    kinematics.velocity = vel;
-
+                    if (vel.LengthSquared() > 0.0001)
+                    {
+                        Vector3 temp = kinematics.velocity;
+                        temp.Normalize();
+                        kinematics.heading = temp;
+                        kinematics.side = Util.PerpInZPlane(kinematics.heading);
+                    }
+                    
+                    // Update position and orientation
                     position.SetPosition(position.GetPosition() + kinematics.velocity);
-
+                    position.SetOrientation(facingDirection.angular);
 
                 }
             }
