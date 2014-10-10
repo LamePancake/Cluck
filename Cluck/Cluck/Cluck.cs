@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
+using Cluck.Debug;
+
 
 namespace Cluck
 {
@@ -90,7 +92,7 @@ namespace Cluck
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, GraphicsDevice);
 
             base.Initialize();
 
@@ -156,21 +158,20 @@ namespace Cluck
             chickenRenderable = new Renderable(chicken);
             chickenRenderable2 = new Renderable(chicken);
 
-            PositionComponent chicken1pos = new PositionComponent(new Vector3(800, 0, 800), 0);
-            PositionComponent chicken2pos = new PositionComponent(new Vector3(-800, 0, -800), 0);
+            KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
 
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
 
-            fenceEntity.AddComponent(new Renderable(fence));
-            groundEntity.AddComponent(new Renderable(ground));
-
+DebugCircleComponent chickenWanderCircle = new DebugCircleComponent();
             chickenEntity.AddComponent(chickenRenderable);
             chickenEntity.AddComponent(new KinematicComponent(0.5f, 5f, 15, 5));
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
-            chickenEntity.AddComponent(new CollidableComponent());
-
+            //chickenEntity.AddComponent(chickenWanderCircle);
             chickenEntity2.AddComponent(chickenRenderable2);
             chickenEntity2.AddComponent(new KinematicComponent(0.5f, 5f, 30, 15));
             chickenEntity2.AddComponent(chickenSteering2);
@@ -180,8 +181,8 @@ namespace Cluck
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
-            world.Add(chickenEntity2); 
-        }
+            world.Add(chickenEntity2);
+            //world.Add(chickenEntity2);        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
