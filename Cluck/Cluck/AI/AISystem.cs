@@ -16,7 +16,7 @@ namespace Cluck.AI
             steeringBehaviours = new SteeringBehaviours();
         }
 
-        public void Update(List<GameEntity> world, float deltaTime)
+        public void Update(List<GameEntity> world, float deltaTime, Vector3 playerPos)
         {
             foreach (GameEntity entity in world)
             {
@@ -81,6 +81,17 @@ namespace Cluck.AI
                     SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);
                     position.SetOrientation(facingDirection.angular);
 
+                }
+
+                if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.kinematic))
+                {
+                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+
+                    PositionComponent position = entity.GetComponent<PositionComponent>();
+
+                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
+
+                    Console.WriteLine("in sight: " + sensory.WithinView(position.GetPosition(), kinematics.heading, playerPos));
                 }
             }
         }

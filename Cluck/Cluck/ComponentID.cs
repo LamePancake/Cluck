@@ -14,6 +14,7 @@ namespace Cluck
         aiSteering = 0x00010,
         position = 0x00020,
         debugCircle = 0x00040,
+        sensory = 0x00100,
          /*= 0x00080,
          = 0x00100,
          = 0x00200,
