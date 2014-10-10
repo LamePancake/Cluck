@@ -17,13 +17,17 @@ namespace Cluck
     /// </summary>
     public class Cluck : Microsoft.Xna.Framework.Game
     {
+        public const Int32 INIT_WORLD_SIZE = 1024;
+
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        private Boolean collided;
         private Model ground;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
+        private Model chicken;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -53,6 +57,11 @@ namespace Cluck
 
         private List<GameEntity> world;
         private AISystem aiSystem;
+        private RenderSystem renderSystem;
+        private PhysicsSystem physicsSystem;
+
+        Model SkySphere;
+        Effect SkySphereEffect;
 
         public Cluck()
         {
@@ -71,14 +80,18 @@ namespace Cluck
         /// </summary>
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
+            // Create the world
+            world = new List<GameEntity>(INIT_WORLD_SIZE);
+
+            aiSystem = new AISystem();
+            renderSystem = new RenderSystem(camera);
+            physicsSystem = new PhysicsSystem();
+
+            collided = false;
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-
-            TestEntity testEntity = new TestEntity();
-
-            world.Add(testEntity);
+            renderSystem = new RenderSystem(camera);
 
             base.Initialize();
 
@@ -132,10 +145,66 @@ namespace Cluck
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
+            chicken = Content.Load<Model>(@"Models\chicken");
+
             time = timer.ToString();
+            
 
             playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
-        }
+GameEntity fenceEntity = new GameEntity();
+            GameEntity groundEntity = new GameEntity();
+            GameEntity chickenEntity = new GameEntity();
+            GameEntity chickenEntity2 = new GameEntity();
+
+            KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
+            PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
+            PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
+
+            SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
+            SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
+
+            SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent();
+
+            chickenEntity.AddComponent(new Renderable(chicken));
+            chickenEntity.AddComponent(chickinematics);
+            chickenEntity.AddComponent(chickenSteering);
+            chickenEntity.AddComponent(chicken1pos);
+            chickenEntity.AddComponent(chickenSensory);
+
+            chickenEntity2.AddComponent(new Renderable(chicken));
+            chickenEntity2.AddComponent(chickinematics2);
+            chickenEntity2.AddComponent(chickenSteering2);
+            chickenEntity2.AddComponent(chicken2pos);
+            chickenEntity2.AddComponent(new CollidableComponent());
+
+            fenceEntity.AddComponent(new Renderable(fence));
+            groundEntity.AddComponent(new Renderable(ground));
+
+            world.Add(fenceEntity);
+            world.Add(groundEntity);
+            world.Add(chickenEntity);
+            world.Add(chickenEntity2);
+            SkySphereEffect = Content.Load<Effect>("SkySphere");
+            TextureCube SkyboxTexture =
+                Content.Load<TextureCube>(@"Textures\sky");
+            SkySphere = Content.Load<Model>(@"Models\SphereHighPoly");
+
+            // Set the parameters of the effect
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
+                SkyboxTexture);
+            // Set the Skysphere Effect to each part of the Skysphere model
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = SkySphereEffect;
+                }
+            }        }
 
         /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
@@ -166,13 +235,13 @@ namespace Cluck
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
 
-            if(Keyboard.GetState().IsKeyDown(Keys.Escape))
+            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
             // TODO: Add your update logic here
             if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
             {
-                if(!timeStart)
+                if (!timeStart)
                 {
                     timeStart = true;
                 }
@@ -181,13 +250,6 @@ namespace Cluck
                     timeStart = false;
                 }
             }
-
-            bool isCatch = false;
-            if ((Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState) || GamePad.GetState(PlayerIndex.One).Buttons.X == ButtonState.Pressed)
-            {
-                isCatch = true;
-            }
-            playerComponent.Update(gameTime, isCatch);
 
             if (timer > TimeSpan.Zero && timeStart)
             {
@@ -198,9 +260,10 @@ namespace Cluck
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world);
-
+            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
+            physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
             oldKeyState = curKeyState;
+
             base.Update(gameTime);
         }
 
@@ -210,60 +273,30 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            // Draw the sphere model that the effect projects onto
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                mesh.Draw();
+            }
 
+            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;           
             // TODO: Add your drawing code here
-            //leftArm.Draw(GraphicsDevice, effect, "diffuseMapTexture", armsDiffuse);
 
-            Matrix[] groundMatrix = new Matrix[ground.Bones.Count];
-            ground.CopyAbsoluteBoneTransformsTo(groundMatrix);
-            foreach (ModelMesh mm in ground.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = groundMatrix[mm.ParentBone.Index] * Matrix.CreateTranslation(0, -1, 0);
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
-
-            Matrix[] fenceMatrix = new Matrix[fence.Bones.Count];
-            fence.CopyAbsoluteBoneTransformsTo(fenceMatrix);
-            foreach (ModelMesh mm in fence.Meshes)
-            {
-                foreach (ModelMeshPart mmp in mm.MeshParts)
-                {
-                    //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    //be.TextureEnabled = true;
-                    be.EnableDefaultLighting();
-                    be.World = fenceMatrix[mm.ParentBone.Index];
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
-                }
-                mm.Draw();
-            }
-
+            renderSystem.Update(world, gameTime);
             playerComponent.Draw(gameTime);
-
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
             spriteBatch.End();
 
             base.Draw(gameTime);
         }
+
+        
 
         private void drawTimer()
         {

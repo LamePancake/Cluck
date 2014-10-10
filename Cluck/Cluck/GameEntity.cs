@@ -37,19 +37,16 @@ namespace Cluck
             return (componentFlags & cFlag) == cFlag; 
         }
 
-        public Component GetComponent(int cFlag)
+        public T GetComponent<T>() where T: Component
         {
-            Component selected = null;
-
-            foreach (Component component in components)
+            T temp = null;
+            foreach(Component c in components)
             {
-                if (component.GetFlag() == cFlag)
-                {
-                    selected = component;
-                }
+                temp = c as T;
+                if(temp != null)
+                    return temp;
             }
-
-            return selected;
+            return null;
         }
     }
 }

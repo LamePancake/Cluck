@@ -77,6 +77,22 @@ namespace Cluck
 
         private InputManager inputManager;
 
+        private Matrix[] leftArmMatrix;
+        private Matrix[] rightArmMatrix;
+
+        private const float ARM_SCALE = 0.03f;
+        private const float RIGHT_ARM_X_OFFSET = 0.8f;
+        private const float ARM_Y_OFFSET = -0.6f;
+        private const float ARM_Z_OFFSET = 1.55f;
+        private const float LEFT_ARM_X_OFFSET = -0.8f;
+        private const float MIN_RIGHT_ARM_X_OFFSET = 0.5f;
+        private const float MIN_LEFT_ARM_X_OFFSET = -0.5f;
+
+        float leftXOffset;
+        float rightXOffset;
+
+        private bool isClapping;
+
         public FirstPersonCamera(Game game) : base(game)
         {
             UpdateOrder = 1;
@@ -116,6 +132,9 @@ namespace Cluck
             Perspective(fovx, aspect, znear, zfar);
 
             inputManager = new InputManager();
+
+            leftXOffset = LEFT_ARM_X_OFFSET;
+            rightXOffset = RIGHT_ARM_X_OFFSET;
         }
 
         public override void Initialize()
@@ -238,6 +257,12 @@ namespace Cluck
         public override void Update(GameTime gameTime)
         {
             Input i = inputManager.Update(Game.Window.ClientBounds);
+
+            if (i.IsClapping())
+            {
+                isClapping = true;
+            }
+
             UpdateCamera(gameTime, i);
 
             base.Update(gameTime);
@@ -252,18 +277,39 @@ namespace Cluck
         /// <param name="xOffset">How far to position the weapon left or right.</param>
         /// <param name="yOffset">How far to position the weapon up or down.</param>
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
+        /// <param name="scale">How much to scale the weapon.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix ArmWorldMatrix(float xOffset, float yOffset, float zOffset)
+        public Matrix GetLeftArmWorldMatrix()
         {
-            Vector3 weaponPos = eye;
+            Vector3 leftArmPos = eye;
 
-            weaponPos += viewDir * zOffset;
-            weaponPos += yAxis * yOffset;
-            weaponPos += xAxis * xOffset;
+            if (isClapping)
+            {
+                if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET)
+                {
+                    leftXOffset += 0.05f;
+                }
+                else
+                {
+                    isClapping = false;
+                }
+            }
+            else
+            {
+                if (leftXOffset > LEFT_ARM_X_OFFSET)
+                {
+                    leftXOffset -= 0.05f;
+                }
+            }
 
-            return Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
-                    * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
-                    * Matrix.CreateTranslation(weaponPos);
+            leftArmPos += viewDir * ARM_Z_OFFSET;
+            leftArmPos += yAxis * ARM_Y_OFFSET;
+            leftArmPos += xAxis * leftXOffset;
+
+            return Matrix.CreateScale(ARM_SCALE)
+                * Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+                * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
+                * Matrix.CreateTranslation(leftArmPos);
         }
 
         /// <summary>
@@ -277,18 +323,37 @@ namespace Cluck
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
         /// <param name="scale">How much to scale the weapon.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix ArmWorldMatrix(float xOffset, float yOffset, float zOffset, float scale)
+        public Matrix GetRightArmWorldMatrix()
         {
-            Vector3 weaponPos = eye;
+            Vector3 rightArmPos = eye;
 
-            weaponPos += viewDir * zOffset;
-            weaponPos += yAxis * yOffset;
-            weaponPos += xAxis * xOffset;
+            if (isClapping)
+            {
+                if (rightXOffset >= MIN_RIGHT_ARM_X_OFFSET)
+                {
+                    rightXOffset -= 0.05f;
+                }
+                else
+                {
+                    isClapping = false;
+                }
+            }
+            else
+            {
+                if (rightXOffset < RIGHT_ARM_X_OFFSET)
+                {
+                    rightXOffset += 0.05f;
+                }
+            }
 
-            return Matrix.CreateScale(scale)
+            rightArmPos += viewDir * ARM_Z_OFFSET;
+            rightArmPos += yAxis * ARM_Y_OFFSET;
+            rightArmPos += xAxis * rightXOffset;
+
+            return Matrix.CreateScale(ARM_SCALE)
                 * Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
-                * Matrix.CreateTranslation(weaponPos);
+                * Matrix.CreateTranslation(rightArmPos);
         }
 
 
@@ -716,6 +781,16 @@ namespace Cluck
             {
                 return true;
             }
+            return false;
+        }
+
+        public bool isCrouching()
+        {
+            if (posture == Posture.Crouching)
+            {
+                return true;
+            }
+
             return false;
         }
 
