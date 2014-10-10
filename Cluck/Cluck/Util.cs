@@ -28,9 +28,9 @@ namespace Cluck
 
 	        //rotate
             matTransform.M11 = heading.X;
-            matTransform.M13 = heading.Y;
+            matTransform.M13 = heading.Z;
             matTransform.M31 = side.X;
-            matTransform.M33 = side.Y;
+            matTransform.M33 = side.Z;
 
             //Console.WriteLine("Pos: " + Matrix.CreateTranslation(pos));
 	        //and translate
@@ -48,7 +48,7 @@ namespace Cluck
 
         public static Vector3 PerpInZPlane(Vector3 vec)
         {
-            return new Vector3(-vec.Y, vec.X, vec.Z);
+            return new Vector3(-vec.Z, vec.Y, vec.X);
         }
     }
 }

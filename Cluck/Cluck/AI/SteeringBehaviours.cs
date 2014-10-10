@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Text;
+using Cluck.Debug;
 
 namespace Cluck.AI
 {
@@ -48,22 +49,21 @@ namespace Cluck.AI
 
             double jitterThisFrame = agentSteering.wanderJitter * timeElapsed;
 
-            agentSteering.wanderTarget += new Vector2((float)(RandomClamped() * jitterThisFrame), (float)(RandomClamped() * jitterThisFrame));
+            agentSteering.wanderTarget += new Vector3((float)(RandomClamped() * jitterThisFrame), 0, (float)(RandomClamped() * jitterThisFrame));
 
 	        agentSteering.wanderTarget.Normalize();
 
 	        agentSteering.wanderTarget *= agentSteering.wanderRadius;
 
-            Vector2 targetLocal = agentSteering.wanderTarget + new Vector2(agentSteering.wanderOffset, 0);
+            Vector3 targetLocal = agentSteering.wanderTarget + new Vector3(agentSteering.wanderOffset, 0, 0);
 
-            Vector3 targetLocal3 = new Vector3(targetLocal.X, 0, targetLocal.Y);
+            Vector3 targetWorld = Util.PointToWorldSpace(targetLocal, agentkinematic.heading, agentkinematic.side, agentPos.GetPosition());
 
-            Vector3 targetWorld = Util.PointToWorldSpace(targetLocal3, agentkinematic.heading, agentkinematic.side, agentPos.GetPosition());
+            steering = Seek(targetWorld, agentPos.GetPosition(), agentkinematic);
 
-            return Seek(targetWorld, agentPos.GetPosition(), agentkinematic);
+            return steering;
         }
-
-
+        
         public SteeringOutput Align(float targetOrientation, PositionComponent agentPos, KinematicComponent agentKinematic)
 	    {
             float targetRadius = 0.15f;
@@ -111,8 +111,6 @@ namespace Cluck.AI
 
 		    steering.angular /= timeToTarget;
 
-            Console.WriteLine("steering.angular1 " + steering.angular); 
-
 		    float angularAcceleration = Math.Abs(steering.angular);
 
             if (angularAcceleration > agentKinematic.maxAngularAcceleration)
@@ -120,8 +118,6 @@ namespace Cluck.AI
 			    steering.angular /= angularAcceleration;
                 steering.angular *= agentKinematic.maxAngularAcceleration;
 		    }
-
-            Console.WriteLine("steering.angular " + steering.angular); 
 
 		    steering.linear = new Vector3(0,0,0);
 

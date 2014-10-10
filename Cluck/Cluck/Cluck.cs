@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
+using Cluck.Debug;
+
 
 namespace Cluck
 {
@@ -77,7 +79,7 @@ namespace Cluck
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, GraphicsDevice);
 
             base.Initialize();
 
@@ -148,14 +150,16 @@ namespace Cluck
             Renderable chickenRenderable = new Renderable(chicken);
             Renderable chickenRenderable2 = new Renderable(chicken);
 
-            KinematicComponent chickinematics = new KinematicComponent(0.05f, 2f, (float)Math.PI/4, 0.1f);
-            KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 2f, (float)Math.PI/4, 0.1f);
+            KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
+            KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
 
             PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
             PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
 
             SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
             SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
+
+            DebugCircleComponent chickenWanderCircle = new DebugCircleComponent();
 
             fenceEntity.AddComponent(fenceRenderable);
             groundEntity.AddComponent(groundRenderable);
@@ -164,6 +168,7 @@ namespace Cluck
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
+            //chickenEntity.AddComponent(chickenWanderCircle);
 
             chickenEntity2.AddComponent(chickenRenderable2);
             chickenEntity2.AddComponent(chickinematics2);

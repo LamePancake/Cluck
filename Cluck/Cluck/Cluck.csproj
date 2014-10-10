@@ -81,7 +81,8 @@
     <Compile Include="AI\TestEntityStates.cs" />
     <Compile Include="Component.cs" />
     <Compile Include="ComponentID.cs" />
-    <Compile Include="Debug\DebugSphereComponent.cs" />
+    <Compile Include="DebugDraw.cs" />
+    <Compile Include="Debug\DebugCircleComponent.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="GameSystem.cs" />

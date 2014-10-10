@@ -5,15 +5,19 @@ using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using Cluck.Debug;
+
 namespace Cluck
 {
     class RenderSystem : GameSystem
     {
-        FirstPersonCamera camera;
+        private FirstPersonCamera camera;
+        private DebugDraw debugDraw;
 
-        public RenderSystem(FirstPersonCamera cam)
+        public RenderSystem(FirstPersonCamera cam, GraphicsDevice graphics)
             : base((int)component_flags.renderable)
         {
+            debugDraw = new DebugDraw(graphics);
             camera = cam;
         }
 
@@ -39,6 +43,12 @@ namespace Cluck
                     renderable.SetMatrix(final);
 
                     Render(renderable);
+                }
+
+                if (entity.HasComponent((int)component_flags.debugCircle))
+                {
+                    DebugCircleComponent debug = entity.GetComponent<DebugCircleComponent>();
+                    debugDraw.DrawWireSphere(debug.GetBounding(), Color.OrangeRed);
                 }
 
                 

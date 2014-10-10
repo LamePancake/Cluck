@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Cluck.Debug;
 
 namespace Cluck.AI
 {
@@ -34,18 +35,17 @@ namespace Cluck.AI
                     SteeringComponent steering = entity.GetComponent<SteeringComponent>();
 
                     PositionComponent position = entity.GetComponent<PositionComponent>();
-
+                    
                     SteeringOutput output = steeringBehaviours.Wander(position, kinematics, steering, deltaTime);
-                    SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);
 
                     // update velocity and rotation
                     kinematics.velocity += (output.linear * deltaTime);
-                    //kinematics.rotation += (output.angular * deltaTime);
+                    kinematics.rotation += (output.angular * deltaTime);
                     
                     // clamp rotation
-                    //float rot = kinematics.rotation;
+                    float rot = kinematics.rotation;
 
-                    /*float targetRotation = Math.Abs(rot);
+                    float targetRotation = Math.Abs(rot);
 
                     if (targetRotation > kinematics.maxRotation)
                     {
@@ -53,7 +53,7 @@ namespace Cluck.AI
                         rot *= kinematics.maxRotation;
 
                         kinematics.rotation = rot;
-                    }*/
+                    }
 
                     // clamp velocity
                     Vector3 vel = kinematics.velocity;
@@ -76,6 +76,9 @@ namespace Cluck.AI
                     
                     // Update position and orientation
                     position.SetPosition(position.GetPosition() + kinematics.velocity);
+                    //position.SetOrientation(position.GetOrientation() + kinematics.rotation);
+
+                    SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);
                     position.SetOrientation(facingDirection.angular);
 
                 }
