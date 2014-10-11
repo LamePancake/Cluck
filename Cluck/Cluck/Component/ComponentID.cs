@@ -14,10 +14,10 @@ namespace Cluck
         aiSteering = 0x00010,
         position = 0x00020,
         collidable = 0x00040,
-        player = 0x00080,
         sensory = 0x00100,
-        /*
-         = 0x00200,
+        arm = 0x00200,
+         
+        /*= 0x00080,
          = 0x00400,
          = 0x00800,
          = 0x01000,

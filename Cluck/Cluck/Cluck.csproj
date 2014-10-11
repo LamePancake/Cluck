@@ -80,6 +80,7 @@
     <Compile Include="AI\SteeringComponent.cs" />
     <Compile Include="AI\TestEntity.cs" />
     <Compile Include="AI\TestEntityStates.cs" />
+    <Compile Include="Component\ArmComponent.cs" />
     <Compile Include="Component\CollidableComponent.cs" />
     <Compile Include="Component\Component.cs" />
     <Compile Include="Component\ComponentID.cs" />
@@ -91,7 +92,6 @@
     <Compile Include="Input.cs" />
     <Compile Include="InputManager.cs" />
     <Compile Include="Component\KinematicComponent.cs" />
-    <Compile Include="Component\PlayerComponent.cs" />
     <Compile Include="Component\PositionComponent.cs" />
     <Compile Include="Component\TextureComponent.cs" />
     <COmpile Include="Component\Renderable.cs" />

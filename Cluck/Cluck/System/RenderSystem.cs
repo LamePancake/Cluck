@@ -24,7 +24,7 @@ namespace Cluck
             {
                 Renderable renderable;
                 
-                if (entity.HasComponent(myFlag) && !entity.HasComponent((int)component_flags.kinematic))
+                if (entity.HasComponent(myFlag) && !entity.HasComponent((int)component_flags.kinematic) && !entity.HasComponent((int)component_flags.arm))
                 {
                     renderable = entity.GetComponent<Renderable>();
                     Render(renderable);
@@ -41,10 +41,21 @@ namespace Cluck
 
                     Render(renderable);
                 }
-                else if(entity.HasComponent((int)component_flags.player))
+                else if (entity.HasComponent((int)component_flags.arm) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    PlayerComponent player = entity.GetComponent<PlayerComponent>();
-                    player.Draw(gameTime);
+                    renderable = entity.GetComponent<Renderable>();
+                    ArmComponent arms = entity.GetComponent<ArmComponent>();
+
+                    if (arms.WhichArm())
+                    {
+                        renderable.SetMatrix(camera.GetRightArmWorldMatrix());
+                    }
+                    else
+                    {
+                        renderable.SetMatrix(camera.GetLeftArmWorldMatrix());
+                    }
+
+                    Render(renderable);
                 }
             }
         }

@@ -50,7 +50,6 @@ namespace Cluck
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 2.0f;
 
         private FirstPersonCamera camera;
-        private PlayerComponent playerComponent;
 
         private int windowWidth;
         private int windowHeight;
@@ -149,12 +148,13 @@ namespace Cluck
 
             time = timer.ToString();
             
-
-            playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
+
+            GameEntity leftArmEntity = new GameEntity();
+            GameEntity rightArmEntity = new GameEntity();
 
             KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
             KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
@@ -181,10 +181,22 @@ namespace Cluck
             fenceEntity.AddComponent(new Renderable(fence));
             groundEntity.AddComponent(new Renderable(ground));
 
+            leftArmEntity.AddComponent(new CollidableComponent());
+            leftArmEntity.AddComponent(new Renderable(leftArm));
+            leftArmEntity.AddComponent(new ArmComponent(false));
+
+            rightArmEntity.AddComponent(new CollidableComponent());
+            rightArmEntity.AddComponent(new Renderable(rightArm));
+            rightArmEntity.AddComponent(new ArmComponent(true));
+
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
             world.Add(chickenEntity2);
+
+            world.Add(leftArmEntity);
+            world.Add(rightArmEntity);
+
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =
                 Content.Load<TextureCube>(@"Textures\sky");
@@ -289,7 +301,6 @@ namespace Cluck
             // TODO: Add your drawing code here
 
             renderSystem.Update(world, gameTime);
-            playerComponent.Draw(gameTime);
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
             spriteBatch.End();
