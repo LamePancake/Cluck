@@ -33,6 +33,7 @@ namespace Cluck
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
+        private Texture2D chickenDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
 
@@ -137,6 +138,7 @@ namespace Cluck
             timerFont = Content.Load<SpriteFont>("MessageFont");
             // TODO: use this.Content to load your game content here
             armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
+            chickenDiffuse = Content.Load<Texture2D>(@"Textures\chicken_diffuse");
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
@@ -166,27 +168,27 @@ namespace Cluck
 
             SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent();
 
-            chickenEntity.AddComponent(new Renderable(chicken));
+            chickenEntity.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
             chickenEntity.AddComponent(chickenSensory);
 
-            chickenEntity2.AddComponent(new Renderable(chicken));
+            chickenEntity2.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity2.AddComponent(chickinematics2);
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
             chickenEntity2.AddComponent(new CollidableComponent());
 
-            fenceEntity.AddComponent(new Renderable(fence));
-            groundEntity.AddComponent(new Renderable(ground));
+            fenceEntity.AddComponent(new Renderable(fence, null));
+            groundEntity.AddComponent(new Renderable(ground, null));
 
             leftArmEntity.AddComponent(new CollidableComponent());
-            leftArmEntity.AddComponent(new Renderable(leftArm));
+            leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse));
             leftArmEntity.AddComponent(new ArmComponent(false));
 
             rightArmEntity.AddComponent(new CollidableComponent());
-            rightArmEntity.AddComponent(new Renderable(rightArm));
+            rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse));
             rightArmEntity.AddComponent(new ArmComponent(true));
 
             world.Add(fenceEntity);

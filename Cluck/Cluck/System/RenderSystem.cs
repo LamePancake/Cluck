@@ -66,6 +66,7 @@ namespace Cluck
         {
             Model model = rend.GetModel();
             Matrix world = rend.GetMatrix();
+            Texture2D texture = rend.GetTexture();
 
             Matrix[] groundMatrix = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(groundMatrix);
@@ -77,12 +78,16 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
-                    //be.TextureEnabled = true;
+                    if (texture != null)
+                    {
+                        be.TextureEnabled = true;
+                        be.Texture = texture;
+                    }
+
                     be.EnableDefaultLighting();
                     be.World = groundMatrix[mm.ParentBone.Index] * world;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }
