@@ -8,6 +8,7 @@ namespace Cluck.AI
 {
     class AISystem : GameSystem
     {
+
         SteeringBehaviours steeringBehaviours;
 
         public AISystem() : base((int)component_flags.aiThinking)
@@ -27,15 +28,28 @@ namespace Cluck.AI
 
                 if (entity.HasComponent((int)component_flags.kinematic) 
                     && entity.HasComponent((int)component_flags.aiSteering)
-                    && entity.HasComponent((int)component_flags.position))
+                    && entity.HasComponent((int)component_flags.position)
+                    && entity.HasComponent((int)component_flags.sensory))
                 {
                     KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
 
                     SteeringComponent steering = entity.GetComponent<SteeringComponent>();
 
                     PositionComponent position = entity.GetComponent<PositionComponent>();
+
+                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+
+                    // this is a hack!! Here be dragons.
+                    if (sensory.WithinView(position.GetPosition(), kinematics.velocity, playerPos))
+                    {
+                        sensory.PlayerSpotted(true);
+                    }
+                    else
+                    {
+                        sensory.PlayerSpotted(false);
+                    }
                     
-                    SteeringOutput output = steeringBehaviours.Wander(position, kinematics, steering, deltaTime);
+                    SteeringOutput output = steering.Calculate(position, kinematics, deltaTime, playerPos);
 
                     // update velocity and rotation
                     kinematics.velocity += (output.linear * deltaTime);
