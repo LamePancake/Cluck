@@ -90,7 +90,9 @@ namespace Cluck.AI
 
                     KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
 
-                    Console.WriteLine("in sight: " + sensory.WithinView(position.GetPosition(), kinematics.heading, playerPos));
+                    sensory.UpdateSenses(world);
+
+                    //Console.WriteLine("in sight: " + sensory.WithinView(position.GetPosition(), kinematics.heading, playerPos));
                 }
             }
         }
