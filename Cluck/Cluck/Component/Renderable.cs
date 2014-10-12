@@ -19,6 +19,7 @@ namespace Cluck
             entityModel = model;
             worldMatrix = Matrix.Identity;
             entityTexture = texture;
+            entityModel.Meshes[0].BoundingSphere.Equals(entityModel.Meshes[0].BoundingSphere.Radius * 5);
         }
 
         public Model GetModel()

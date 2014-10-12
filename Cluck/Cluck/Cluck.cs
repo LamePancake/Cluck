@@ -271,6 +271,11 @@ namespace Cluck
                 timer -= gameTime.ElapsedGameTime;
             }
 
+            if (Keyboard.GetState().IsKeyDown(Keys.F))
+            {
+                physicsSystem.CatchChicken();
+            }
+
             time = timer.ToString();
 
             KeepCameraInBounds();

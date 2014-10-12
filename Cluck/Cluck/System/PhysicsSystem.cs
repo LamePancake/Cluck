@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -13,6 +14,8 @@ namespace Cluck
         /// </summary>
         private float prevTime = 0.0f;
         private List<GameEntity> physicalObjects;
+        private Boolean catchable = false;
+        private int chickenInRange;
 
         public PhysicsSystem() 
             : base((int)component_flags.kinematic | (int)component_flags.collidable)
@@ -83,10 +86,14 @@ namespace Cluck
                         if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00008))
                         {
                             Console.WriteLine("arm " + i + ", chicken " + j);
+                            catchable = true;
+                            chickenInRange = j;
                         }
                         else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00008) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
                         {
                             Console.WriteLine("chicken " + i + ", arm " + j);
+                            catchable = true;
+                            chickenInRange = i;
                         }
                     }
                 }
@@ -145,6 +152,19 @@ namespace Cluck
                 }
             }
             return false;
+        }
+
+        private bool GetCatchState()
+        {
+            return catchable;
+        }
+
+        public void CatchChicken()
+        {
+            if (catchable)
+            {
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>();
+            }
         }
     }
 }
