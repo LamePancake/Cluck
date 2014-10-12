@@ -14,16 +14,9 @@ namespace Cluck.AI
 
     class SteeringBehaviours
     {
-        private Random randomGen;
 
         public SteeringBehaviours()
         {
-            randomGen = new Random();
-        }
-
-        private double RandomClamped()
-        {
-            return (randomGen.NextDouble() - randomGen.NextDouble());
         }
 
         public SteeringOutput Seek(Vector3 target, Vector3 agentPos, KinematicComponent agent)
@@ -48,7 +41,7 @@ namespace Cluck.AI
 
             double jitterThisFrame = agentSteering.wanderJitter * timeElapsed;
 
-            agentSteering.wanderTarget += new Vector3((float)(RandomClamped() * jitterThisFrame), 0, (float)(RandomClamped() * jitterThisFrame));
+            agentSteering.wanderTarget += new Vector3((float)(Util.RandomClamped() * jitterThisFrame), 0, (float)(Util.RandomClamped() * jitterThisFrame));
 
 	        agentSteering.wanderTarget.Normalize();
 
@@ -122,6 +115,31 @@ namespace Cluck.AI
 
 		    return steering;
 	    }
+
+        public SteeringOutput Flee(PositionComponent agentPos, KinematicComponent agentKinematic, Vector3 scaryPos)
+        {
+            SteeringOutput steering = new SteeringOutput();
+	        const double panicDistanceSq = 1000.0;
+            Vector3 agentPosition = agentPos.GetPosition();
+
+            scaryPos.Y = agentPosition.Y; // don't have chickens go through the ground.
+
+            Vector3 awayFromScary = agentPosition - scaryPos;
+
+            steering.linear = awayFromScary;
+
+            if (awayFromScary.Length() > panicDistanceSq)
+	        {
+                steering.linear = new Vector3(0, 0, 0);
+	        }
+
+            steering.linear.Normalize();
+            steering.linear = steering.linear * agentKinematic.maxAcceleration;
+
+            steering.angular = 0;
+
+	        return steering;
+        }
 
         public SteeringOutput Face(Vector3 target, PositionComponent agentPos)
         {

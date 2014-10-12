@@ -9,6 +9,17 @@ namespace Cluck
 {
     class Util
     {
+        static Random randomGen = new Random();
+
+        public Util()
+        {
+        }
+
+        public static double RandomClamped()
+        {
+            return (randomGen.NextDouble() - randomGen.NextDouble());
+        }
+
         /*
         Desc:
         Trasforms a specified point to world space.
