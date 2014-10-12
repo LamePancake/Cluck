@@ -59,7 +59,7 @@ namespace Cluck.AI
                            entityMem.time = time.ElapsedGameTime.Milliseconds;
                            entityMem.position = entityPos.GetPosition();
 
-                           Console.WriteLine("Memory Updated.");
+                           //Console.WriteLine("Memory Updated.");
                        }
                        else
                        {
@@ -96,7 +96,7 @@ namespace Cluck.AI
         {
             Vector3 toTarget = otherEntityPos - entityPos;
 
-            Console.WriteLine("Dist " + toTarget.Length());
+           // Console.WriteLine("Dist " + toTarget.Length());
 
             if (toTarget.Length() < rangeOfSight)
             {

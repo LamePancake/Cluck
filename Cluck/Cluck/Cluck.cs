@@ -22,7 +22,6 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private Boolean collided;
         private Model ground;
         private Model fence;
         private Model leftArm;
@@ -40,7 +39,7 @@ namespace Cluck
         private const float CAMERA_FOVX = 85.0f;
         private const float CAMERA_ZNEAR = 0.01f;
         private const float CAMERA_ZFAR = 2048.0f * 2.0f;
-        private const float CAMERA_PLAYER_EYE_HEIGHT = 110.0f;
+        private const float CAMERA_PLAYER_EYE_HEIGHT = 0f;
         private const float CAMERA_ACCELERATION_X = 900.0f;
         private const float CAMERA_ACCELERATION_Y = 900.0f;
         private const float CAMERA_ACCELERATION_Z = 900.0f;
@@ -84,14 +83,12 @@ namespace Cluck
             world = new List<GameEntity>(INIT_WORLD_SIZE);
 
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem();
-
-            collided = false;
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
 
             base.Initialize();
 
@@ -174,6 +171,7 @@ namespace Cluck
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
             chickenEntity.AddComponent(chickenSensory);
+            chickenEntity.AddComponent(new CollidableComponent());
 
             chickenEntity2.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity2.AddComponent(chickinematics2);

@@ -2,11 +2,11 @@ Content\Models\arm_left.xnb
 Content\Models\arm_right.xnb
 Content\Models\chicken.xnb
 Content\Models\fence.xnb
-Content\Textures\arms_diffuse.xnb
-Content\Textures\arms_normals.xnb
 Content\Models\chicken_pen.xnb
 Content\Models\fence_bounds.xnb
 Content\Models\ground.xnb
+Content\Textures\arms_diffuse.xnb
+Content\Textures\arms_normals.xnb
 Content\Textures\wood_diffuse.xnb
 Content\Textures\chicken_diffuse.xnb
 Content\Textures\chicken_normals.xnb

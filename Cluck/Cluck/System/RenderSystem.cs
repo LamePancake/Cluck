@@ -11,11 +11,13 @@ namespace Cluck
     class RenderSystem : GameSystem
     {
         FirstPersonCamera camera;
+        GraphicsDevice graphicsDevice;
 
-        public RenderSystem(FirstPersonCamera cam)
+        public RenderSystem(FirstPersonCamera cam, GraphicsDevice gdev)
             : base((int)component_flags.renderable)
         {
             camera = cam;
+            graphicsDevice = gdev;
         }
 
         public void Update(List<GameEntity> world, GameTime gameTime)
@@ -89,6 +91,7 @@ namespace Cluck
                     be.World = groundMatrix[mm.ParentBone.Index] * world;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
+                    BoundingSphereRenderer.Render(mm.BoundingSphere, graphicsDevice, be.View, be.Projection, be.World, Color.Red, Color.Green, Color.Blue);
                 }
                 mm.Draw();
             }

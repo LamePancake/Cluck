@@ -36,6 +36,7 @@ namespace Cluck.AI
                     PositionComponent position = entity.GetComponent<PositionComponent>();
                     
                     SteeringOutput output = steeringBehaviours.Wander(position, kinematics, steering, deltaTime);
+                    //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
                     kinematics.velocity += (output.linear * deltaTime);
