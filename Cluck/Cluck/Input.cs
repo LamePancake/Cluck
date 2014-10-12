@@ -15,6 +15,7 @@ namespace Cluck
         private bool jump;
         private bool crouch;
         private bool sprint;
+        private bool clap;
 
         private float mouseX;
         private float mouseY;
@@ -29,6 +30,7 @@ namespace Cluck
             jump = false;
             crouch = false;
             sprint = false;
+            clap = false;
 
             mouseX = 0;
             mouseY = 0;
@@ -42,6 +44,7 @@ namespace Cluck
         public bool IsJumping() { return jump; }
         public bool IsCrouching() { return crouch; }
         public bool IsSprinting() { return sprint; }
+        public bool IsClapping() { return clap; }
 
         public float GetViewX() { return mouseX; }
         public float GetViewY() { return mouseY; }
@@ -54,6 +57,7 @@ namespace Cluck
         public void SetJumping(bool j) { jump = j; }
         public void SetCrouching(bool c) { crouch = c; }
         public void SetSprinting(bool s) { sprint = s; }
+        public void SetClapping(bool c) { clap = c; }
 
         public void SetViewX(float x) { mouseX = x; }
         public void SetViewY(float Y) { mouseY = Y; }
