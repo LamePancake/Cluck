@@ -22,7 +22,6 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
-        private Boolean collided;
         private Model ground;
         private Model fence;
         private Model leftArm;
@@ -86,8 +85,6 @@ namespace Cluck
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera);
             physicsSystem = new PhysicsSystem();
-
-            collided = false;
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
@@ -174,6 +171,7 @@ namespace Cluck
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
             chickenEntity.AddComponent(chickenSensory);
+            chickenEntity.AddComponent(new CollidableComponent());
 
             chickenEntity2.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity2.AddComponent(chickinematics2);

@@ -77,13 +77,18 @@ namespace Cluck
                         .HasComponent((int)component_flags.collidable))
                         continue;
 
-                    if (Colliding(physicalObjects.ElementAt<GameEntity>(i), 
+                    if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
-                        if ((physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00008))
-                            || (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00008) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200)))
+                    {
+                        if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00008))
                         {
-                            Console.WriteLine("chicken" + i + "," + j);
+                            Console.WriteLine("arm " + i + ", chicken " + j);
                         }
+                        else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00008) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
+                        {
+                            Console.WriteLine("chicken " + i + ", arm " + j);
+                        }
+                    }
                 }
             }
         }
@@ -111,16 +116,29 @@ namespace Cluck
             Renderable c1 = ent1.GetComponent<Renderable>();
             Renderable c2 = ent2.GetComponent<Renderable>();
 
+            // Get the bounding sphere
+            // Translate it to the entity's position
+            // Loop through the other entity, performing the same steps with its spheres, checking whether they collide
+
             for (int i = 0; i < c1.GetModel().Meshes.Count; i++)
             {
-                // Check whether the bounding boxes of the two cubes intersect.
                 BoundingSphere c1BoundingSphere = c1.GetModel().Meshes[i].BoundingSphere;
-                c1BoundingSphere.Center += new Vector3(c1.GetMatrix().M41, c1.GetMatrix().M42, c1.GetMatrix().M43);
+                
+                // Translate the bounding sphere to the appropriate place (hack to deal with arms' lack of position component)
+                if (ent1.HasComponent((int)component_flags.position))
+                    c1BoundingSphere.Center = ent1.GetComponent<PositionComponent>().GetPosition();
+                else
+                    c1BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
 
                 for (int j = 0; j < c2.GetModel().Meshes.Count; j++)
                 {
                     BoundingSphere c2BoundingSphere = c2.GetModel().Meshes[j].BoundingSphere;
-                    c2BoundingSphere.Center += new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+
+                    // Translate the bounding sphere to the appropriate place
+                    if(ent2.HasComponent((int)component_flags.position))
+                        c2BoundingSphere.Center = ent2.GetComponent<PositionComponent>().GetPosition();
+                    else
+                        c2BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
 
                     if (c1BoundingSphere.Intersects(c2BoundingSphere))
                         return true;
