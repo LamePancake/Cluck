@@ -7,6 +7,9 @@ namespace Cluck.AI
 {
     class ChickenEntity : GameEntity
     {
+        public ChickenEntity()
+        {
 
+        }
     }
 }

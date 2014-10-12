@@ -28,11 +28,12 @@ namespace Cluck.AI
     class SensoryMemoryComponent : Component
     {
         private double FOV = Math.PI; // 180 degrees
-        private double rangeOfSight = 10000;
+        private double rangeOfSight = 500;
         private PositionComponent myPosition;
         private KinematicComponent myKinematic;
         private Dictionary<GameEntity, EntityMemory> memories;
         private GameTime time;
+        private bool playerSpotted;
 
         public SensoryMemoryComponent(PositionComponent ownersPosition, KinematicComponent ownersKinematic)
             : base((int)component_flags.sensory)
@@ -41,6 +42,7 @@ namespace Cluck.AI
             myKinematic = ownersKinematic;
             time = new GameTime();
             memories = new Dictionary<GameEntity, EntityMemory>();
+            playerSpotted = false;
         }
 
         public void UpdateSenses(List<GameEntity> entities)
@@ -65,11 +67,16 @@ namespace Cluck.AI
                        {
                            EntityMemory entityMem = new EntityMemory(entityPos.GetPosition(), time.ElapsedGameTime.Milliseconds);
                            memories.Add(entity, entityMem);
-                           Console.WriteLine("New Memory.");
+                           //Console.WriteLine("New Memory.");
                        }
                    }
                }
            }
+        }
+
+        public bool HasMemories()
+        {
+            return (memories.Count > 0);
         }
 
         public float GetEntityTimeMemory(GameEntity entity)
@@ -95,9 +102,7 @@ namespace Cluck.AI
         public bool WithinView(Vector3 entityPos, Vector3 entityHeading, Vector3 otherEntityPos)
         {
             Vector3 toTarget = otherEntityPos - entityPos;
-
-           // Console.WriteLine("Dist " + toTarget.Length());
-
+            
             if (toTarget.Length() < rangeOfSight)
             {
                 toTarget.Normalize();
@@ -106,6 +111,16 @@ namespace Cluck.AI
             }
 
             return false;
+        }
+
+        public void PlayerSpotted(bool state)
+        {
+            playerSpotted = state;
+        }
+
+        public bool PlayerSpotted()
+        {
+            return playerSpotted;
         }
     }
 }

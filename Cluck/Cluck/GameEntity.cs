@@ -57,7 +57,7 @@ namespace Cluck
                 if(temp != null)
                     return temp;
             }
-            return null;
+            return temp;
         }
     }
 }

@@ -88,7 +88,7 @@ namespace Cluck
                     }
 
                     be.EnableDefaultLighting();
-                    be.World = groundMatrix[mm.ParentBone.Index] * world;
+                    be.World = groundMatrix[mm.ParentBone.Index] * Matrix.CreateScale(0.03f) * world;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
                     BoundingSphereRenderer.Render(mm.BoundingSphere, graphicsDevice, be.View, be.Projection, be.World, Color.Red, Color.Green, Color.Blue);

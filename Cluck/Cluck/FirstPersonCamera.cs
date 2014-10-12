@@ -306,8 +306,8 @@ namespace Cluck
             leftArmPos += yAxis * ARM_Y_OFFSET;
             leftArmPos += xAxis * leftXOffset;
 
-            return Matrix.CreateScale(ARM_SCALE)
-                * Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+            return /*Matrix.CreateScale(ARM_SCALE)
+                **/ Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(leftArmPos);
         }
@@ -350,8 +350,8 @@ namespace Cluck
             rightArmPos += yAxis * ARM_Y_OFFSET;
             rightArmPos += xAxis * rightXOffset;
 
-            return Matrix.CreateScale(ARM_SCALE)
-                * Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+            return /*Matrix.CreateScale(ARM_SCALE)
+                **/ Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(rightArmPos);
         }
