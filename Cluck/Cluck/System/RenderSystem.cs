@@ -23,21 +23,22 @@ namespace Cluck
             foreach (GameEntity entity in world)
             {
                 Renderable renderable;
-                
-                if (entity.HasComponent(myFlag) && !entity.HasComponent((int)component_flags.kinematic) && !entity.HasComponent((int)component_flags.arm))
+
+                if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    renderable = entity.GetComponent<Renderable>();
-                    Render(renderable);
-                }
-                else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
-                {
-                    PositionComponent position = entity.GetComponent <PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>();
 
                     renderable = entity.GetComponent<Renderable>();
-                    
+
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
+
+                    Render(renderable);
+                }
+                else if (entity.HasComponent((int)component_flags.renderable) && !entity.HasComponent((int)component_flags.arm))
+                {
+                    renderable = entity.GetComponent<Renderable>();
 
                     Render(renderable);
                 }
