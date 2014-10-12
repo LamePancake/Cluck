@@ -11,3 +11,6 @@ Content\Textures\wood_diffuse.xnb
 Content\Textures\chicken_diffuse.xnb
 Content\Textures\chicken_normals.xnb
 Content\MessageFont.xnb
+Content\Models\SphereHighPoly.xnb
+Content\Textures\sky.xnb
+Content\SkySphere.xnb

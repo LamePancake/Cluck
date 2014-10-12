@@ -11,12 +11,14 @@ namespace Cluck
     {
         private Model entityModel;
         private Matrix worldMatrix;
+        private Texture2D entityTexture;
 
-        public Renderable(Model model)
+        public Renderable(Model model, Texture2D texture)
             : base((int)component_flags.renderable)
         {
             entityModel = model;
             worldMatrix = Matrix.Identity;
+            entityTexture = texture;
         }
 
         public Model GetModel()
@@ -37,6 +39,16 @@ namespace Cluck
         public void SetMatrix(Matrix mat)
         {
             worldMatrix = mat;
+        }
+
+        public Texture2D GetTexture()
+        {
+            return entityTexture;
+        }
+
+        public void SetTexture(Texture2D texture)
+        {
+            entityTexture = texture;
         }
     }
 }

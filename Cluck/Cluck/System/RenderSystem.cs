@@ -23,28 +23,40 @@ namespace Cluck
             foreach (GameEntity entity in world)
             {
                 Renderable renderable;
-                
-                if (entity.HasComponent(myFlag) && !entity.HasComponent((int)component_flags.kinematic))
+
+                if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    renderable = entity.GetComponent<Renderable>();
-                    Render(renderable);
-                }
-                else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
-                {
-                    PositionComponent position = entity.GetComponent <PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>();
 
                     renderable = entity.GetComponent<Renderable>();
-                    
+
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
 
                     Render(renderable);
                 }
-                else if(entity.HasComponent((int)component_flags.player))
+                else if (entity.HasComponent((int)component_flags.renderable) && !entity.HasComponent((int)component_flags.arm))
                 {
-                    PlayerComponent player = entity.GetComponent<PlayerComponent>();
-                    player.Draw(gameTime);
+                    renderable = entity.GetComponent<Renderable>();
+
+                    Render(renderable);
+                }
+                else if (entity.HasComponent((int)component_flags.arm) && entity.HasComponent((int)component_flags.renderable))
+                {
+                    renderable = entity.GetComponent<Renderable>();
+                    ArmComponent arms = entity.GetComponent<ArmComponent>();
+
+                    if (arms.WhichArm())
+                    {
+                        renderable.SetMatrix(camera.GetRightArmWorldMatrix());
+                    }
+                    else
+                    {
+                        renderable.SetMatrix(camera.GetLeftArmWorldMatrix());
+                    }
+
+                    Render(renderable);
                 }
             }
         }
@@ -55,6 +67,7 @@ namespace Cluck
         {
             Model model = rend.GetModel();
             Matrix world = rend.GetMatrix();
+            Texture2D texture = rend.GetTexture();
 
             Matrix[] groundMatrix = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(groundMatrix);
@@ -66,12 +79,16 @@ namespace Cluck
                 }
                 foreach (BasicEffect be in mm.Effects)
                 {
-                    //be.TextureEnabled = true;
+                    if (texture != null)
+                    {
+                        be.TextureEnabled = true;
+                        be.Texture = texture;
+                    }
+
                     be.EnableDefaultLighting();
                     be.World = groundMatrix[mm.ParentBone.Index] * world;
                     be.View = camera.ViewMatrix;
                     be.Projection = camera.ProjectionMatrix;
-                    //be.Texture = armsDiffuse;
                 }
                 mm.Draw();
             }

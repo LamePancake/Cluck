@@ -33,6 +33,7 @@ namespace Cluck
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
+        private Texture2D chickenDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
 
@@ -50,7 +51,6 @@ namespace Cluck
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 2.0f;
 
         private FirstPersonCamera camera;
-        private PlayerComponent playerComponent;
 
         private int windowWidth;
         private int windowHeight;
@@ -59,6 +59,9 @@ namespace Cluck
         private AISystem aiSystem;
         private RenderSystem renderSystem;
         private PhysicsSystem physicsSystem;
+
+        Model SkySphere;
+        Effect SkySphereEffect;
 
         public Cluck()
         {
@@ -135,6 +138,7 @@ namespace Cluck
             timerFont = Content.Load<SpriteFont>("MessageFont");
             // TODO: use this.Content to load your game content here
             armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
+            chickenDiffuse = Content.Load<Texture2D>(@"Textures\chicken_diffuse");
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
@@ -146,12 +150,13 @@ namespace Cluck
 
             time = timer.ToString();
             
-
-            playerComponent = new PlayerComponent(camera, rightArm, leftArm, armsDiffuse);
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             GameEntity chickenEntity = new GameEntity();
             GameEntity chickenEntity2 = new GameEntity();
+
+            GameEntity leftArmEntity = new GameEntity();
+            GameEntity rightArmEntity = new GameEntity();
 
             KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
             KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
@@ -164,26 +169,58 @@ namespace Cluck
             SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chicken1pos, chickinematics);
             SensoryMemoryComponent chicken2Sensory = new SensoryMemoryComponent(chicken2pos, chickinematics2);
 
-            chickenEntity.AddComponent(new Renderable(chicken));
+            chickenEntity.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity.AddComponent(chickinematics);
             chickenEntity.AddComponent(chickenSteering);
             chickenEntity.AddComponent(chicken1pos);
             chickenEntity.AddComponent(chickenSensory);
 
-            chickenEntity2.AddComponent(new Renderable(chicken));
+            chickenEntity2.AddComponent(new Renderable(chicken, chickenDiffuse));
             chickenEntity2.AddComponent(chickinematics2);
             chickenEntity2.AddComponent(chickenSteering2);
             chickenEntity2.AddComponent(chicken2pos);
             chickenEntity2.AddComponent(new CollidableComponent());
             chickenEntity2.AddComponent(chickenSteering2);
 
-            fenceEntity.AddComponent(new Renderable(fence));
-            groundEntity.AddComponent(new Renderable(ground));
+            fenceEntity.AddComponent(new Renderable(fence, null));
+            groundEntity.AddComponent(new Renderable(ground, null));
+
+            leftArmEntity.AddComponent(new CollidableComponent());
+            leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse));
+            leftArmEntity.AddComponent(new ArmComponent(false));
+
+            rightArmEntity.AddComponent(new CollidableComponent());
+            rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse));
+            rightArmEntity.AddComponent(new ArmComponent(true));
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
             world.Add(chickenEntity);
             world.Add(chickenEntity2);
+
+            world.Add(leftArmEntity);
+            world.Add(rightArmEntity);
+
+            SkySphereEffect = Content.Load<Effect>("SkySphere");
+            TextureCube SkyboxTexture =
+                Content.Load<TextureCube>(@"Textures\sky");
+            SkySphere = Content.Load<Model>(@"Models\SphereHighPoly");
+
+            // Set the parameters of the effect
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
+                SkyboxTexture);
+            // Set the Skysphere Effect to each part of the Skysphere model
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                foreach (ModelMeshPart part in mesh.MeshParts)
+                {
+                    part.Effect = SkySphereEffect;
+                }
+            }        
         }
 
         /// <summary>
@@ -231,13 +268,6 @@ namespace Cluck
                 }
             }
 
-            bool isCatch = false;
-            if ((Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState) || GamePad.GetState(PlayerIndex.One).Buttons.X == ButtonState.Pressed)
-            {
-                isCatch = true;
-            }
-            playerComponent.Update(gameTime, isCatch);
-
             if (timer > TimeSpan.Zero && timeStart)
             {
                 timer -= gameTime.ElapsedGameTime;
@@ -260,20 +290,21 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            if (!collided)
-            {
-                GraphicsDevice.Clear(Color.CornflowerBlue);
-            }
-            else
-            {
-                GraphicsDevice.Clear(Color.Red);
-            }
             graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
+                camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
+                camera.ProjectionMatrix);
+            // Draw the sphere model that the effect projects onto
+            foreach (ModelMesh mesh in SkySphere.Meshes)
+            {
+                mesh.Draw();
+            }
 
+            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;           
             // TODO: Add your drawing code here
 
             renderSystem.Update(world, gameTime);
-            playerComponent.Draw(gameTime);
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
             spriteBatch.End();

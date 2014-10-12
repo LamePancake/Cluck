@@ -77,6 +77,11 @@ namespace Cluck
                 i.SetJumping(true);
             }
 
+            if (previousGamePadState.IsButtonUp(Buttons.X) && currentGamePadState.IsButtonDown(Buttons.X))
+            {
+                i.SetClapping(true);
+            }
+
             if (currentGamePadState.IsButtonDown(Buttons.B))
             {
                 i.SetCrouching(true);
@@ -153,6 +158,11 @@ namespace Cluck
 
             i.AddViewX((float)deltaX);
             i.AddViewY((float)deltaY);
+
+            if (previousMouseState.LeftButton == ButtonState.Released && currentMouseState.LeftButton == ButtonState.Pressed)
+            {
+                i.SetClapping(true);
+            }
         }
     }
 }
