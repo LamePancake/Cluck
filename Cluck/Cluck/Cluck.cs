@@ -83,12 +83,12 @@ namespace Cluck
             world = new List<GameEntity>(INIT_WORLD_SIZE);
 
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem();
 
             world = new List<GameEntity>();
             aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera);
+            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
 
             base.Initialize();
 

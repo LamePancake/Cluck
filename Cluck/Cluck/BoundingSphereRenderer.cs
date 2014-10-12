@@ -79,6 +79,7 @@ public static class BoundingSphereRenderer
         GraphicsDevice graphicsDevice,
         Matrix view,
         Matrix projection,
+        Matrix world,
         Color xyColor,
         Color xzColor,
         Color yzColor)
@@ -88,9 +89,9 @@ public static class BoundingSphereRenderer
 
         graphicsDevice.SetVertexBuffer(vertBuffer);
 
-        effect.World =
+        effect.World = 
             Matrix.CreateScale(sphere.Radius) *
-            Matrix.CreateTranslation(sphere.Center);
+            Matrix.CreateTranslation(sphere.Center) * world;
         effect.View = view;
         effect.Projection = projection;
         effect.DiffuseColor = xyColor.ToVector3();
@@ -122,78 +123,78 @@ public static class BoundingSphereRenderer
 
     }
 
-    public static void Render(BoundingSphere[] spheres,
-       GraphicsDevice graphicsDevice,
-       Matrix view,
-       Matrix projection,
-       Color xyColor,
-        Color xzColor,
-        Color yzColor)
-    {
-        foreach (BoundingSphere sphere in spheres)
-        {
-            Render(sphere, graphicsDevice, view, projection, xyColor, xzColor, yzColor);
-        }
-    }
+    //public static void Render(BoundingSphere[] spheres,
+    //   GraphicsDevice graphicsDevice,
+    //   Matrix view,
+    //   Matrix projection,
+    //   Color xyColor,
+    //    Color xzColor,
+    //    Color yzColor)
+    //{
+    //    foreach (BoundingSphere sphere in spheres)
+    //    {
+    //        Render(sphere, graphicsDevice, view, projection, xyColor, xzColor, yzColor);
+    //    }
+    //}
 
-    public static void Render(BoundingSphere[] spheres,
-        GraphicsDevice graphicsDevice,
-        Matrix view,
-        Matrix projection,
-        Color color)
-    {
-        foreach (BoundingSphere sphere in spheres)
-        {
-            Render(sphere, graphicsDevice, view, projection, color);
-        }
-    }
+    //public static void Render(BoundingSphere[] spheres,
+    //    GraphicsDevice graphicsDevice,
+    //    Matrix view,
+    //    Matrix projection,
+    //    Color color)
+    //{
+    //    foreach (BoundingSphere sphere in spheres)
+    //    {
+    //        Render(sphere, graphicsDevice, view, projection, color);
+    //    }
+    //}
 
-    /// <summary>
-    /// Renders a bounding sphere using a single color for all three axis.
-    /// </summary>
-    /// <param name="sphere">The sphere to render.</param>
-    /// <param name="graphicsDevice">The graphics device to use when rendering.</param>
-    /// <param name="view">The current view matrix.</param>
-    /// <param name="projection">The current projection matrix.</param>
-    /// <param name="color">The color to use for rendering the circles.</param>
-    public static void Render(
-        BoundingSphere sphere,
-        GraphicsDevice graphicsDevice,
-        Matrix view,
-        Matrix projection,
-        Color color)
-    {
-        if (vertBuffer == null)
-            InitializeGraphics(graphicsDevice, 30);
+    ///// <summary>
+    ///// Renders a bounding sphere using a single color for all three axis.
+    ///// </summary>
+    ///// <param name="sphere">The sphere to render.</param>
+    ///// <param name="graphicsDevice">The graphics device to use when rendering.</param>
+    ///// <param name="view">The current view matrix.</param>
+    ///// <param name="projection">The current projection matrix.</param>
+    ///// <param name="color">The color to use for rendering the circles.</param>
+    //public static void Render(
+    //    BoundingSphere sphere,
+    //    GraphicsDevice graphicsDevice,
+    //    Matrix view,
+    //    Matrix projection,
+    //    Color color)
+    //{
+    //    if (vertBuffer == null)
+    //        InitializeGraphics(graphicsDevice, 30);
 
-        graphicsDevice.SetVertexBuffer(vertBuffer);
+    //    graphicsDevice.SetVertexBuffer(vertBuffer);
 
-        effect.World =
-              Matrix.CreateScale(sphere.Radius) *
-              Matrix.CreateTranslation(sphere.Center);
-        effect.View = view;
-        effect.Projection = projection;
-        effect.DiffuseColor = color.ToVector3();
+    //    effect.World =
+    //          Matrix.CreateScale(sphere.Radius) *
+    //          Matrix.CreateTranslation(sphere.Center);
+    //    effect.View = view;
+    //    effect.Projection = projection;
+    //    effect.DiffuseColor = color.ToVector3();
 
-        foreach (EffectPass pass in effect.CurrentTechnique.Passes)
-        {
-            pass.Apply();
+    //    foreach (EffectPass pass in effect.CurrentTechnique.Passes)
+    //    {
+    //        pass.Apply();
 
-            //render each circle individually
-            graphicsDevice.DrawPrimitives(
-                  PrimitiveType.LineStrip,
-                  0,
-                  sphereResolution);
-            graphicsDevice.DrawPrimitives(
-                  PrimitiveType.LineStrip,
-                  sphereResolution + 1,
-                  sphereResolution);
-            graphicsDevice.DrawPrimitives(
-                  PrimitiveType.LineStrip,
-                  (sphereResolution + 1) * 2,
-                  sphereResolution);
+    //        //render each circle individually
+    //        graphicsDevice.DrawPrimitives(
+    //              PrimitiveType.LineStrip,
+    //              0,
+    //              sphereResolution);
+    //        graphicsDevice.DrawPrimitives(
+    //              PrimitiveType.LineStrip,
+    //              sphereResolution + 1,
+    //              sphereResolution);
+    //        graphicsDevice.DrawPrimitives(
+    //              PrimitiveType.LineStrip,
+    //              (sphereResolution + 1) * 2,
+    //              sphereResolution);
 
-        }
+    //    }
 
-    }
+    //}
 }
