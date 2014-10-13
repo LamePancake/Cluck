@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -13,6 +14,10 @@ namespace Cluck
         /// </summary>
         private float prevTime = 0.0f;
         private List<GameEntity> physicalObjects;
+        private Boolean catchable = false;
+        private Boolean chickenCaught = false;
+        private int chickenInRange;
+        private int armIndex;
 
         public PhysicsSystem() 
             : base((int)component_flags.kinematic | (int)component_flags.collidable)
@@ -25,6 +30,12 @@ namespace Cluck
 
             ApplyForces(gameTime - prevTime);
             ApplyCollisions();
+            if (chickenCaught)
+            {
+                Renderable arm = physicalObjects.ElementAt<GameEntity>(armIndex).GetComponent<Renderable>();
+
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<PositionComponent>().SetPosition(new Vector3(arm.GetMatrix().M41, arm.GetMatrix().M42, arm.GetMatrix().M43));
+            }
 
             prevTime = gameTime;
         }
@@ -80,13 +91,18 @@ namespace Cluck
                     if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
                     {
-                        if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00008))
+                        if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00010))
                         {
                             Console.WriteLine("arm " + i + ", chicken " + j);
+                            catchable = true;
+                            chickenInRange = j;
                         }
-                        else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00008) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
+                        else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00010) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
                         {
                             Console.WriteLine("chicken " + i + ", arm " + j);
+                            catchable = true;
+                            chickenInRange = i;
+                            armIndex = j;
                         }
                     }
                 }
@@ -145,6 +161,21 @@ namespace Cluck
                 }
             }
             return false;
+        }
+
+        private bool GetCatchState()
+        {
+            return catchable;
+        }
+
+        public void CatchChicken()
+        {
+            if (catchable && physicalObjects.ElementAt<GameEntity>(chickenInRange).HasComponent(0x00010))
+            {
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>();
+                chickenCaught = true;
+
+            }
         }
     }
 }

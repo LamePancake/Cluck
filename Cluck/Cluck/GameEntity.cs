@@ -32,6 +32,17 @@ namespace Cluck
             }
         }
 
+        public void RemoveComponent<T>() where T : Component
+        {
+            Component component = GetComponent<T>();
+
+            if (HasComponent(component.GetFlag()))
+            {
+                components.Remove(component);
+                componentFlags ^= component.GetFlag();
+            }
+        }
+
         public bool HasComponent(int cFlag)
         {
             return (componentFlags & cFlag) == cFlag; 
@@ -46,7 +57,7 @@ namespace Cluck
                 if(temp != null)
                     return temp;
             }
-            return null;
+            return temp;
         }
     }
 }
