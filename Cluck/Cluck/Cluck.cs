@@ -86,9 +86,9 @@ namespace Cluck
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem();
 
-            world = new List<GameEntity>();
-            aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
+            //world = new List<GameEntity>();
+            //aiSystem = new AISystem();
+            //renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
 
             base.Initialize();
 
@@ -115,12 +115,6 @@ namespace Cluck
                 CAMERA_FOVX,
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
-
-            //Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4.0f,
-            //        (float)this.Window.ClientBounds.Width / (float)this.Window.ClientBounds.Height, 1f, 10f);
-            //effect.Projection = projection;
-            //Matrix V = Matrix.CreateTranslation(0f, 0f, -10f);
-            //effect.View = V;
         }
 
         /// <summary>
