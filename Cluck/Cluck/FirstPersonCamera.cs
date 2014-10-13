@@ -81,10 +81,10 @@ namespace Cluck
         private Matrix[] rightArmMatrix;
 
         private const float ARM_SCALE = 0.03f;
-        private const float RIGHT_ARM_X_OFFSET = 0.8f;
-        private const float ARM_Y_OFFSET = -0.6f;
-        private const float ARM_Z_OFFSET = 1.55f;
-        private const float LEFT_ARM_X_OFFSET = -0.8f;
+        private const float RIGHT_ARM_X_OFFSET = 20;
+        private const float ARM_Y_OFFSET = -15;
+        private const float ARM_Z_OFFSET = 37;
+        private const float LEFT_ARM_X_OFFSET = -20;
         private const float MIN_RIGHT_ARM_X_OFFSET = 0.5f;
         private const float MIN_LEFT_ARM_X_OFFSET = -0.5f;
 
@@ -307,7 +307,7 @@ namespace Cluck
             leftArmPos += xAxis * leftXOffset;
 
             return /*Matrix.CreateScale(ARM_SCALE)
-                **/ Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+                * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(leftArmPos);
         }
@@ -351,7 +351,7 @@ namespace Cluck
             rightArmPos += xAxis * rightXOffset;
 
             return /*Matrix.CreateScale(ARM_SCALE)
-                **/ Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+                * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(rightArmPos);
         }
