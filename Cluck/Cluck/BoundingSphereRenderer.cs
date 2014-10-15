@@ -89,9 +89,9 @@ public static class BoundingSphereRenderer
 
         graphicsDevice.SetVertexBuffer(vertBuffer);
 
-        effect.World = 
-            Matrix.CreateScale(sphere.Radius) *
-            Matrix.CreateTranslation(sphere.Center) * world;
+        effect.World = world;
+            //Matrix.CreateScale(sphere.Radius) *
+            //Matrix.CreateTranslation(sphere.Center) * world;
         effect.View = view;
         effect.Projection = projection;
         effect.DiffuseColor = xyColor.ToVector3();

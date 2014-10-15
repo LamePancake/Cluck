@@ -27,6 +27,8 @@ namespace Cluck
         private Model leftArm;
         private Model rightArm;
         private Model chicken;
+        private Matrix boundingSphereSize;
+        private int boundingSize;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private Boolean timeStart;
@@ -79,6 +81,9 @@ namespace Cluck
         /// </summary>
         protected override void Initialize()
         {
+            //set boundingsphere scale
+            boundingSize = 5;
+            SetBoundingSphereSize(boundingSize);
             // Create the world
             world = new List<GameEntity>(INIT_WORLD_SIZE);
 
@@ -133,11 +138,14 @@ namespace Cluck
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
+            leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
+            rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
 
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");
+            chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
 
             time = timer.ToString();
             
@@ -368,5 +376,92 @@ namespace Cluck
 
             camera.Position = newPos;
         }
+
+        private BoundingSphere calBoundingSphere(Model mod)
+        {
+            List<Vector3> points = new List<Vector3>();
+            BoundingSphere sphere;
+
+            Matrix[] boneTransforms = new Matrix[mod.Bones.Count];
+            mod.CopyAbsoluteBoneTransformsTo(boneTransforms);
+
+            foreach (ModelMesh mesh in mod.Meshes)
+            {
+                Console.WriteLine("mesh count " + mod.Meshes.Count);
+
+                foreach (ModelMeshPart mmp in mesh.MeshParts)
+                {
+                    Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
+                    VertexPositionNormalTexture[] vertices =
+                        new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
+
+                    mmp.VertexBuffer.GetData<VertexPositionNormalTexture>(vertices);
+
+                    foreach (VertexPositionNormalTexture vertex in vertices)
+                    {
+                        Vector3 point = Vector3.Transform(vertex.Position,
+                            boneTransforms[mesh.ParentBone.Index]);
+
+                        points.Add(point);
+                    }
+                }
+            }
+            Console.WriteLine("point count " + points.Count);
+            sphere = BoundingSphere.CreateFromPoints(points);
+            sphere = sphere.Transform(boundingSphereSize);
+            return sphere;
+        }
+
+        private void SetBoundingSphereSize(int size)
+        {
+            boundingSphereSize.M11 = size;
+            boundingSphereSize.M12 = 0;
+            boundingSphereSize.M13 = 0;
+            boundingSphereSize.M14 = 0;
+
+            boundingSphereSize.M21 = 0;
+            boundingSphereSize.M22 = size;
+            boundingSphereSize.M23 = 0;
+            boundingSphereSize.M24 = 0;
+
+            boundingSphereSize.M31 = 0;
+            boundingSphereSize.M32 = 0;
+            boundingSphereSize.M33 = size;
+            boundingSphereSize.M34 = 0;
+
+            boundingSphereSize.M41 = 0;
+            boundingSphereSize.M42 = 0;
+            boundingSphereSize.M43 = 0;
+            boundingSphereSize.M44 = 1;
+
+        }
+
+        //protected BoundingSphere CalculateBoundingSphere(Model mod)
+        //{
+        //    BoundingSphere mergedSphere = new BoundingSphere();
+        //    BoundingSphere[] boundingSpheres;
+        //    int index = 0;
+        //    int meshCount = mod.Meshes.Count;
+
+        //    boundingSpheres = new BoundingSphere[meshCount];
+        //    foreach (ModelMesh mesh in mod.Meshes)
+        //    {
+        //        boundingSpheres[index++] = mesh.BoundingSphere;
+        //    }
+
+        //    mergedSphere = boundingSpheres[0];
+        //    if ((mod.Meshes.Count) > 1)
+        //    {
+        //        index = 1;
+        //        do
+        //        {
+        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
+        //                boundingSpheres[index]);
+        //            index++;
+        //        } while (index < mod.Meshes.Count);
+        //    }
+        //    mergedSphere.Center.Y = 0;
+        //    return mergedSphere;
+        //}
     }
 }
