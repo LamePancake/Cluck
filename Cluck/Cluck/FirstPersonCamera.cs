@@ -92,8 +92,8 @@ namespace Cluck
         private const float CHICKEN_OFFSET_Y = -15;
         private const float CHICKEN_OFFSET_Z = 57;
 
-        private const float ARM_MOVEMENT = 20.0f;
-
+        private const float ARM_MOVEMENT = 25.0f;
+        
         float leftXOffset;
         float rightXOffset;
 

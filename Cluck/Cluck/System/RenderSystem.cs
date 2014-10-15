@@ -33,7 +33,7 @@ namespace Cluck
                     entity.GetComponent<PositionComponent>().SetPosition(camera.GetChickenPosition());
                     renderable = entity.GetComponent<Renderable>();
                     PositionComponent position = entity.GetComponent<PositionComponent>();
-                    Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
+                    Matrix final = Matrix.CreateRotationX(MathHelper.ToRadians(camera.PitchDegrees)) * Matrix.CreateRotationY(MathHelper.ToRadians(camera.HeadingDegrees)) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
 
