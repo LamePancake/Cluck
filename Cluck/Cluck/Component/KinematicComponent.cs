@@ -8,8 +8,9 @@ namespace Cluck
 {
     class KinematicComponent : Component
     {
-        public Vector3 position;
         public float maxAcceleration;
+        public float maxRunSpeed = 2.5f;
+        public float maxWalkSpeed = 1.2f;
         public float maxSpeed;
         public float maxAngularAcceleration;
         public float maxRotation;

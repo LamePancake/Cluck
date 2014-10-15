@@ -155,7 +155,7 @@ namespace Cluck
             GameEntity leftArmEntity = new GameEntity();
             GameEntity rightArmEntity = new GameEntity();
 
-            int numOfChickens = 20;
+            int numOfChickens = 10;
             int i = 0;
 
             for (i = 0; i < numOfChickens; ++i)
