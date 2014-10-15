@@ -49,7 +49,7 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Y = 300.0f;
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
-        private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 2.0f;
+        private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
 
         private FirstPersonCamera camera;
 
@@ -89,7 +89,7 @@ namespace Cluck
 
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
-            physicsSystem = new PhysicsSystem();
+            physicsSystem = new PhysicsSystem(camera);
 
             //world = new List<GameEntity>();
             //aiSystem = new AISystem();
@@ -155,7 +155,7 @@ namespace Cluck
             GameEntity leftArmEntity = new GameEntity();
             GameEntity rightArmEntity = new GameEntity();
 
-            int numOfChickens = 2;
+            int numOfChickens = 20;
             int i = 0;
 
             for (i = 0; i < numOfChickens; ++i)
@@ -301,10 +301,10 @@ namespace Cluck
                 timer -= gameTime.ElapsedGameTime;
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-            {
-                physicsSystem.CatchChicken();
-            }
+            //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
+            //{
+            //    physicsSystem.CatchChicken();
+            //}
 
             time = timer.ToString();
 

@@ -16,9 +16,9 @@ namespace Cluck
         collidable = 0x00040,
         sensory = 0x00100,
         arm = 0x00200,
-         
-        /*= 0x00080,
-         = 0x00400,
+        caught = 0x00080,
+        camera = 0x00400,
+        /* 
          = 0x00800,
          = 0x01000,
          = 0x02000,

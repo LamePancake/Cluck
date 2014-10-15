@@ -85,13 +85,21 @@ namespace Cluck
         private const float ARM_Y_OFFSET = -15;
         private const float ARM_Z_OFFSET = 37;
         private const float LEFT_ARM_X_OFFSET = -20;
-        private const float MIN_RIGHT_ARM_X_OFFSET = 0.5f;
-        private const float MIN_LEFT_ARM_X_OFFSET = -0.5f;
+        private const float MIN_RIGHT_ARM_X_OFFSET = 15.0f;
+        private const float MIN_LEFT_ARM_X_OFFSET = -15.0f;
+
+        private const float CHICKEN_OFFSET_X = 0;
+        private const float CHICKEN_OFFSET_Y = -15;
+        private const float CHICKEN_OFFSET_Z = 57;
+
+        private const float ARM_MOVEMENT = 20.0f;
 
         float leftXOffset;
         float rightXOffset;
 
         private bool isClapping;
+
+        public bool chickenCaught;
 
         public FirstPersonCamera(Game game) : base(game)
         {
@@ -135,6 +143,7 @@ namespace Cluck
 
             leftXOffset = LEFT_ARM_X_OFFSET;
             rightXOffset = RIGHT_ARM_X_OFFSET;
+            chickenCaught = false;
         }
 
         public override void Initialize()
@@ -258,9 +267,13 @@ namespace Cluck
         {
             Input i = inputManager.Update(Game.Window.ClientBounds);
 
-            if (i.IsClapping())
+            if (i.IsClapping() && !chickenCaught)
             {
                 isClapping = true;
+            }
+            else if (i.IsClapping() && chickenCaught)
+            {
+                isClapping = false;
             }
 
             UpdateCamera(gameTime, i);
@@ -279,7 +292,7 @@ namespace Cluck
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
         /// <param name="scale">How much to scale the weapon.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix GetLeftArmWorldMatrix()
+        public Matrix GetLeftArmWorldMatrix(float gameTime)
         {
             Vector3 leftArmPos = eye;
 
@@ -287,9 +300,9 @@ namespace Cluck
             {
                 if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET)
                 {
-                    leftXOffset += 0.05f;
+                    leftXOffset += ARM_MOVEMENT * gameTime;
                 }
-                else
+                else if (!chickenCaught)
                 {
                     isClapping = false;
                 }
@@ -298,8 +311,9 @@ namespace Cluck
             {
                 if (leftXOffset > LEFT_ARM_X_OFFSET)
                 {
-                    leftXOffset -= 0.05f;
+                    leftXOffset -= ARM_MOVEMENT * gameTime;
                 }
+                chickenCaught = false;
             }
 
             leftArmPos += viewDir * ARM_Z_OFFSET;
@@ -310,6 +324,20 @@ namespace Cluck
                 * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(leftArmPos);
+        }
+
+        public Vector3 GetChickenPosition()
+        {
+            Vector3 chickenPos = eye;
+            chickenPos += viewDir * CHICKEN_OFFSET_Z;
+            chickenPos += yAxis * CHICKEN_OFFSET_Y;
+            chickenPos += xAxis * CHICKEN_OFFSET_X;
+
+            Matrix chickenWorld = Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
+                * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
+                * Matrix.CreateTranslation(chickenPos);
+
+            return new Vector3(chickenWorld.M41, chickenWorld.M42, chickenWorld.M43);
         }
 
         /// <summary>
@@ -323,7 +351,7 @@ namespace Cluck
         /// <param name="zOffset">How far to position the weapon in front or behind.</param>
         /// <param name="scale">How much to scale the weapon.</param>
         /// <returns>The weapon world transformation matrix.</returns>
-        public Matrix GetRightArmWorldMatrix()
+        public Matrix GetRightArmWorldMatrix(float gameTime)
         {
             Vector3 rightArmPos = eye;
 
@@ -331,19 +359,20 @@ namespace Cluck
             {
                 if (rightXOffset >= MIN_RIGHT_ARM_X_OFFSET)
                 {
-                    rightXOffset -= 0.05f;
+                    rightXOffset -= ARM_MOVEMENT * gameTime;
                 }
-                else
+                else if (!chickenCaught)
                 {
                     isClapping = false;
                 }
             }
-            else
+            else 
             {
                 if (rightXOffset < RIGHT_ARM_X_OFFSET)
                 {
-                    rightXOffset += 0.05f;
+                    rightXOffset += ARM_MOVEMENT * gameTime;
                 }
+                chickenCaught = false;
             }
 
             rightArmPos += viewDir * ARM_Z_OFFSET;
@@ -793,6 +822,8 @@ namespace Cluck
 
             return false;
         }
+
+        public bool IsClapping() { return isClapping; }
 
     #endregion
     }
