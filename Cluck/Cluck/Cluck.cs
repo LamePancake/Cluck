@@ -27,6 +27,8 @@ namespace Cluck
         private Model leftArm;
         private Model rightArm;
         private Model chicken;
+        private Model penBase;
+        private Model chickenPen;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -159,13 +161,24 @@ namespace Cluck
                 mm.BoundingSphere.Equals(CalculateBoundingSphere(chicken));
             }
 
+            penBase = Content.Load<Model>(@"Models\pen_base");
+            chickenPen = Content.Load<Model>(@"Models\chicken_pen");
+
             time = timer.ToString();
-            
+
+            GameEntity playerEntitiy = new GameEntity();
+            playerEntitiy.AddComponent(new CameraComponent(camera));
+            playerEntitiy.AddComponent(new PositionComponent(camera.Position, camera.Orientation.W));
+            world.Add(playerEntitiy);
+
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             
             GameEntity leftArmEntity = new GameEntity();
             GameEntity rightArmEntity = new GameEntity();
+
+            GameEntity penBaseEntity = new GameEntity();
+            GameEntity chickenPenEntity = new GameEntity();
 
             int numOfChickens = 10;
             int i = 0;
@@ -233,13 +246,25 @@ namespace Cluck
             rightArmEntity.AddComponent(new ArmComponent(true));
 
             fenceEntity.AddComponent(new Renderable(fence, null));
+            //fenceEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
             groundEntity.AddComponent(new Renderable(ground, null));
+            //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
+
+            penBaseEntity.AddComponent(new Renderable(penBase, null));
+            penBaseEntity.AddComponent(new CaptureComponent());
+            penBaseEntity.AddComponent(new CollidableComponent());
+            penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            chickenPenEntity.AddComponent(new Renderable(chickenPen, null));
+            chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            chickenPenEntity.AddComponent(new CollidableComponent());
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
 
             world.Add(leftArmEntity);
             world.Add(rightArmEntity);
+            world.Add(penBaseEntity);
+            world.Add(chickenPenEntity);
 
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =

@@ -18,8 +18,8 @@ namespace Cluck
         arm = 0x00200,
         caught = 0x00080,
         camera = 0x00400,
-        /* 
-         = 0x00800,
+        capture = 0x00800,
+        /*          
          = 0x01000,
          = 0x02000,
          = 0x04000,
