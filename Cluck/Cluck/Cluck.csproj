@@ -84,6 +84,7 @@
     <Compile Include="AI\TestEntityStates.cs" />
     <Compile Include="BoundingSphereRenderer.cs" />
     <Compile Include="Component\ArmComponent.cs" />
+    <Compile Include="Component\CaptureComponent.cs" />
     <Compile Include="Component\CaughtComponent.cs" />
     <Compile Include="Component\CollidableComponent.cs" />
     <Compile Include="Component\Component.cs" />
