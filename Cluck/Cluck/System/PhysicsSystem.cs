@@ -47,6 +47,12 @@ namespace Cluck
             List<GameEntity> physicalWorld = new List<GameEntity>((Int32)64);
             foreach(GameEntity g in world)
             {
+                if (g.HasComponent((int)component_flags.camera) && g.HasComponent((int)component_flags.position))
+                {
+                    g.GetComponent<PositionComponent>().SetPosition(camera.Position);
+                    g.GetComponent<PositionComponent>().SetOrientation(camera.Orientation.W);
+                }
+
                 if (g.HasComponent((int)component_flags.kinematic) || g.HasComponent((int)component_flags.collidable))
                 {
                     if (g.HasComponent((int)component_flags.caught) && !camera.chickenCaught)

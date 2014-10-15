@@ -165,7 +165,12 @@ namespace Cluck
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
 
             time = timer.ToString();
-            
+
+            GameEntity playerEntitiy = new GameEntity();
+            playerEntitiy.AddComponent(new CameraComponent(camera));
+            playerEntitiy.AddComponent(new PositionComponent(camera.Position, camera.Orientation.W));
+            world.Add(playerEntitiy);
+
             GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             
