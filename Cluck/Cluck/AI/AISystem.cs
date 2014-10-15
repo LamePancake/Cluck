@@ -50,6 +50,7 @@ namespace Cluck.AI
                     }
                     
                     SteeringOutput output = steering.Calculate(position, kinematics, deltaTime, playerPos);
+                    //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
                     kinematics.velocity += (output.linear * deltaTime);

@@ -131,9 +131,12 @@ namespace Cluck.AI
             if (awayFromScary.Length() > panicDistanceSq)
 	        {
                 steering.linear = new Vector3(0, 0, 0);
+                
+                return steering;
 	        }
 
             steering.linear.Normalize();
+
             steering.linear = steering.linear * agentKinematic.maxAcceleration;
 
             steering.angular = 0;

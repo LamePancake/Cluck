@@ -23,6 +23,7 @@ namespace Cluck
         private KeyboardState previousKeyboardState;
         private GamePadState previousGamePadState;
         private GamePadState currentGamePadState;
+        private float sensitivity = 10.0f;
 
         public InputManager()
         {
@@ -77,7 +78,7 @@ namespace Cluck
                 i.SetJumping(true);
             }
 
-            if (previousGamePadState.IsButtonUp(Buttons.X) && currentGamePadState.IsButtonDown(Buttons.X))
+            if (previousGamePadState.Buttons.RightStick == ButtonState.Released && currentGamePadState.Buttons.RightStick == ButtonState.Pressed)
             {
                 i.SetClapping(true);
             }
@@ -94,12 +95,12 @@ namespace Cluck
 
             if (GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.X != 0)
             {
-                i.SetViewX(-GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.X);
+                i.SetViewX(-GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.X * sensitivity);
             }
 
             if (GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.Y != 0)
             {
-                i.SetViewY(GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.Y);
+                i.SetViewY(GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.Y * sensitivity);
             }
         }
 
