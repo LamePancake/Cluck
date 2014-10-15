@@ -140,26 +140,12 @@ namespace Cluck
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
-            //leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
-            //rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
-            foreach (ModelMesh mm in leftArm.Meshes)
-            {
-                mm.BoundingSphere.Equals(CalculateBoundingSphere(leftArm));
-            }
-            foreach (ModelMesh mm in rightArm.Meshes)
-            {
-                mm.BoundingSphere.Equals(CalculateBoundingSphere(rightArm));
-            }
 
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");
-            //chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
-            foreach (ModelMesh mm in chicken.Meshes)
-            {
-                mm.BoundingSphere.Equals(CalculateBoundingSphere(chicken));
-            }
+
 
             penBase = Content.Load<Model>(@"Models\pen_base");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
@@ -189,7 +175,7 @@ namespace Cluck
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
                 AIThinking chickenThink = new AIThinking(chickenEntity, Meander.Instance);
-                Renderable chickenRenderable = new Renderable(chicken, chickenDiffuse);
+                Renderable chickenRenderable = new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken));
 
                 // add chicken components to chicken
                 chickenEntity.AddComponent(chickenRenderable);
@@ -233,23 +219,23 @@ namespace Cluck
             //chickenEntity2.AddComponent(chickenthink2);
 
             leftArmEntity.AddComponent(new CollidableComponent());
-            leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse));
+            leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
             leftArmEntity.AddComponent(new ArmComponent(false));
 
             rightArmEntity.AddComponent(new CollidableComponent());
-            rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse));
+            rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse, calBoundingSphere(rightArm)));
             rightArmEntity.AddComponent(new ArmComponent(true));
 
-            fenceEntity.AddComponent(new Renderable(fence, null));
+            fenceEntity.AddComponent(new Renderable(fence, null, fence.Meshes[0].BoundingSphere));
             //fenceEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
-            groundEntity.AddComponent(new Renderable(ground, null));
+            groundEntity.AddComponent(new Renderable(ground, null, ground.Meshes[0].BoundingSphere));
             //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
-            penBaseEntity.AddComponent(new Renderable(penBase, null));
+            penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase)));
             penBaseEntity.AddComponent(new CaptureComponent());
             penBaseEntity.AddComponent(new CollidableComponent());
             penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-            chickenPenEntity.AddComponent(new Renderable(chickenPen, null));
+            chickenPenEntity.AddComponent(new Renderable(chickenPen, null, chickenPen.Meshes[0].BoundingSphere));
             chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
             chickenPenEntity.AddComponent(new CollidableComponent());
 
@@ -440,8 +426,8 @@ namespace Cluck
             }
             Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(Matrix.CreateScale(boundingSize));
-            sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
+            sphere = sphere.Transform(Matrix.CreateScale(0.8f));
+            //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return sphere;
         }
 
