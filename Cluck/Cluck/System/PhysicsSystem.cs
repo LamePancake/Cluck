@@ -102,7 +102,7 @@ namespace Cluck
                             Console.WriteLine("arm " + i + ", chicken " + j);
                             catchable = true;
                             chickenInRange = j;
-                            if (camera.IsClapping())
+                            if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
                             }
@@ -113,7 +113,7 @@ namespace Cluck
                             catchable = true;
                             chickenInRange = i;
                             armIndex = j;
-                            if (camera.IsClapping())
+                            if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
                             }
