@@ -82,7 +82,7 @@ namespace Cluck
         protected override void Initialize()
         {
             //set boundingsphere scale
-            boundingSize = 5;
+            boundingSize = 50;
             SetBoundingSphereSize(boundingSize);
             // Create the world
             world = new List<GameEntity>(INIT_WORLD_SIZE);
@@ -138,14 +138,26 @@ namespace Cluck
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
-            leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
-            rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
+            //leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
+            //rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
+            foreach (ModelMesh mm in leftArm.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(leftArm));
+            }
+            foreach (ModelMesh mm in rightArm.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(rightArm));
+            }
 
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");
-            chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
+            //chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
+            foreach (ModelMesh mm in chicken.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(chicken));
+            }
 
             time = timer.ToString();
             
@@ -408,7 +420,8 @@ namespace Cluck
             }
             Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(boundingSphereSize);
+            sphere = sphere.Transform(Matrix.CreateScale(boundingSize));
+            sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return sphere;
         }
 
@@ -436,32 +449,32 @@ namespace Cluck
 
         }
 
-        //protected BoundingSphere CalculateBoundingSphere(Model mod)
-        //{
-        //    BoundingSphere mergedSphere = new BoundingSphere();
-        //    BoundingSphere[] boundingSpheres;
-        //    int index = 0;
-        //    int meshCount = mod.Meshes.Count;
+        protected BoundingSphere CalculateBoundingSphere(Model mod)
+        {
+            BoundingSphere mergedSphere = new BoundingSphere();
+            BoundingSphere[] boundingSpheres;
+            int index = 0;
+            int meshCount = mod.Meshes.Count;
 
-        //    boundingSpheres = new BoundingSphere[meshCount];
-        //    foreach (ModelMesh mesh in mod.Meshes)
-        //    {
-        //        boundingSpheres[index++] = mesh.BoundingSphere;
-        //    }
+            boundingSpheres = new BoundingSphere[meshCount];
+            foreach (ModelMesh mesh in mod.Meshes)
+            {
+                boundingSpheres[index++] = mesh.BoundingSphere;
+            }
 
-        //    mergedSphere = boundingSpheres[0];
-        //    if ((mod.Meshes.Count) > 1)
-        //    {
-        //        index = 1;
-        //        do
-        //        {
-        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
-        //                boundingSpheres[index]);
-        //            index++;
-        //        } while (index < mod.Meshes.Count);
-        //    }
-        //    mergedSphere.Center.Y = 0;
-        //    return mergedSphere;
-        //}
+            mergedSphere = boundingSpheres[0];
+            if ((mod.Meshes.Count) > 1)
+            {
+                index = 1;
+                do
+                {
+                    mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
+                        boundingSpheres[index]);
+                    index++;
+                } while (index < mod.Meshes.Count);
+            }
+            mergedSphere.Center.Y = 0;
+            return mergedSphere;
+        }
     }
 }

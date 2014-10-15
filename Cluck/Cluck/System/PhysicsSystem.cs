@@ -118,6 +118,10 @@ namespace Cluck
                                 CatchChicken();
                             }
                         }
+                        else
+                        {
+                            catchable = false;
+                        }
                     }
                 }
             }
@@ -156,19 +160,27 @@ namespace Cluck
                 
                 // Translate the bounding sphere to the appropriate place (hack to deal with arms' lack of position component)
                 if (ent1.HasComponent((int)component_flags.position))
+                {
                     c1BoundingSphere.Center = ent1.GetComponent<PositionComponent>().GetPosition();
+                }
                 else
+                {
                     c1BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+                }
 
                 for (int j = 0; j < c2.GetModel().Meshes.Count; j++)
                 {
                     BoundingSphere c2BoundingSphere = c2.GetModel().Meshes[j].BoundingSphere;
 
                     // Translate the bounding sphere to the appropriate place
-                    if(ent2.HasComponent((int)component_flags.position))
+                    if (ent2.HasComponent((int)component_flags.position))
+                    {
                         c2BoundingSphere.Center = ent2.GetComponent<PositionComponent>().GetPosition();
+                    }
                     else
+                    {
                         c2BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+                    }
 
                     if (c1BoundingSphere.Intersects(c2BoundingSphere))
                         return true;
