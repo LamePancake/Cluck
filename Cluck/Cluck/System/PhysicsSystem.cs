@@ -18,10 +18,13 @@ namespace Cluck
         private Boolean chickenCaught = false;
         private int chickenInRange;
         private int armIndex;
+        FirstPersonCamera camera;
 
-        public PhysicsSystem() 
+        public PhysicsSystem(FirstPersonCamera cam) 
             : base((int)component_flags.kinematic | (int)component_flags.collidable)
-        { }
+        {
+            camera = cam;
+        }
 
         public void Update(List<GameEntity> world, float gameTime)
         {
@@ -30,12 +33,6 @@ namespace Cluck
 
             ApplyForces(gameTime - prevTime);
             ApplyCollisions();
-            if (chickenCaught)
-            {
-                Renderable arm = physicalObjects.ElementAt<GameEntity>(armIndex).GetComponent<Renderable>();
-
-                physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<PositionComponent>().SetPosition(new Vector3(arm.GetMatrix().M41, arm.GetMatrix().M42, arm.GetMatrix().M43));
-            }
 
             prevTime = gameTime;
         }
@@ -51,7 +48,16 @@ namespace Cluck
             foreach(GameEntity g in world)
             {
                 if (g.HasComponent((int)component_flags.kinematic) || g.HasComponent((int)component_flags.collidable))
+                {
+                    if (g.HasComponent((int)component_flags.caught) && !camera.chickenCaught)
+                    {
+                        g.RemoveComponent<CaughtComponent>();
+                        PositionComponent p = g.GetComponent<PositionComponent>();
+                        p.SetPosition(new Vector3(p.GetPosition().X, 0, p.GetPosition().Z));
+                        g.AddComponent(new SteeringComponent(p));
+                    }
                     physicalWorld.Add(g);
+                }
             }
             return physicalWorld;
         }
@@ -96,6 +102,10 @@ namespace Cluck
                             Console.WriteLine("arm " + i + ", chicken " + j);
                             catchable = true;
                             chickenInRange = j;
+                            if (camera.IsClapping() && !camera.chickenCaught)
+                            {
+                                CatchChicken();
+                            }
                         }
                         else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00010) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
                         {
@@ -103,6 +113,14 @@ namespace Cluck
                             catchable = true;
                             chickenInRange = i;
                             armIndex = j;
+                            if (camera.IsClapping() && !camera.chickenCaught)
+                            {
+                                CatchChicken();
+                            }
+                        }
+                        else
+                        {
+                            catchable = false;
                         }
                     }
                 }
@@ -142,19 +160,27 @@ namespace Cluck
                 
                 // Translate the bounding sphere to the appropriate place (hack to deal with arms' lack of position component)
                 if (ent1.HasComponent((int)component_flags.position))
+                {
                     c1BoundingSphere.Center = ent1.GetComponent<PositionComponent>().GetPosition();
+                }
                 else
+                {
                     c1BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+                }
 
                 for (int j = 0; j < c2.GetModel().Meshes.Count; j++)
                 {
                     BoundingSphere c2BoundingSphere = c2.GetModel().Meshes[j].BoundingSphere;
 
                     // Translate the bounding sphere to the appropriate place
-                    if(ent2.HasComponent((int)component_flags.position))
+                    if (ent2.HasComponent((int)component_flags.position))
+                    {
                         c2BoundingSphere.Center = ent2.GetComponent<PositionComponent>().GetPosition();
+                    }
                     else
+                    {
                         c2BoundingSphere.Center = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+                    }
 
                     if (c1BoundingSphere.Intersects(c2BoundingSphere))
                         return true;
@@ -173,8 +199,9 @@ namespace Cluck
             if (catchable && physicalObjects.ElementAt<GameEntity>(chickenInRange).HasComponent(0x00010))
             {
                 physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>();
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).AddComponent(new CaughtComponent());
                 chickenCaught = true;
-
+                camera.chickenCaught = true;
             }
         }
     }

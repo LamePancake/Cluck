@@ -36,19 +36,57 @@ namespace Cluck.AI
 
         public SteeringOutput Calculate(PositionComponent position, KinematicComponent kinematics, float deltaTime, Vector3 playerPos)
         {
-            SteeringOutput steeringOut = new SteeringOutput();
+            float weightWander = 0.7f;
+            float weightFlee = 0.4f;
+            SteeringOutput steeringTot = new SteeringOutput();
+            SteeringOutput steering = new SteeringOutput();
 
             if (wanderOn)
             {
-                steeringOut = steeringBehaviours.Wander(position, kinematics, this, deltaTime);
+                steering = steeringBehaviours.Wander(position, kinematics, this, deltaTime);
+
+                steeringTot.linear += (steering.linear * weightWander);
+
+                //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightWander))
+                //    return steeringTot;
             }
 
             if (fleeOn)
             {
-                steeringOut = steeringBehaviours.Flee(position, kinematics, playerPos);
+                steering = steeringBehaviours.Flee(position, kinematics, playerPos);
+
+                steeringTot.linear += (steering.linear * weightFlee);
+
+                //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightFlee))
+                //    return steeringTot;
             }
 
-            return steeringOut;
+            return steeringTot;
+        }
+
+        bool AccumulateForce(Vector3 RunningTot, Vector3 ForceToAdd, KinematicComponent kinematic, float weight)
+        {
+            ForceToAdd *= weight;
+
+            double MagnitudeSoFar = RunningTot.Length();
+
+            double MagnitudeRemaining = kinematic.maxSpeed - MagnitudeSoFar;
+
+            if (MagnitudeRemaining <= 0.0) return false;
+
+            double MagnitudeToAdd = ForceToAdd.Length();
+  
+            if (MagnitudeToAdd < MagnitudeRemaining)
+            {
+                RunningTot += ForceToAdd;
+            }
+            else
+            {
+                //add it to the steering force
+                ForceToAdd.Normalize();
+                RunningTot += (ForceToAdd * (float)MagnitudeRemaining); 
+            }
+            return true;
         }
 
         public Vector3 GetTarget()

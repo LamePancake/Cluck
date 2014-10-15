@@ -12,12 +12,14 @@ namespace Cluck
     {
         FirstPersonCamera camera;
         GraphicsDevice graphicsDevice;
+        private float prevTime;
 
         public RenderSystem(FirstPersonCamera cam, GraphicsDevice gdev)
             : base((int)component_flags.renderable)
         {
             camera = cam;
             graphicsDevice = gdev;
+            prevTime = 0.0f;
         }
 
         public void Update(List<GameEntity> world, GameTime gameTime)
@@ -26,7 +28,18 @@ namespace Cluck
             {
                 Renderable renderable;
 
-                if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
+                if(entity.HasComponent((int)component_flags.caught))
+                {
+                    entity.GetComponent<PositionComponent>().SetPosition(camera.GetChickenPosition());
+                    renderable = entity.GetComponent<Renderable>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>();
+                    Matrix final = Matrix.CreateRotationX(MathHelper.ToRadians(camera.PitchDegrees)) * Matrix.CreateRotationY(MathHelper.ToRadians(camera.HeadingDegrees)) * Matrix.CreateTranslation(position.GetPosition());
+
+                    renderable.SetMatrix(final);
+
+                    Render(renderable);
+                }
+                else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
                 {
                     PositionComponent position = entity.GetComponent<PositionComponent>();
 
@@ -51,11 +64,11 @@ namespace Cluck
 
                     if (arms.WhichArm())
                     {
-                        renderable.SetMatrix(camera.GetRightArmWorldMatrix());
+                        renderable.SetMatrix(camera.GetRightArmWorldMatrix((float)gameTime.ElapsedGameTime.TotalSeconds));
                     }
                     else
                     {
-                        renderable.SetMatrix(camera.GetLeftArmWorldMatrix());
+                        renderable.SetMatrix(camera.GetLeftArmWorldMatrix((float)gameTime.ElapsedGameTime.TotalSeconds));
                     }
 
                     Render(renderable);

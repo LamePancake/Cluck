@@ -27,6 +27,8 @@ namespace Cluck
         private Model leftArm;
         private Model rightArm;
         private Model chicken;
+        private Model penBase;
+        private Model chickenPen;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -49,7 +51,7 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Y = 300.0f;
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
-        private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 2.0f;
+        private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
 
         private FirstPersonCamera camera;
 
@@ -82,18 +84,18 @@ namespace Cluck
         protected override void Initialize()
         {
             //set boundingsphere scale
-            boundingSize = 5;
+            boundingSize = 50;
             SetBoundingSphereSize(boundingSize);
             // Create the world
             world = new List<GameEntity>(INIT_WORLD_SIZE);
 
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
-            physicsSystem = new PhysicsSystem();
+            physicsSystem = new PhysicsSystem(camera);
 
-            world = new List<GameEntity>();
-            aiSystem = new AISystem();
-            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
+            //world = new List<GameEntity>();
+            //aiSystem = new AISystem();
+            //renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
 
             base.Initialize();
 
@@ -120,12 +122,6 @@ namespace Cluck
                 CAMERA_FOVX,
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
-
-            //Matrix projection = Matrix.CreatePerspectiveFieldOfView((float)Math.PI / 4.0f,
-            //        (float)this.Window.ClientBounds.Width / (float)this.Window.ClientBounds.Height, 1f, 10f);
-            //effect.Projection = projection;
-            //Matrix V = Matrix.CreateTranslation(0f, 0f, -10f);
-            //effect.View = V;
         }
 
         /// <summary>
@@ -144,14 +140,29 @@ namespace Cluck
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
-            leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
-            rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
+            //leftArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(leftArm));
+            //rightArm.Meshes[0].BoundingSphere.Equals(calBoundingSphere(rightArm));
+            foreach (ModelMesh mm in leftArm.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(leftArm));
+            }
+            foreach (ModelMesh mm in rightArm.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(rightArm));
+            }
 
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");
-            chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
+            //chicken.Meshes[0].BoundingSphere.Equals(calBoundingSphere(chicken));
+            foreach (ModelMesh mm in chicken.Meshes)
+            {
+                mm.BoundingSphere.Equals(CalculateBoundingSphere(chicken));
+            }
+
+            penBase = Content.Load<Model>(@"Models\pen_base");
+            chickenPen = Content.Load<Model>(@"Models\chicken_pen");
 
             time = timer.ToString();
             
@@ -161,7 +172,10 @@ namespace Cluck
             GameEntity leftArmEntity = new GameEntity();
             GameEntity rightArmEntity = new GameEntity();
 
-            int numOfChickens = 2;
+            GameEntity penBaseEntity = new GameEntity();
+            GameEntity chickenPenEntity = new GameEntity();
+
+            int numOfChickens = 10;
             int i = 0;
 
             for (i = 0; i < numOfChickens; ++i)
@@ -227,13 +241,25 @@ namespace Cluck
             rightArmEntity.AddComponent(new ArmComponent(true));
 
             fenceEntity.AddComponent(new Renderable(fence, null));
+            //fenceEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
             groundEntity.AddComponent(new Renderable(ground, null));
+            //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
+
+            penBaseEntity.AddComponent(new Renderable(penBase, null));
+            penBaseEntity.AddComponent(new CaptureComponent());
+            penBaseEntity.AddComponent(new CollidableComponent());
+            penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            chickenPenEntity.AddComponent(new Renderable(chickenPen, null));
+            chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            chickenPenEntity.AddComponent(new CollidableComponent());
 
             world.Add(fenceEntity);
             world.Add(groundEntity);
 
             world.Add(leftArmEntity);
             world.Add(rightArmEntity);
+            world.Add(penBaseEntity);
+            world.Add(chickenPenEntity);
 
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =
@@ -307,10 +333,10 @@ namespace Cluck
                 timer -= gameTime.ElapsedGameTime;
             }
 
-            if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-            {
-                physicsSystem.CatchChicken();
-            }
+            //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
+            //{
+            //    physicsSystem.CatchChicken();
+            //}
 
             time = timer.ToString();
 
@@ -414,7 +440,8 @@ namespace Cluck
             }
             Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(boundingSphereSize);
+            sphere = sphere.Transform(Matrix.CreateScale(boundingSize));
+            sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return sphere;
         }
 
@@ -442,32 +469,32 @@ namespace Cluck
 
         }
 
-        //protected BoundingSphere CalculateBoundingSphere(Model mod)
-        //{
-        //    BoundingSphere mergedSphere = new BoundingSphere();
-        //    BoundingSphere[] boundingSpheres;
-        //    int index = 0;
-        //    int meshCount = mod.Meshes.Count;
+        protected BoundingSphere CalculateBoundingSphere(Model mod)
+        {
+            BoundingSphere mergedSphere = new BoundingSphere();
+            BoundingSphere[] boundingSpheres;
+            int index = 0;
+            int meshCount = mod.Meshes.Count;
 
-        //    boundingSpheres = new BoundingSphere[meshCount];
-        //    foreach (ModelMesh mesh in mod.Meshes)
-        //    {
-        //        boundingSpheres[index++] = mesh.BoundingSphere;
-        //    }
+            boundingSpheres = new BoundingSphere[meshCount];
+            foreach (ModelMesh mesh in mod.Meshes)
+            {
+                boundingSpheres[index++] = mesh.BoundingSphere;
+            }
 
-        //    mergedSphere = boundingSpheres[0];
-        //    if ((mod.Meshes.Count) > 1)
-        //    {
-        //        index = 1;
-        //        do
-        //        {
-        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
-        //                boundingSpheres[index]);
-        //            index++;
-        //        } while (index < mod.Meshes.Count);
-        //    }
-        //    mergedSphere.Center.Y = 0;
-        //    return mergedSphere;
-        //}
+            mergedSphere = boundingSpheres[0];
+            if ((mod.Meshes.Count) > 1)
+            {
+                index = 1;
+                do
+                {
+                    mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
+                        boundingSpheres[index]);
+                    index++;
+                } while (index < mod.Meshes.Count);
+            }
+            mergedSphere.Center.Y = 0;
+            return mergedSphere;
+        }
     }
 }
