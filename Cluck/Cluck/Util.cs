@@ -20,6 +20,11 @@ namespace Cluck
             return (randomGen.NextDouble() - randomGen.NextDouble());
         }
 
+        public static double Random()
+        {
+            return randomGen.NextDouble();
+        }
+
         /*
         Desc:
         Trasforms a specified point to world space.
