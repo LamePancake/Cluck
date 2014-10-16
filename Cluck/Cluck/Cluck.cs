@@ -66,6 +66,9 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
+        public const int TOTAL_NUM_OF_CHICKENS = 10;
+        public static int remainingChickens;
+
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -122,6 +125,8 @@ namespace Cluck
                 CAMERA_FOVX,
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
+
+            remainingChickens = TOTAL_NUM_OF_CHICKENS;
         }
 
         /// <summary>
@@ -166,18 +171,18 @@ namespace Cluck
             GameEntity penBaseEntity = new GameEntity();
             GameEntity chickenPenEntity = new GameEntity();
 
-            int numOfChickens = 10;
             int i = 0;
 
-            for (i = 0; i < numOfChickens; ++i)
+            for (i = 0; i < TOTAL_NUM_OF_CHICKENS; ++i)
             {
                 // new chicken entity
                 GameEntity chickenEntity = new GameEntity();
 
                 // create chicken components
-                KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI / 4, 0.1f);
+                KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
                 PositionComponent chickenPos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI / 2);
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
+                chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
                 AIThinking chickenThink = new AIThinking(chickenEntity, Meander.Instance);
                 Renderable chickenRenderable = new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken));
@@ -193,36 +198,7 @@ namespace Cluck
 
                 world.Add(chickenEntity);
             }
-
-            //KinematicComponent chickinematics = new KinematicComponent(0.05f, 1f, (float)Math.PI/4, 0.1f);
-            //KinematicComponent chickinematics2 = new KinematicComponent(0.05f, 0.5f, (float)Math.PI/4, 0.1f);
-            //PositionComponent chicken1pos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI/2);
-            //PositionComponent chicken2pos = new PositionComponent(new Vector3(-20, 0, -20), (float)Math.PI);
-
-            //SteeringComponent chickenSteering2 = new SteeringComponent(chicken1pos);
-            //SteeringComponent chickenSteering = new SteeringComponent(chicken2pos);
-
-            //SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chicken1pos, chickinematics);
-            //SensoryMemoryComponent chicken2Sensory = new SensoryMemoryComponent(chicken2pos, chickinematics2);
-
-            //AIThinking chickenthink = new AIThinking(chickenEntity, Meander.Instance);
-            //AIThinking chickenthink2 = new AIThinking(chickenEntity, Meander.Instance);
-
-            //chickenEntity.AddComponent(new Renderable(chicken, chickenDiffuse));
-            //chickenEntity.AddComponent(chickinematics);
-            //chickenEntity.AddComponent(chickenSteering);
-            //chickenEntity.AddComponent(chicken1pos);
-            //chickenEntity.AddComponent(chickenSensory);
-            //chickenEntity.AddComponent(chickenthink);
-
-            //chickenEntity2.AddComponent(new Renderable(chicken, chickenDiffuse));
-            //chickenEntity2.AddComponent(chickinematics2);
-            //chickenEntity2.AddComponent(chickenSteering2);
-            //chickenEntity2.AddComponent(chicken2pos);
-            //chickenEntity2.AddComponent(new CollidableComponent());
-            //chickenEntity2.AddComponent(chickenSteering2);
-            //chickenEntity2.AddComponent(chickenthink2);
-
+            
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
             leftArmEntity.AddComponent(new ArmComponent(false));
@@ -329,11 +305,11 @@ namespace Cluck
             //    physicsSystem.CatchChicken();
             //}
 
-            time = timer.ToString();
+            time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
 
             KeepCameraInBounds();
 
-            aiSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds, camera.Position);
+            aiSystem.Update(world, gameTime, camera.Position);
             physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
             oldKeyState = curKeyState;
 
@@ -361,18 +337,18 @@ namespace Cluck
             // TODO: Add your drawing code here
 
             renderSystem.Update(world, gameTime);
-            spriteBatch.Begin();
-            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
-            spriteBatch.End();
-
+            drawGUI();
             base.Draw(gameTime);
         }
 
         
 
-        private void drawTimer()
+        private void drawGUI()
         {
-
+            spriteBatch.Begin();
+            spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
+            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.End();
         }
 
         private void KeepCameraInBounds()

@@ -16,14 +16,14 @@ namespace Cluck.AI
             steeringBehaviours = new SteeringBehaviours();
         }
 
-        public void Update(List<GameEntity> world, float deltaTime, Vector3 playerPos)
+        public void Update(List<GameEntity> world, GameTime deltaTime, Vector3 playerPos)
         {
             foreach (GameEntity entity in world)
             {
                 if (entity.HasComponent(myFlag))
                 {
                     AIThinking thinking = entity.GetComponent<AIThinking>();
-                    thinking.Update();
+                    thinking.Update(deltaTime);
                 }
 
                 if (entity.HasComponent((int)component_flags.kinematic) 
@@ -40,21 +40,21 @@ namespace Cluck.AI
                     SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
 
                     // this is a hack!! Here be dragons.
-                    if (sensory.WithinView(position.GetPosition(), kinematics.velocity, playerPos))
-                    {
-                        sensory.PlayerSpotted(true);
-                    }
-                    else
-                    {
-                        sensory.PlayerSpotted(false);
-                    }
-                    
-                    SteeringOutput output = steering.Calculate(position, kinematics, deltaTime, playerPos);
+                    //if (sensory.WithinView(position.GetPosition(), kinematics.velocity, playerPos))
+                    //{
+                    //    sensory.PlayerSpotted(true);
+                    //}
+                    //else
+                    //{
+                    //    sensory.PlayerSpotted(false);
+                    //}
+
+                    SteeringOutput output = steering.Calculate(position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
                     //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
-                    kinematics.velocity += (output.linear * deltaTime);
-                    kinematics.rotation += (output.angular * deltaTime);
+                    kinematics.velocity += (output.linear * deltaTime.ElapsedGameTime.Milliseconds);
+                    kinematics.rotation += (output.angular * deltaTime.ElapsedGameTime.Milliseconds);
                     
                     // clamp rotation
                     float rot = kinematics.rotation;
@@ -105,7 +105,7 @@ namespace Cluck.AI
 
                     KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
 
-                    sensory.UpdateSenses(world);
+                    sensory.UpdateSenses(world, deltaTime);
 
                     //Console.WriteLine("in sight: " + sensory.WithinView(position.GetPosition(), kinematics.heading, playerPos));
                 }

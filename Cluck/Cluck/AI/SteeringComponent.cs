@@ -11,6 +11,8 @@ namespace Cluck.AI
 
         SteeringBehaviours steeringBehaviours;
         private PositionComponent target;
+        private GameEntity scaryEntity;
+        private Vector3 scaryPos;
         public Vector3 wanderTarget;
         public float wanderOffset = 900;
         public float wanderRadius = 50;
@@ -32,9 +34,11 @@ namespace Cluck.AI
             wanderTarget = new Vector3((float)(wanderRadius * Math.Cos(theta)), 0, (float)(wanderRadius * Math.Sin(theta)));
 
             steeringBehaviours = new SteeringBehaviours();
+
+            scaryPos = Vector3.Zero;
         }
 
-        public SteeringOutput Calculate(PositionComponent position, KinematicComponent kinematics, float deltaTime, Vector3 playerPos)
+        public SteeringOutput Calculate(PositionComponent position, KinematicComponent kinematics, float deltaTime)
         {
             float weightWander = 0.7f;
             float weightFlee = 0.4f;
@@ -53,7 +57,7 @@ namespace Cluck.AI
 
             if (fleeOn)
             {
-                steering = steeringBehaviours.Flee(position, kinematics, playerPos);
+                steering = steeringBehaviours.Flee(position, kinematics, scaryPos);
 
                 steeringTot.linear += (steering.linear * weightFlee);
 
@@ -102,6 +106,21 @@ namespace Cluck.AI
         public void SetFlee(bool state)
         {
             fleeOn = state;
+        }
+
+        public void SetScaryPos(Vector3 scary)
+        {
+            scaryPos = scary;
+        }
+
+        public void SetScaryEntity(GameEntity entity)
+        {
+            scaryEntity = entity;
+        }
+
+        public GameEntity GetScaryEntity()
+        {
+            return scaryEntity;
         }
     }
 }

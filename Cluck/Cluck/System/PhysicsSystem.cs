@@ -59,7 +59,18 @@ namespace Cluck
                         g.RemoveComponent<CaughtComponent>();
                         PositionComponent p = g.GetComponent<PositionComponent>();
                         p.SetPosition(new Vector3(p.GetPosition().X, 0, p.GetPosition().Z));
-                        g.AddComponent(new SteeringComponent(p));
+
+                        SteeringComponent steering = new SteeringComponent(p);
+
+                        foreach (GameEntity entity in world)
+                        {
+                            if (entity.HasComponent((int)component_flags.camera) && entity.HasComponent((int)component_flags.position))
+                            {
+                                steering.SetScaryEntity(entity);
+                            }
+                        }
+
+                        g.AddComponent(steering);
                     }
                     physicalWorld.Add(g);
                 }
@@ -136,6 +147,7 @@ namespace Cluck
                             }
                             
                             Cluck.AddTime(new TimeSpan(0, 0, 10));
+                            Cluck.remainingChickens--;
                         }
                         else
                         {
