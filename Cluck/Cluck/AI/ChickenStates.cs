@@ -48,14 +48,17 @@ namespace Cluck.AI
 
                 GameEntity scary = steering.GetScaryEntity();
 
-                EntityMemory mem = sensory.GetMemory(scary);
-
-                if (mem != null)
+                if (scary != null)
                 {
-                    if (sensory.NewMemory(mem))
+                    EntityMemory mem = sensory.GetMemory(scary);
+
+                    if (mem != null)
                     {
-                        steering.SetScaryPos(mem.position);
-                        component.ChangeStates(RunAway.Instance);
+                        if (sensory.NewMemory(mem))
+                        {
+                            steering.SetScaryPos(mem.position);
+                            component.ChangeStates(RunAway.Instance);
+                        }
                     }
                 }
             }
@@ -129,17 +132,20 @@ namespace Cluck.AI
 
                 GameEntity scary = steering.GetScaryEntity();
 
-                EntityMemory mem = sensory.GetMemory(scary);
-
-                if (mem != null)
+                if (scary != null)
                 {
-                    if (sensory.NewMemory(mem))
+                    EntityMemory mem = sensory.GetMemory(scary);
+
+                    if (mem != null)
                     {
-                        steering.SetScaryPos(mem.position);
-                    }
-                    else if (mem.time < 0)
-                    {
-                        component.ChangeStates(Meander.Instance);
+                        if (sensory.NewMemory(mem))
+                        {
+                            steering.SetScaryPos(mem.position);
+                        }
+                        else if (mem.time < 0)
+                        {
+                            component.ChangeStates(Meander.Instance);
+                        }
                     }
                 }
             }

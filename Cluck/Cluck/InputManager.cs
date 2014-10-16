@@ -78,7 +78,7 @@ namespace Cluck
                 i.SetJumping(true);
             }
 
-            if (previousGamePadState.Buttons.RightStick == ButtonState.Released && currentGamePadState.Buttons.RightStick == ButtonState.Pressed)
+            if (previousGamePadState.Buttons.RightShoulder == ButtonState.Released && currentGamePadState.Buttons.RightShoulder == ButtonState.Pressed)
             {
                 i.SetClapping(true);
             }
