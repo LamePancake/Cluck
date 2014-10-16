@@ -147,6 +147,7 @@ namespace Cluck
                             }
                             
                             Cluck.AddTime(new TimeSpan(0, 0, 10));
+                            Cluck.remainingChickens--;
                         }
                         else
                         {
