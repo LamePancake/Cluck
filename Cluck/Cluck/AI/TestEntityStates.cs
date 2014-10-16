@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Text;
 
@@ -28,7 +29,7 @@ namespace Cluck.AI
             Console.WriteLine("State Entered: Work");
         }
 
-        public void Execute(AIThinking component, GameEntity entity)
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
             TestEntity testEntity = (TestEntity)entity;
 
@@ -74,7 +75,7 @@ namespace Cluck.AI
             Console.WriteLine("State Entered: Sleep");
         }
 
-        public void Execute(AIThinking component, GameEntity entity)
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
             TestEntity testEntity = (TestEntity)entity;
 
@@ -123,7 +124,7 @@ namespace Cluck.AI
             Console.WriteLine("State Entered: Drink");
         }
 
-        public void Execute(AIThinking component, GameEntity entity)
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
             TestEntity testEntity = (TestEntity)entity;
 
