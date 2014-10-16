@@ -32,7 +32,7 @@ namespace Cluck
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
-        private TimeSpan timer;
+        private static TimeSpan timer;
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
@@ -286,7 +286,7 @@ namespace Cluck
         //
         // Adds time on to TimeSpan timer
         //
-        private void AddTime(TimeSpan addition)
+        public static void AddTime(TimeSpan addition)
         {
             timer += addition;
         }
