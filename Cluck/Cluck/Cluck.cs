@@ -30,6 +30,7 @@ namespace Cluck
         private Model penBase;
         private Model chickenPen;
         private Model testFence;
+        private Song testSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -156,6 +157,7 @@ namespace Cluck
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
 
             testFence = Content.Load<Model>(@"Models\fence");
+            testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
 
             time = timer.ToString();
 
@@ -262,7 +264,9 @@ namespace Cluck
                 {
                     part.Effect = SkySphereEffect;
                 }
-            }        
+            }
+            // Plays  Lacrimosa Dominae
+            MediaPlayer.Play(testSong);
         }
 
         /// <summary>
