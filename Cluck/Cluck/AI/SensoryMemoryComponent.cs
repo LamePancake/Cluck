@@ -9,7 +9,7 @@ namespace Cluck.AI
     class EntityMemory
     {
         public Vector3 position;
-        public float time;
+        public double time;
 
         public EntityMemory()
         {
@@ -17,7 +17,7 @@ namespace Cluck.AI
             time = -1;
         }
 
-        public EntityMemory(Vector3 pos, float miliseconds)
+        public EntityMemory(Vector3 pos, double miliseconds)
         {
             position = new Vector3();
             position = pos;
@@ -28,24 +28,25 @@ namespace Cluck.AI
     class SensoryMemoryComponent : Component
     {
         private double FOV = Math.PI; // 180 degrees
+        private double memorySpan = 5000;
         private double rangeOfSight = 500;
         private PositionComponent myPosition;
         private KinematicComponent myKinematic;
         private Dictionary<GameEntity, EntityMemory> memories;
-        private GameTime time;
-        private bool playerSpotted;
+        double totalTime;
+        //private bool playerSpotted;
 
         public SensoryMemoryComponent(PositionComponent ownersPosition, KinematicComponent ownersKinematic)
             : base((int)component_flags.sensory)
         {
             myPosition = ownersPosition;
             myKinematic = ownersKinematic;
-            time = new GameTime();
             memories = new Dictionary<GameEntity, EntityMemory>();
-            playerSpotted = false;
+            //playerSpotted = false;
+            totalTime = 0;
         }
 
-        public void UpdateSenses(List<GameEntity> entities)
+        public void UpdateSenses(List<GameEntity> entities, GameTime time)
         {
            foreach (GameEntity entity in entities)
            {
@@ -53,22 +54,35 @@ namespace Cluck.AI
                {
                    PositionComponent entityPos = entity.GetComponent<PositionComponent>();
 
-                   if (WithinView(myPosition.GetPosition(), myKinematic.heading, entityPos.GetPosition()))
+                   if (memories.ContainsKey(entity))
                    {
-                       if (memories.ContainsKey(entity))
-                       {
-                           EntityMemory entityMem = memories[entity];
-                           entityMem.time = time.ElapsedGameTime.Milliseconds;
-                           entityMem.position = entityPos.GetPosition();
 
-                           //Console.WriteLine("Memory Updated.");
+                       EntityMemory entityMem = memories[entity];
+
+                       if (WithinView(myPosition.GetPosition(), myKinematic.heading, entityPos.GetPosition()))
+                       {
+                           entityMem.position = entityPos.GetPosition();
+                           entityMem.time = memorySpan;
                        }
                        else
                        {
-                           EntityMemory entityMem = new EntityMemory(entityPos.GetPosition(), time.ElapsedGameTime.Milliseconds);
-                           memories.Add(entity, entityMem);
-                           //Console.WriteLine("New Memory.");
+                           if (entityMem.time > 0)
+                           {
+                               double remaining = entityMem.time - time.ElapsedGameTime.Milliseconds;
+
+                               entityMem.time = remaining;
+
+                               if (remaining <= 0)
+                               {
+                                   memories.Remove(entity);
+                               }
+                           }
                        }
+                   }
+                   else
+                   {
+                       EntityMemory entityMemEmpty = new EntityMemory();
+                       memories.Add(entity, entityMemEmpty);
                    }
                }
            }
@@ -79,7 +93,17 @@ namespace Cluck.AI
             return (memories.Count > 0);
         }
 
-        public float GetEntityTimeMemory(GameEntity entity)
+        public EntityMemory GetMemory(GameEntity entity)
+        {
+            if (memories.ContainsKey(entity))
+            {
+                return memories[entity];
+            }
+
+            return null;
+        }
+
+        public double GetEntityTimeMemory(GameEntity entity)
         {
             if (memories.ContainsKey(entity))
             {
@@ -99,6 +123,16 @@ namespace Cluck.AI
             return Vector3.Zero;
         }
 
+        public bool NewMemory(EntityMemory mem)
+        {
+            if (memorySpan - mem.time < 10)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public bool WithinView(Vector3 entityPos, Vector3 entityHeading, Vector3 otherEntityPos)
         {
             Vector3 toTarget = otherEntityPos - entityPos;
@@ -113,14 +147,14 @@ namespace Cluck.AI
             return false;
         }
 
-        public void PlayerSpotted(bool state)
-        {
-            playerSpotted = state;
-        }
+        //public void PlayerSpotted(bool state)
+        //{
+        //    playerSpotted = state;
+        //}
 
-        public bool PlayerSpotted()
-        {
-            return playerSpotted;
-        }
+        //public bool PlayerSpotted()
+        //{
+        //    return playerSpotted;
+        //}
     }
 }

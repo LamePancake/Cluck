@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Text;
 
@@ -26,9 +27,9 @@ namespace Cluck.AI
             currentState.Enter(this, myOwner);
         }
 
-        public void Update()
+        public void Update(GameTime time)
         {
-            currentState.Execute(this, myOwner);
+            currentState.Execute(this, myOwner, time);
         }
     }
 }

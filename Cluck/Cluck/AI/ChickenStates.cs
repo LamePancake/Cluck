@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework;
 using System.Linq;
 using System.Text;
 
@@ -36,16 +37,29 @@ namespace Cluck.AI
             }
         }
 
-        public void Execute(AIThinking component, GameEntity entity)
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
 
-            if (entity.HasComponent((int)component_flags.sensory))
+            if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
             {
                 SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
 
-                if (sensory.PlayerSpotted())
+                SteeringComponent steering = entity.GetComponent<SteeringComponent>();
+
+                GameEntity scary = steering.GetScaryEntity();
+
+                if (scary != null)
                 {
-                    component.ChangeStates(RunAway.Instance);
+                    EntityMemory mem = sensory.GetMemory(scary);
+
+                    if (mem != null)
+                    {
+                        if (sensory.NewMemory(mem))
+                        {
+                            steering.SetScaryPos(mem.position);
+                            component.ChangeStates(RunAway.Instance);
+                        }
+                    }
                 }
             }
 
@@ -107,23 +121,34 @@ namespace Cluck.AI
             }
         }
 
-        public void Execute(AIThinking component, GameEntity entity)
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
 
-            //testEntity.Rest();
-            //testEntity.GetThirsty();
+            if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
+            {
+                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
 
-            //if (testEntity.IsRested())
-            //{
-            //    if (testEntity.IsThirsty())
-            //    {
-            //        component.ChangeStates(Drink.Instance);
-            //    }
-            //    else
-            //    {
-            //        component.ChangeStates(Work.Instance);
-            //    }
-            //}
+                SteeringComponent steering = entity.GetComponent<SteeringComponent>();
+
+                GameEntity scary = steering.GetScaryEntity();
+
+                if (scary != null)
+                {
+                    EntityMemory mem = sensory.GetMemory(scary);
+
+                    if (mem != null)
+                    {
+                        if (sensory.NewMemory(mem))
+                        {
+                            steering.SetScaryPos(mem.position);
+                        }
+                        else if (mem.time < 0)
+                        {
+                            component.ChangeStates(Meander.Instance);
+                        }
+                    }
+                }
+            }
         }
 
         public void Exit(AIThinking component, GameEntity entity)
