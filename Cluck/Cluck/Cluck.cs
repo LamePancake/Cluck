@@ -43,7 +43,7 @@ namespace Cluck
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
         private const float CAMERA_ZFAR = 2048.0f * 2.0f;
-        private const float CAMERA_PLAYER_EYE_HEIGHT = 20;
+        private const float CAMERA_PLAYER_EYE_HEIGHT = 60f;
         private const float CAMERA_ACCELERATION_X = 900.0f;
         private const float CAMERA_ACCELERATION_Y = 900.0f;
         private const float CAMERA_ACCELERATION_Z = 900.0f;
@@ -65,6 +65,9 @@ namespace Cluck
 
         Model SkySphere;
         Effect SkySphereEffect;
+
+        public const int TOTAL_NUM_OF_CHICKENS = 10;
+        public static int remainingChickens;
 
         public Cluck()
         {
@@ -122,6 +125,8 @@ namespace Cluck
                 CAMERA_FOVX,
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
+
+            remainingChickens = TOTAL_NUM_OF_CHICKENS;
         }
 
         /// <summary>
@@ -166,10 +171,9 @@ namespace Cluck
             GameEntity penBaseEntity = new GameEntity();
             GameEntity chickenPenEntity = new GameEntity();
 
-            int numOfChickens = 10;
             int i = 0;
 
-            for (i = 0; i < numOfChickens; ++i)
+            for (i = 0; i < TOTAL_NUM_OF_CHICKENS; ++i)
             {
                 // new chicken entity
                 GameEntity chickenEntity = new GameEntity();
@@ -304,7 +308,7 @@ namespace Cluck
             //    physicsSystem.CatchChicken();
             //}
 
-            time = timer.ToString();
+            time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
 
             KeepCameraInBounds();
 
@@ -336,18 +340,18 @@ namespace Cluck
             // TODO: Add your drawing code here
 
             renderSystem.Update(world, gameTime);
-            spriteBatch.Begin();
-            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
-            spriteBatch.End();
-
+            drawGUI();
             base.Draw(gameTime);
         }
 
         
 
-        private void drawTimer()
+        private void drawGUI()
         {
-
+            spriteBatch.Begin();
+            spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
+            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.End();
         }
 
         private void KeepCameraInBounds()
@@ -406,7 +410,7 @@ namespace Cluck
             }
             Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(Matrix.CreateScale(0.8f));
+            sphere = sphere.Transform(Matrix.CreateScale(0.9f));
             //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return sphere;
         }

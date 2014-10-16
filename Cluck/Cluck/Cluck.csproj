@@ -92,7 +92,6 @@
     <Compile Include="Component\ComponentID.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
-    <Compile Include="HeadBob.cs" />
     <Compile Include="System\PhysicsSystem.cs" />
     <Compile Include="System\GameSystem.cs" />
     <Compile Include="System\RenderSystem.cs" />
