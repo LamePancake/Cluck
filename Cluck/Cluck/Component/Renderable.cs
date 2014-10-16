@@ -13,6 +13,7 @@ namespace Cluck
         private Matrix worldMatrix;
         private Texture2D entityTexture;
         private BoundingSphere entitySphere;
+        private BoundingBox entityBox;
 
         public Renderable(Model model, Texture2D texture, BoundingSphere sphere)
             : base((int)component_flags.renderable)
@@ -21,7 +22,15 @@ namespace Cluck
             worldMatrix = Matrix.Identity;
             entityTexture = texture;
             entitySphere = sphere;
-            //entityModel.Meshes[0].BoundingSphere.Equals(entityModel.Meshes[0].BoundingSphere.Radius * 40);
+        }
+
+        public Renderable(Model model, Texture2D texture, BoundingBox box)
+            : base((int)component_flags.renderable)
+        {
+            entityModel = model;
+            worldMatrix = Matrix.Identity;
+            entityTexture = texture;
+            entityBox = box;
         }
 
         public Model GetModel()
@@ -62,6 +71,16 @@ namespace Cluck
         public void SetBoundingSphere(BoundingSphere boundsphere)
         {
             entitySphere = boundsphere;
+        }
+
+        public BoundingBox GetBoundingBox()
+        {
+            return entityBox;
+        }
+
+        public void SetBoundingSphere(BoundingBox boundbox)
+        {
+            entityBox = boundbox;
         }
     }
 }
