@@ -56,7 +56,7 @@ namespace Cluck
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
         private const float CAMERA_ZFAR = 2048.0f * 2.0f;
-        private const float CAMERA_PLAYER_EYE_HEIGHT = 60f;
+        private const float CAMERA_PLAYER_EYE_HEIGHT = 100;
         private const float CAMERA_ACCELERATION_X = 900.0f;
         private const float CAMERA_ACCELERATION_Y = 900.0f;
         private const float CAMERA_ACCELERATION_Z = 900.0f;
@@ -478,7 +478,7 @@ namespace Cluck
             }
             Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(Matrix.CreateScale(0.9f));
+            sphere = sphere.Transform(Matrix.CreateScale(1f));
             //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return sphere;
         }

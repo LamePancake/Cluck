@@ -43,7 +43,7 @@ namespace Cluck
         private const float DEFAULT_CROUCHING_MULTIPLIER = 0.75f;
         private const float DEFAULT_MOUSE_SMOOTHING_SENSITIVITY = 0.5f;
         private const float DEFAULT_SPEED_ROTATION = 0.3f;
-        private const float HEIGHT_MULTIPLIER_CROUCHING = 0.5f;
+        private const float HEIGHT_MULTIPLIER_CROUCHING = 0.6f;
         private const int MOUSE_SMOOTHING_CACHE_SIZE = 10;
         private const float BOBBINGSPEED_RUNNING = 0.30f;
         private const float BOBBINGSPEED_WALKING = 0.25f;
@@ -87,7 +87,7 @@ namespace Cluck
         private const float ARM_SCALE = 0.03f;
         private const float RIGHT_ARM_X_OFFSET = 20;
         private const float ARM_Y_OFFSET = -15;
-        private const float ARM_Z_OFFSET = 35;
+        private const float ARM_Z_OFFSET = 33;
         private const float LEFT_ARM_X_OFFSET = -20;
         private const float MIN_RIGHT_ARM_X_OFFSET = 15.0f;
         private const float MIN_LEFT_ARM_X_OFFSET = -15.0f;
