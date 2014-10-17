@@ -198,7 +198,10 @@ namespace Cluck
 
                 // create chicken components
                 KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
-                PositionComponent chickenPos = new PositionComponent(new Vector3((float)Util.RandomClamped() * INIT_WORLD_SIZE, 0, (float)Util.RandomClamped() * INIT_WORLD_SIZE), (float)(Util.RandomClamped() * Math.PI));
+
+                Vector3 randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
+
+                PositionComponent chickenPos = new PositionComponent(randomPos, (float)(Util.RandomClamped() * Math.PI));
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
@@ -217,8 +220,10 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
-            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence, new Vector3(-500, 0, -500))));
+            Vector3 fencePos = new Vector3(-500, 0, -500);
+            testFenceEntity.AddComponent(new PositionComponent(fencePos, 0.0f));
+            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos));
+            testFenceEntity.AddComponent(fenceRenderable);
             testFenceEntity.AddComponent(new FenceComponent());
 
             leftArmEntity.AddComponent(new CollidableComponent());

@@ -20,6 +20,11 @@ namespace Cluck
             return (randomGen.NextDouble() - randomGen.NextDouble());
         }
 
+        public static double Random()
+        {
+            return randomGen.NextDouble();
+        }
+
         /*
         Desc:
         Trasforms a specified point to world space.
@@ -55,6 +60,20 @@ namespace Cluck
             //Console.WriteLine(TransPoint);
 
 	        return TransPoint;
+        }
+
+        public static Vector3 Vec3RotateAroundOrigin(Vector3 vec, float ang)
+        {
+            //create a transformation matrix
+	        Matrix matTransform = Matrix.Identity;
+  
+            //rotate
+            matTransform *= Matrix.CreateRotationY(ang);
+	
+            //now transform the object's vertices
+            vec = Vector3.Transform(vec, matTransform);
+
+            return vec;
         }
 
         public static Vector3 PerpInZPlane(Vector3 vec)
@@ -140,23 +159,6 @@ namespace Cluck
             return true;
         }
 
-        public static Vector3 GetNormal(int face)
-        {
-            switch (face)
-            {
-                case 0:
-                    return new Vector3(-1, 0, 0);
-                case 1:
-                    return new Vector3(1, 0, 0);
-                case 2:
-                    return new Vector3(0, -1, 0);
-                case 3:
-                    return new Vector3(0, 1, 0);
-                case 4:
-                    return new Vector3(0, 0, -1);
-                default: // face should be 5, this is hacky
-                    return new Vector3(0, 0, 1);
-            }
-        }
+
     }
 }

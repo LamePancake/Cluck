@@ -19,6 +19,8 @@ namespace Cluck.AI
         {
         }
 
+
+
         public SteeringOutput Seek(Vector3 target, Vector3 agentPos, KinematicComponent agent)
 	    {
 		    SteeringOutput steering = new SteeringOutput();
@@ -63,20 +65,20 @@ namespace Cluck.AI
             //feeler pointing straight in front
             agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength * agentkinematic.heading));
 
-            ////feeler to left
-            //Vector3 temp = agentkinematic.heading;
-            //temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 2) * 3.5f));
-            //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+            //feeler to left
+            Vector3 temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 2) * 3.5f));
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
 
-            ////feeler to right
-            //temp = agentkinematic.heading;
-            //temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
-            //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+            //feeler to right
+            temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
         }
 
         public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
         {
-          SteeringOutput steering = new SteeringOutput();
+            SteeringOutput steering = new SteeringOutput();
 
           CreateFeelers(agentPos, agentkinematic, agentSteering);
           
@@ -85,13 +87,13 @@ namespace Cluck.AI
 
           int ClosestWall = -1;
 
-          Vector3 ClosestPoint = Vector3.Zero;
+          Vector3 ClosestPoint;
           int IntersectedFace = -1;
 
           for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
           {
-              agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
-              Ray wiskerRay = new Ray(agentPos.GetPosition(), agentkinematic.heading);
+              //agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
+              Ray wiskerRay = new Ray(agentPos.GetPosition(), agentSteering.feelers[wisker]);
               //
               //wiskerRay.Direction = agentSteering.feelers[wisker];
               //Console.WriteLine("Dir: " + wiskerRay.Direction);
@@ -106,11 +108,9 @@ namespace Cluck.AI
                     int face = -1;
                     Util.IntersectRayVsBox(box, wiskerRay,out distToThisIP,out face);
 
-                    if (distToThisIP > agentSteering.feelerLength) continue;
-
                     if (distToThisIP < distToClosestIP)
                     {
-                        //Console.WriteLine("Interrrrsectiionnn1 " + agentPos.GetPosition());
+                        Console.WriteLine("Interrrrsectiionnn1 " + agentPos.GetPosition());
                         distToClosestIP = distToThisIP;
 
                         ClosestWall = wall;
@@ -119,7 +119,7 @@ namespace Cluck.AI
 
                         Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
 
-                        ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
+                        //ClosestPoint = point;
                     }
                 }
             }
@@ -127,10 +127,9 @@ namespace Cluck.AI
   
             if (ClosestWall >= 0)
             {
-                Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
-                Console.WriteLine("Length: " + OverShoot.Length());
-                Console.WriteLine("Face: " + IntersectedFace);
-                steering.linear = Util.GetNormal(IntersectedFace) * OverShoot.Length() * 0.5f;
+                //Vector3 OverShoot = m_Feelers[wisker] - ClosestPoint;
+	  
+                //SteeringForce = walls[ClosestWall].Normal() * OverShoot.Length();
 
             }
 
