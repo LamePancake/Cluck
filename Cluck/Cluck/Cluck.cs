@@ -22,6 +22,13 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        // Initialize an array of indices for the box. 12 lines require 24 indices
+        short[] bBoxIndices = {
+                0, 1, 1, 2, 2, 3, 3, 0, // Front edges
+                4, 5, 5, 6, 6, 7, 7, 4, // Back edges
+                0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
+            };
+
         private Model ground;
         private Model fence;
         private Model leftArm;
@@ -44,6 +51,7 @@ namespace Cluck
         private GamePadState oldGPState;
         private GamePadState curGPState;
         private static int winState;
+        private BoundingBox testBox;
 
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -71,7 +79,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 1;
+        public const int TOTAL_NUM_OF_CHICKENS = 20;
         public static int remainingChickens;
 
         public Cluck()
@@ -209,8 +217,10 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence)));
             testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
+            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence, new Vector3(-500, 0, -500))));
+            testBox = calBoundingBox(testFence, new Vector3(-500, 0, -500));
+
             
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
@@ -379,6 +389,7 @@ namespace Cluck
             renderSystem.Update(world, gameTime);
             drawGUI();
             drawWinState(winState);
+            RenderBox(testBox);
             
             base.Draw(gameTime);
         }
@@ -468,7 +479,7 @@ namespace Cluck
             return sphere;
         }
 
-        private BoundingBox calBoundingBox(Model mod)
+        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos)
         {
             List<Vector3> points = new List<Vector3>();
             BoundingBox box;
@@ -492,6 +503,10 @@ namespace Cluck
                     {
                         Vector3 point = Vector3.Transform(vertex.Position,
                             boneTransforms[mesh.ParentBone.Index]);
+
+                        Matrix mat = Matrix.CreateTranslation(worldPos);
+
+                        point = Vector3.Transform(point, mat);
 
                         points.Add(point);
                     }
@@ -554,5 +569,36 @@ namespace Cluck
         //    mergedSphere.Center.Y = 0;
         //    return mergedSphere;
         //}
+
+        private void RenderBox(BoundingBox box)
+        {
+
+            Vector3[] corners = box.GetCorners();
+
+            VertexPositionColor[] primitiveList = new VertexPositionColor[corners.Length];
+
+            // Assign the 8 box vertices
+            for (int i = 0; i < corners.Length; i++)
+            {
+                primitiveList[i] = new VertexPositionColor(corners[i], Color.White);
+            }
+
+            /* Set your own effect parameters here */
+            BasicEffect boxEffect = new BasicEffect(graphics.GraphicsDevice);
+
+            boxEffect.World = Matrix.Identity;
+            boxEffect.View = camera.ViewMatrix;
+            boxEffect.Projection = camera.ProjectionMatrix;
+            boxEffect.TextureEnabled = false;
+
+            // Draw the box with a LineList
+            foreach (EffectPass pass in boxEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawUserIndexedPrimitives(
+                    PrimitiveType.LineList, primitiveList, 0, 8,
+                    bBoxIndices, 0, 12);
+            }
+        }
     }
 }
