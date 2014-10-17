@@ -170,10 +170,7 @@ namespace Cluck
 
             penBase = Content.Load<Model>(@"Models\pen_base");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
-
-            testFence = Content.Load<Model>(@"Models\fence");
-            //testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
-
+            
             time = timer.ToString();
 
             GameEntity playerEntitiy = new GameEntity();
@@ -189,7 +186,6 @@ namespace Cluck
             GameEntity penBaseEntity = new GameEntity();
             GameEntity chickenPenEntity = new GameEntity();
 
-            GameEntity testFenceEntity = new GameEntity();
             BuildBounds(fence, null);
 
             int i = 0;
@@ -223,12 +219,6 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            Vector3 fencePos = new Vector3(-500, 0, -500);
-            testFenceEntity.AddComponent(new PositionComponent(fencePos, 0.0f));
-            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos, 0.0f));
-            testFenceEntity.AddComponent(fenceRenderable);
-            testFenceEntity.AddComponent(new FenceComponent());
-
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
             leftArmEntity.AddComponent(new ArmComponent(false));
@@ -254,15 +244,7 @@ namespace Cluck
             world.Add(rightArmEntity);
             world.Add(penBaseEntity);
             world.Add(chickenPenEntity);
-
-            world.Add(testFenceEntity);
             
-            Vector3[] testFenceCorners = testFenceEntity.GetComponent<Renderable>().GetBoundingBox().GetCorners();
-            foreach (Vector3 v3 in testFenceCorners)
-            {
-                Console.Write("Boundingbox Corner: " + v3.X + ", " + v3.Y + ", " + v3.Z + "\n");
-            }
-
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =
                 Content.Load<TextureCube>(@"Textures\sky");

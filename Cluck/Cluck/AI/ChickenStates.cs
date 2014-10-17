@@ -26,7 +26,7 @@ namespace Cluck.AI
 
         public void Enter(AIThinking component, GameEntity entity)
         {
-            Console.WriteLine("State Entered: Meander");
+            //Console.WriteLine("State Entered: Meander");
             if (entity.HasComponent((int)component_flags.aiSteering)
                 && entity.HasComponent((int)component_flags.kinematic))
             {
@@ -78,7 +78,7 @@ namespace Cluck.AI
 
         public void Exit(AIThinking component, GameEntity entity)
         {
-            Console.WriteLine("State Exited: Meander");
+            //Console.WriteLine("State Exited: Meander");
             if (entity.HasComponent((int)component_flags.aiSteering))
             {
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>();
@@ -108,7 +108,7 @@ namespace Cluck.AI
 
         public void Enter(AIThinking component, GameEntity entity)
         {
-            Console.WriteLine("State Entered: RunAway");
+            //Console.WriteLine("State Entered: RunAway");
 
             if (entity.HasComponent((int)component_flags.aiSteering)
                 && entity.HasComponent((int)component_flags.kinematic))
@@ -153,7 +153,7 @@ namespace Cluck.AI
 
         public void Exit(AIThinking component, GameEntity entity)
         {
-            Console.WriteLine("State Exited: RunAway");
+            //Console.WriteLine("State Exited: RunAway");
 
             if (entity.HasComponent((int)component_flags.aiSteering))
             {
