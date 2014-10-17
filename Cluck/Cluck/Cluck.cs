@@ -22,6 +22,13 @@ namespace Cluck
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
 
+        // Initialize an array of indices for the box. 12 lines require 24 indices
+        short[] bBoxIndices = {
+                0, 1, 1, 2, 2, 3, 3, 0, // Front edges
+                4, 5, 5, 6, 6, 7, 7, 4, // Back edges
+                0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
+            };
+
         private Model ground;
         private Model fence;
         private Model leftArm;
@@ -41,6 +48,10 @@ namespace Cluck
         private Texture2D chickenDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
+        private GamePadState oldGPState;
+        private GamePadState curGPState;
+        private static int winState;
+        private BoundingBox testBox;
 
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -68,7 +79,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 10;
+        public const int TOTAL_NUM_OF_CHICKENS = 13;
         public static int remainingChickens;
 
         public Cluck()
@@ -93,6 +104,7 @@ namespace Cluck
             SetBoundingSphereSize(boundingSize);
             // Create the world
             world = new List<GameEntity>(INIT_WORLD_SIZE);
+            winState = 0;
 
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
@@ -157,7 +169,7 @@ namespace Cluck
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
 
             testFence = Content.Load<Model>(@"Models\fence");
-            testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
+            //testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
 
             time = timer.ToString();
 
@@ -186,7 +198,7 @@ namespace Cluck
 
                 // create chicken components
                 KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
-                PositionComponent chickenPos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI / 2);
+                PositionComponent chickenPos = new PositionComponent(new Vector3((float)Util.RandomClamped() * INIT_WORLD_SIZE, 0, (float)Util.RandomClamped() * INIT_WORLD_SIZE), (float)(Util.RandomClamped() * Math.PI));
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
@@ -205,9 +217,10 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence)));
             testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
-            
+            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence, new Vector3(-500, 0, -500))));
+            testFenceEntity.AddComponent(new FenceComponent());
+
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
             leftArmEntity.AddComponent(new ArmComponent(false));
@@ -266,7 +279,7 @@ namespace Cluck
                 }
             }
             // Plays  Lacrimosa Dominae
-            MediaPlayer.Play(testSong);
+            //MediaPlayer.Play(testSong);
         }
 
         /// <summary>
@@ -293,7 +306,8 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            curKeyState = Keyboard.GetState();
+            timeStart = true;
+
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -301,36 +315,52 @@ namespace Cluck
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
-            // TODO: Add your update logic here
-            if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
+            if (timer > TimeSpan.Zero && remainingChickens > 0)
             {
-                if (!timeStart)
-                {
-                    timeStart = true;
-                }
-                else
-                {
-                    timeStart = false;
-                }
-            }
+                winState = 0;
+                curKeyState = Keyboard.GetState();
 
-            if (timer > TimeSpan.Zero && timeStart)
+
+
+                // TODO: Add your update logic here
+                //if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
+                //{
+                //    if (!timeStart)
+                //    {
+                //        timeStart = true;
+                //    }
+                //    else
+                //    {
+                //        timeStart = false;
+                //    }
+                //}
+
+                if (timer > TimeSpan.Zero && timeStart)
+                {
+                    timer -= gameTime.ElapsedGameTime;
+                }
+
+                //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
+                //{
+                //    physicsSystem.CatchChicken();
+                //}
+
+                time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
+
+                KeepCameraInBounds();
+
+                aiSystem.Update(world, gameTime, camera.Position);
+                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                oldKeyState = curKeyState;
+            }
+            else if (timer <= TimeSpan.Zero && remainingChickens > 0)
             {
-                timer -= gameTime.ElapsedGameTime;
+                winState = -1;
             }
-
-            //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-            //{
-            //    physicsSystem.CatchChicken();
-            //}
-
-            time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-            KeepCameraInBounds();
-
-            aiSystem.Update(world, gameTime, camera.Position);
-            physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-            oldKeyState = curKeyState;
+            else
+            {
+                winState = 1;
+            }
 
             base.Update(gameTime);
         }
@@ -357,10 +387,27 @@ namespace Cluck
 
             renderSystem.Update(world, gameTime);
             drawGUI();
+            drawWinState(winState);
+            //RenderBox(testBox);
+            
             base.Draw(gameTime);
         }
 
-        
+        private void drawWinState(int state)
+        {
+            if (state == 1)
+            {
+                spriteBatch.Begin();
+                spriteBatch.DrawString(timerFont, "You've prevented Cluck's wrath!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
+                spriteBatch.End();
+            }
+            else if (state == -1)
+            {
+                spriteBatch.Begin();
+                spriteBatch.DrawString(timerFont, "You failed to collect all the chickens before Cluck arrived!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
+                spriteBatch.End();
+            }
+        }
 
         private void drawGUI()
         {
@@ -431,7 +478,7 @@ namespace Cluck
             return sphere;
         }
 
-        private BoundingBox calBoundingBox(Model mod)
+        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos)
         {
             List<Vector3> points = new List<Vector3>();
             BoundingBox box;
@@ -455,6 +502,10 @@ namespace Cluck
                     {
                         Vector3 point = Vector3.Transform(vertex.Position,
                             boneTransforms[mesh.ParentBone.Index]);
+
+                        Matrix mat = Matrix.CreateTranslation(worldPos);
+
+                        point = Vector3.Transform(point, mat);
 
                         points.Add(point);
                     }
@@ -517,5 +568,36 @@ namespace Cluck
         //    mergedSphere.Center.Y = 0;
         //    return mergedSphere;
         //}
+
+        private void RenderBox(BoundingBox box)
+        {
+
+            Vector3[] corners = box.GetCorners();
+
+            VertexPositionColor[] primitiveList = new VertexPositionColor[corners.Length];
+
+            // Assign the 8 box vertices
+            for (int i = 0; i < corners.Length; i++)
+            {
+                primitiveList[i] = new VertexPositionColor(corners[i], Color.White);
+            }
+
+            /* Set your own effect parameters here */
+            BasicEffect boxEffect = new BasicEffect(graphics.GraphicsDevice);
+
+            boxEffect.World = Matrix.Identity;
+            boxEffect.View = camera.ViewMatrix;
+            boxEffect.Projection = camera.ProjectionMatrix;
+            boxEffect.TextureEnabled = false;
+
+            // Draw the box with a LineList
+            foreach (EffectPass pass in boxEffect.CurrentTechnique.Passes)
+            {
+                pass.Apply();
+                GraphicsDevice.DrawUserIndexedPrimitives(
+                    PrimitiveType.LineList, primitiveList, 0, 8,
+                    bBoxIndices, 0, 12);
+            }
+        }
     }
 }

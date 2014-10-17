@@ -55,6 +55,89 @@ namespace Cluck.AI
 
             return steering;
         }
+
+        private void CreateFeelers(PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
+        {
+            agentSteering.feelers.Clear();
+
+            //feeler pointing straight in front
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength * agentkinematic.heading));
+
+            ////feeler to left
+            //Vector3 temp = agentkinematic.heading;
+            //temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 2) * 3.5f));
+            //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+
+            ////feeler to right
+            //temp = agentkinematic.heading;
+            //temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
+            //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+        }
+
+        public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
+        {
+          SteeringOutput steering = new SteeringOutput();
+
+          CreateFeelers(agentPos, agentkinematic, agentSteering);
+          
+          float distToThisIP    = 0.0f;
+          float distToClosestIP = float.MaxValue;
+
+          int ClosestWall = -1;
+
+          Vector3 ClosestPoint = Vector3.Zero;
+          int IntersectedFace = -1;
+
+          for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
+          {
+              agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
+              Ray wiskerRay = new Ray(agentPos.GetPosition(), agentkinematic.heading);
+              //
+              //wiskerRay.Direction = agentSteering.feelers[wisker];
+              //Console.WriteLine("Dir: " + wiskerRay.Direction);
+              //wiskerRay.Position = agentPos.GetPosition();
+              //Console.WriteLine("Pos: " + wiskerRay.Position);
+
+            for (int wall = 0; wall < walls.Count; ++wall)
+            {
+                if (walls[wall].HasComponent((int)component_flags.renderable) && walls[wall].HasComponent((int)component_flags.fence))
+                {
+                    BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
+                    int face = -1;
+                    Util.IntersectRayVsBox(box, wiskerRay,out distToThisIP,out face);
+
+                    if (distToThisIP > agentSteering.feelerLength) continue;
+
+                    if (distToThisIP < distToClosestIP)
+                    {
+                        //Console.WriteLine("Interrrrsectiionnn1 " + agentPos.GetPosition());
+                        distToClosestIP = distToThisIP;
+
+                        ClosestWall = wall;
+
+                        IntersectedFace = face;
+
+                        Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
+
+                        ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
+                    }
+                }
+            }
+
+  
+            if (ClosestWall >= 0)
+            {
+                Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
+                Console.WriteLine("Length: " + OverShoot.Length());
+                Console.WriteLine("Face: " + IntersectedFace);
+                steering.linear = Util.GetNormal(IntersectedFace) * OverShoot.Length() * 0.5f;
+
+            }
+
+          }
+
+          return steering;
+        }
         
         public SteeringOutput Align(float targetOrientation, PositionComponent agentPos, KinematicComponent agentKinematic)
 	    {
