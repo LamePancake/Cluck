@@ -41,6 +41,9 @@ namespace Cluck
         private Texture2D chickenDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
+        private GamePadState oldGPState;
+        private GamePadState curGPState;
+        private static int winState;
 
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -68,7 +71,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 10;
+        public const int TOTAL_NUM_OF_CHICKENS = 1;
         public static int remainingChickens;
 
         public Cluck()
@@ -93,6 +96,7 @@ namespace Cluck
             SetBoundingSphereSize(boundingSize);
             // Create the world
             world = new List<GameEntity>(INIT_WORLD_SIZE);
+            winState = 0;
 
             aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
@@ -293,7 +297,8 @@ namespace Cluck
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            curKeyState = Keyboard.GetState();
+            timeStart = true;
+
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -301,36 +306,52 @@ namespace Cluck
             if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 this.Exit();
 
-            // TODO: Add your update logic here
-            if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
+            if (timer > TimeSpan.Zero && remainingChickens > 0)
             {
-                if (!timeStart)
-                {
-                    timeStart = true;
-                }
-                else
-                {
-                    timeStart = false;
-                }
-            }
+                winState = 0;
+                curKeyState = Keyboard.GetState();
 
-            if (timer > TimeSpan.Zero && timeStart)
+
+
+                // TODO: Add your update logic here
+                //if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
+                //{
+                //    if (!timeStart)
+                //    {
+                //        timeStart = true;
+                //    }
+                //    else
+                //    {
+                //        timeStart = false;
+                //    }
+                //}
+
+                if (timer > TimeSpan.Zero && timeStart)
+                {
+                    timer -= gameTime.ElapsedGameTime;
+                }
+
+                //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
+                //{
+                //    physicsSystem.CatchChicken();
+                //}
+
+                time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
+
+                KeepCameraInBounds();
+
+                aiSystem.Update(world, gameTime, camera.Position);
+                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                oldKeyState = curKeyState;
+            }
+            else if (timer <= TimeSpan.Zero && remainingChickens > 0)
             {
-                timer -= gameTime.ElapsedGameTime;
+                winState = -1;
             }
-
-            //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-            //{
-            //    physicsSystem.CatchChicken();
-            //}
-
-            time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-            KeepCameraInBounds();
-
-            aiSystem.Update(world, gameTime, camera.Position);
-            physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-            oldKeyState = curKeyState;
+            else
+            {
+                winState = 1;
+            }
 
             base.Update(gameTime);
         }
@@ -357,10 +378,26 @@ namespace Cluck
 
             renderSystem.Update(world, gameTime);
             drawGUI();
+            drawWinState(winState);
+            
             base.Draw(gameTime);
         }
 
-        
+        private void drawWinState(int state)
+        {
+            if (state == 1)
+            {
+                spriteBatch.Begin();
+                spriteBatch.DrawString(timerFont, "You've prevented Cluck's wrath!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
+                spriteBatch.End();
+            }
+            else if (state == -1)
+            {
+                spriteBatch.Begin();
+                spriteBatch.DrawString(timerFont, "You failed to collect all the chickens before Cluck arrived!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
+                spriteBatch.End();
+            }
+        }
 
         private void drawGUI()
         {
