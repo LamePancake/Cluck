@@ -117,7 +117,7 @@ namespace Cluck.AI
 
                             IntersectedFace = face;
 
-                            Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
+                            //Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
 
                             ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
                         }
@@ -128,8 +128,8 @@ namespace Cluck.AI
                 if (ClosestWall >= 0)
                 {
                     Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
-                    Console.WriteLine("Length: " + OverShoot.Length());
-                    Console.WriteLine("Face: " + IntersectedFace);
+                    //Console.WriteLine("Length: " + OverShoot.Length());
+                    //Console.WriteLine("Face: " + IntersectedFace);
                     steering.linear = Util.GetNormal(IntersectedFace) * OverShoot.Length() * 0.5f;
 
                 }

@@ -14,6 +14,7 @@ namespace Cluck
         GraphicsDevice graphicsDevice;
         private float prevTime;
 
+
         public RenderSystem(FirstPersonCamera cam, GraphicsDevice gdev)
             : base((int)component_flags.renderable)
         {
