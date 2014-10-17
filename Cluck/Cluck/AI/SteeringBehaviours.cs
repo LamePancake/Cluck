@@ -97,13 +97,7 @@ namespace Cluck.AI
 
             for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
             {
-                //agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
-                Ray wiskerRay = agentSteering.feelers[wisker];//new Ray(agentPos.GetPosition(), agentkinematic.heading);
-                //
-                //wiskerRay.Direction = agentSteering.feelers[wisker];
-                //Console.WriteLine("Dir: " + wiskerRay.Direction);
-                //wiskerRay.Position = agentPos.GetPosition();
-                //Console.WriteLine("Pos: " + wiskerRay.Position);
+                Ray wiskerRay = agentSteering.feelers[wisker];
 
                 for (int wall = 0; wall < walls.Count; ++wall)
                 {
@@ -120,7 +114,6 @@ namespace Cluck.AI
 
                         if (distToThisIP < distToClosestIP)
                         {
-                            //Console.WriteLine("Interrrrsectiionnn1 " + agentPos.GetPosition());
                             distToClosestIP = distToThisIP;
 
                             ClosestWall = wall;
@@ -128,7 +121,6 @@ namespace Cluck.AI
                             IntersectedFace = face;
 
                             orientationOfWall = pos.GetOrientation();
-                            //Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
 
                             ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
                         }
@@ -139,9 +131,7 @@ namespace Cluck.AI
                 if (ClosestWall >= 0)
                 {
                     Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
-                    //Console.WriteLine("Length: " + OverShoot.Length());
-                    //Console.WriteLine("Face: " + IntersectedFace);
-                    steering.linear = Util.GetNormal(IntersectedFace, orientationOfWall) * OverShoot.Length() * 0.2f;
+                    steering.linear = Util.GetNormal(IntersectedFace) * OverShoot.Length();
                 }
 
             }

@@ -145,9 +145,8 @@ namespace Cluck
             return true;
         }
 
-        public static Vector3 GetNormal(int face, float orientation)
+        public static Vector3 GetNormal(int face)
         {
-            Matrix rotationalMat = Matrix.CreateRotationY(orientation);
             Vector3 normal = Vector3.Zero;
 
             switch (face)
