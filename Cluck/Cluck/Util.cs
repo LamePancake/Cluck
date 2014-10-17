@@ -172,9 +172,19 @@ namespace Cluck
                     break;
             }
 
-            normal = Vector3.Transform(normal, rotationalMat);
+            //normal = Vector3.Transform(normal, rotationalMat);
 
             return normal;
+        }
+
+        public static Vector3 Vec3RotateAroundOrigin(Vector3 origin, float ang)
+        {
+
+            Matrix mat = Matrix.CreateRotationY(ang);
+
+            origin = Vector3.Transform(origin, mat);
+
+            return origin;
         }
     }
 }

@@ -61,17 +61,23 @@ namespace Cluck.AI
             agentSteering.feelers.Clear();
 
             //feeler pointing straight in front
-            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength * agentkinematic.heading));
+            Ray front = new Ray(agentPos.GetPosition(), agentkinematic.heading);
+            agentSteering.feelers.Add(front);
 
             ////feeler to left
-            //Vector3 temp = agentkinematic.heading;
-            //temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 2) * 3.5f));
-            //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+            Vector3 temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 3f)));
+            Ray left = new Ray(agentPos.GetPosition(), temp);
+            agentSteering.feelers.Add(left);
 
             ////feeler to right
             //temp = agentkinematic.heading;
             //temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
             //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+            temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, -(float)(Math.PI / 3f));
+            Ray right = new Ray(agentPos.GetPosition(), temp);
+            agentSteering.feelers.Add(right);
         }
 
         public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
@@ -91,8 +97,8 @@ namespace Cluck.AI
 
             for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
             {
-                agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
-                Ray wiskerRay = new Ray(agentPos.GetPosition(), agentkinematic.heading);
+                //agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
+                Ray wiskerRay = agentSteering.feelers[wisker];//new Ray(agentPos.GetPosition(), agentkinematic.heading);
                 //
                 //wiskerRay.Direction = agentSteering.feelers[wisker];
                 //Console.WriteLine("Dir: " + wiskerRay.Direction);
