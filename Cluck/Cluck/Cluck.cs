@@ -82,7 +82,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 13;
+        public const int TOTAL_NUM_OF_CHICKENS = 15;
         public static int remainingChickens;
         
         public Cluck()
@@ -225,7 +225,7 @@ namespace Cluck
 
             Vector3 fencePos = new Vector3(-500, 0, -500);
             testFenceEntity.AddComponent(new PositionComponent(fencePos, 0.0f));
-            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos));
+            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos, 0.0f));
             testFenceEntity.AddComponent(fenceRenderable);
             testFenceEntity.AddComponent(new FenceComponent());
 
@@ -483,7 +483,7 @@ namespace Cluck
             return sphere;
         }
 
-        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos)
+        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos, float orientation)
         {
             List<Vector3> points = new List<Vector3>();
             BoundingBox box;
@@ -508,7 +508,8 @@ namespace Cluck
                         Vector3 point = Vector3.Transform(vertex.Position,
                             boneTransforms[mesh.ParentBone.Index]);
 
-                        Matrix mat = Matrix.CreateTranslation(worldPos);
+                        Matrix mat = Matrix.CreateRotationY(orientation) * Matrix.CreateTranslation(worldPos);
+                        //mat *= Matrix.CreateRotationY(orientation);
 
                         point = Vector3.Transform(point, mat);
 
@@ -614,13 +615,13 @@ namespace Cluck
                 fenceEntityTop.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
-                fenceEntityTop.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityTop.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityTop.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityTop.GetComponent<PositionComponent>().GetPosition(), fenceEntityTop.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityTop.AddComponent(new FenceComponent());
 
                 fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x), 
                     0, 
                     (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
-                fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition(), fenceEntityBottom.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityBottom.AddComponent(new FenceComponent());
 
                 world.Add(fenceEntityTop);
@@ -635,13 +636,13 @@ namespace Cluck
                 fenceEntityLeft.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
-                fenceEntityLeft.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityLeft.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityLeft.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityLeft.GetComponent<PositionComponent>().GetPosition(), fenceEntityLeft.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityLeft.AddComponent(new FenceComponent());
 
                 fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
-                fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityRight.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityRight.GetComponent<PositionComponent>().GetPosition(), fenceEntityRight.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityRight.AddComponent(new FenceComponent());
 
                 world.Add(fenceEntityLeft);

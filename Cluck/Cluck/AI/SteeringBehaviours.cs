@@ -82,6 +82,7 @@ namespace Cluck.AI
 
             float distToThisIP = 0.0f;
             float distToClosestIP = float.MaxValue;
+            float orientationOfWall = (float)Math.PI/2;
 
             int ClosestWall = -1;
 
@@ -100,8 +101,11 @@ namespace Cluck.AI
 
                 for (int wall = 0; wall < walls.Count; ++wall)
                 {
-                    if (walls[wall].HasComponent((int)component_flags.renderable) && walls[wall].HasComponent((int)component_flags.fence))
+                    if (walls[wall].HasComponent((int)component_flags.renderable) 
+                        && walls[wall].HasComponent((int)component_flags.fence)
+                        && walls[wall].HasComponent((int)component_flags.position))
                     {
+                        PositionComponent pos = walls[wall].GetComponent<PositionComponent>();
                         BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
                         int face = -1;
                         Util.IntersectRayVsBox(box, wiskerRay, out distToThisIP, out face);
@@ -117,6 +121,7 @@ namespace Cluck.AI
 
                             IntersectedFace = face;
 
+                            orientationOfWall = pos.GetOrientation();
                             //Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
 
                             ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
@@ -129,9 +134,8 @@ namespace Cluck.AI
                 {
                     Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
                     //Console.WriteLine("Length: " + OverShoot.Length());
-                    //Console.WriteLine("Face: " + IntersectedFace);
-                    steering.linear = Util.GetNormal(IntersectedFace) * OverShoot.Length() * 0.5f;
-
+                    Console.WriteLine("Face: " + IntersectedFace);
+                    steering.linear = Util.GetNormal(IntersectedFace, orientationOfWall) * OverShoot.Length() * 0.2f;
                 }
 
             }

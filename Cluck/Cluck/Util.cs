@@ -145,23 +145,36 @@ namespace Cluck
             return true;
         }
 
-        public static Vector3 GetNormal(int face)
+        public static Vector3 GetNormal(int face, float orientation)
         {
+            Matrix rotationalMat = Matrix.CreateRotationY(orientation);
+            Vector3 normal = Vector3.Zero;
+
             switch (face)
             {
                 case 0:
-                    return new Vector3(-1, 0, 0);
+                    normal = new Vector3(-1, 0, 0);
+                    break;
                 case 1:
-                    return new Vector3(1, 0, 0);
+                    normal = new Vector3(1, 0, 0);
+                    break;
                 case 2:
-                    return new Vector3(0, -1, 0);
+                    normal = new Vector3(0, -1, 0);
+                    break;
                 case 3:
-                    return new Vector3(0, 1, 0);
+                    normal = new Vector3(0, 1, 0);
+                    break;
                 case 4:
-                    return new Vector3(0, 0, -1);
-                default: // face should be 5, this is hacky
-                    return new Vector3(0, 0, 1);
+                    normal = new Vector3(0, 0, -1);
+                    break;
+                case 5: // face should be 5, this is hacky
+                    normal = new Vector3(0, 0, 1);
+                    break;
             }
+
+            normal = Vector3.Transform(normal, rotationalMat);
+
+            return normal;
         }
     }
 }
