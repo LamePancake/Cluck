@@ -58,17 +58,17 @@ namespace Cluck.AI
 
         private void CreateFeelers(PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
         {
-            agentSteering.feelers.Clear();
-
             //feeler pointing straight in front
-            Ray front = new Ray(agentPos.GetPosition(), agentkinematic.heading);
-            agentSteering.feelers.Add(front);
+            //Ray front = new Ray(agentPos.GetPosition(), agentkinematic.heading);
+            agentSteering.feelers[0].Position = agentPos.GetPosition();
+            agentSteering.feelers[0].Direction = agentkinematic.heading;
 
             ////feeler to left
             Vector3 temp = agentkinematic.heading;
             temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 3f)));
-            Ray left = new Ray(agentPos.GetPosition(), temp);
-            agentSteering.feelers.Add(left);
+
+            agentSteering.feelers[1].Position = agentPos.GetPosition();
+            agentSteering.feelers[1].Direction = temp;
 
             ////feeler to right
             //temp = agentkinematic.heading;
@@ -76,8 +76,9 @@ namespace Cluck.AI
             //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
             temp = agentkinematic.heading;
             temp = Util.Vec3RotateAroundOrigin(temp, -(float)(Math.PI / 3f));
-            Ray right = new Ray(agentPos.GetPosition(), temp);
-            agentSteering.feelers.Add(right);
+            
+            agentSteering.feelers[2].Position = agentPos.GetPosition();
+            agentSteering.feelers[2].Direction = temp;
         }
 
         public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
@@ -95,7 +96,7 @@ namespace Cluck.AI
             Vector3 ClosestPoint = Vector3.Zero;
             int IntersectedFace = -1;
 
-            for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
+            for (int wisker = 0; wisker < agentSteering.feelers.Length; ++wisker)
             {
                 Ray wiskerRay = agentSteering.feelers[wisker];
 

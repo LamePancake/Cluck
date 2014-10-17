@@ -19,7 +19,7 @@ namespace Cluck.AI
         public float wanderJitter = 3.5f;
         private bool wanderOn;
         private bool fleeOn;
-        public List<Ray> feelers;
+        public Ray[] feelers;
         public float feelerLength = 60;
 
         public SteeringComponent(PositionComponent targetPos)
@@ -40,7 +40,7 @@ namespace Cluck.AI
 
             scaryPos = Vector3.Zero;
 
-            feelers = new List<Ray>();
+            feelers = new Ray[3];
         }
 
         public SteeringOutput Calculate(List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)
