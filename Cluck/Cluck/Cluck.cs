@@ -444,11 +444,11 @@ namespace Cluck
 
             foreach (ModelMesh mesh in mod.Meshes)
             {
-                Console.WriteLine("mesh count " + mod.Meshes.Count);
+                //Console.WriteLine("mesh count " + mod.Meshes.Count);
 
                 foreach (ModelMeshPart mmp in mesh.MeshParts)
                 {
-                    Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
+                    //Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
                     VertexPositionNormalTexture[] vertices =
                         new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
 
@@ -463,7 +463,7 @@ namespace Cluck
                     }
                 }
             }
-            Console.WriteLine("point count " + points.Count);
+            //Console.WriteLine("point count " + points.Count);
             sphere = BoundingSphere.CreateFromPoints(points);
             sphere = sphere.Transform(Matrix.CreateScale(1f));
             //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
@@ -480,11 +480,11 @@ namespace Cluck
 
             foreach (ModelMesh mesh in mod.Meshes)
             {
-                Console.WriteLine("mesh count " + mod.Meshes.Count);
+                //Console.WriteLine("mesh count " + mod.Meshes.Count);
 
                 foreach (ModelMeshPart mmp in mesh.MeshParts)
                 {
-                    Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
+                    //Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
                     VertexPositionNormalTexture[] vertices =
                         new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
 
@@ -504,7 +504,7 @@ namespace Cluck
                     }
                 }
             }
-            Console.WriteLine("point count " + points.Count);
+            //Console.WriteLine("point count " + points.Count);
             box = BoundingBox.CreateFromPoints(points);
             //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
             return box;
