@@ -134,7 +134,7 @@ namespace Cluck.AI
                 {
                     Vector3 OverShoot = wiskerRay.Position - ClosestPoint;
                     //Console.WriteLine("Length: " + OverShoot.Length());
-                    Console.WriteLine("Face: " + IntersectedFace);
+                    //Console.WriteLine("Face: " + IntersectedFace);
                     steering.linear = Util.GetNormal(IntersectedFace, orientationOfWall) * OverShoot.Length() * 0.2f;
                 }
 
