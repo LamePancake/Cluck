@@ -17,14 +17,13 @@ namespace Cluck.AI
         public float wanderOffset = 900;
         public float wanderRadius = 50;
         public float wanderJitter = 3.5f;
-        public float feelerLength = 5f;
-        public List<Vector3> feelers;
         private bool wanderOn;
         private bool fleeOn;
         public List<Vector3> feelers;
         public float feelerLength = 100;
 
-        public SteeringComponent(PositionComponent targetPos) : base((int)component_flags.aiSteering)
+        public SteeringComponent(PositionComponent targetPos)
+            : base((int)component_flags.aiSteering)
         {
             wanderOn = true;
             fleeOn = false;
@@ -33,12 +32,12 @@ namespace Cluck.AI
 
             Random rando = new Random();
 
-            double theta = rando.NextDouble() * (2*Math.PI);
+            double theta = rando.NextDouble() * (2 * Math.PI);
 
             wanderTarget = new Vector3((float)(wanderRadius * Math.Cos(theta)), 0, (float)(wanderRadius * Math.Sin(theta)));
 
             steeringBehaviours = new SteeringBehaviours();
-            feelers = new List<Vector3>();
+
             scaryPos = Vector3.Zero;
 
             feelers = new List<Vector3>();
@@ -72,7 +71,9 @@ namespace Cluck.AI
                 //    return steeringTot;
             }
 
-            steeringBehaviours.WallAvoidance(entities, position, kinematics, this);
+            steering = steeringBehaviours.WallAvoidance(entities, position, kinematics, this);
+
+            steeringTot.linear += (steering.linear * weightWallAvoid);
 
             return steeringTot;
         }
@@ -88,7 +89,7 @@ namespace Cluck.AI
             if (MagnitudeRemaining <= 0.0) return false;
 
             double MagnitudeToAdd = ForceToAdd.Length();
-  
+
             if (MagnitudeToAdd < MagnitudeRemaining)
             {
                 RunningTot += ForceToAdd;
@@ -97,7 +98,7 @@ namespace Cluck.AI
             {
                 //add it to the steering force
                 ForceToAdd.Normalize();
-                RunningTot += (ForceToAdd * (float)MagnitudeRemaining); 
+                RunningTot += (ForceToAdd * (float)MagnitudeRemaining);
             }
             return true;
         }

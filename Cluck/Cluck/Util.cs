@@ -20,11 +20,6 @@ namespace Cluck
             return (randomGen.NextDouble() - randomGen.NextDouble());
         }
 
-        public static double Random()
-        {
-            return randomGen.NextDouble();
-        }
-
         /*
         Desc:
         Trasforms a specified point to world space.
@@ -34,46 +29,32 @@ namespace Cluck
         side - side velocity component.
         pos - x and y to translate by.
         */
-        public static Vector3 PointToWorldSpace(Vector3 point,Vector3 heading, Vector3 side, Vector3 pos)
+        public static Vector3 PointToWorldSpace(Vector3 point, Vector3 heading, Vector3 side, Vector3 pos)
         {
-	        //make a copy of the point
-	        Vector3 TransPoint = point;
+            //make a copy of the point
+            Vector3 TransPoint = point;
 
-	        //create a transformation matrix
-	        Matrix matTransform = Matrix.Identity;
+            //create a transformation matrix
+            Matrix matTransform = Matrix.Identity;
 
-	        //rotate
+            //rotate
             matTransform.M11 = heading.X;
             matTransform.M13 = heading.Z;
             matTransform.M31 = side.X;
             matTransform.M33 = side.Z;
 
             //Console.WriteLine("Pos: " + Matrix.CreateTranslation(pos));
-	        //and translate
-	        matTransform *= Matrix.CreateTranslation(pos);
+            //and translate
+            matTransform *= Matrix.CreateTranslation(pos);
 
             //Console.WriteLine("Trans " + matTransform);
 
-	        //now transform the vertex
+            //now transform the vertex
             TransPoint = Vector3.Transform(TransPoint, matTransform);
 
             //Console.WriteLine(TransPoint);
 
-	        return TransPoint;
-        }
-
-        public static Vector3 Vec3RotateAroundOrigin(Vector3 vec, float ang)
-        {
-            //create a transformation matrix
-	        Matrix matTransform = Matrix.Identity;
-  
-            //rotate
-            matTransform *= Matrix.CreateRotationY(ang);
-	
-            //now transform the object's vertices
-            vec = Vector3.Transform(vec, matTransform);
-
-            return vec;
+            return TransPoint;
         }
 
         public static Vector3 PerpInZPlane(Vector3 vec)
@@ -159,6 +140,23 @@ namespace Cluck
             return true;
         }
 
-
+        public static Vector3 GetNormal(int face)
+        {
+            switch (face)
+            {
+                case 0:
+                    return new Vector3(-1, 0, 0);
+                case 1:
+                    return new Vector3(1, 0, 0);
+                case 2:
+                    return new Vector3(0, -1, 0);
+                case 3:
+                    return new Vector3(0, 1, 0);
+                case 4:
+                    return new Vector3(0, 0, -1);
+                default: // face should be 5, this is hacky
+                    return new Vector3(0, 0, 1);
+            }
+        }
     }
 }
