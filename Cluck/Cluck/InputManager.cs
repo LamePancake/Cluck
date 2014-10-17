@@ -83,7 +83,7 @@ namespace Cluck
                 i.SetClapping(true);
             }
 
-            if (currentGamePadState.IsButtonDown(Buttons.B))
+            if (currentGamePadState.IsButtonDown(Buttons.LeftShoulder))
             {
                 i.SetCrouching(true);
             }

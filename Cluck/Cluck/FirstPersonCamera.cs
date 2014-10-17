@@ -409,7 +409,7 @@ namespace Cluck
         /// The returned values are in the range [-1,1].
         /// </summary>
         /// <param name="direction">The movement direction.</param>
-        private void GetMovementDirection(out Vector3 direction, Input i)
+        private Vector3 GetMovementDirection(Vector3 direction, Input i)
         {
             direction.X = 0.0f;
             direction.Y = 0.0f;
@@ -483,6 +483,7 @@ namespace Cluck
                 if (posture == Posture.Jumping)
                     direction.Y += 1.0f;
             }
+            return direction;
         }
 
         private void UpdateCamera(GameTime gameTime, Input i)
@@ -496,7 +497,7 @@ namespace Cluck
             else
                 velocity = velocityWalking;
 
-            GetMovementDirection(out direction, i);
+            direction = GetMovementDirection(direction, i);
 
             Rotate(i.GetViewX(), i.GetViewY()); 
             UpdatePosition(ref direction, elapsedTimeSec);

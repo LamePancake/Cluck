@@ -90,6 +90,10 @@ namespace Cluck
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
 
+            graphics.PreferredBackBufferHeight = 720;
+            graphics.PreferredBackBufferWidth = 1280;
+            graphics.ApplyChanges();
+
             camera = new FirstPersonCamera(this);
             Components.Add(camera);
         }
@@ -234,9 +238,10 @@ namespace Cluck
             penBaseEntity.AddComponent(new CaptureComponent());
             penBaseEntity.AddComponent(new CollidableComponent());
             penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-            chickenPenEntity.AddComponent(new Renderable(chickenPen, null, chickenPen.Meshes[0].BoundingSphere));
             chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
             chickenPenEntity.AddComponent(new CollidableComponent());
+            chickenPenEntity.AddComponent(new FenceComponent());
 
             world.Add(groundEntity);
 
@@ -408,23 +413,23 @@ namespace Cluck
         {
             Vector3 newPos = camera.Position;
 
-            if (camera.Position.X < -1024.0f)
-                newPos.X = -1024.0f;
+            if (camera.Position.X < -1070.0f)
+                newPos.X = -1070.0f;
 
-            if (camera.Position.X > 1024.0f)
-                newPos.X = 1024.0f;
+            if (camera.Position.X > 1070.0f)
+                newPos.X = 1070.0f;
 
-            if (camera.Position.Y > 1024.0f)
-                newPos.Y = 1024.0f;
+            if (camera.Position.Y > 1070.0f)
+                newPos.Y = 1070.0f;
 
             if (camera.Position.Y < -1.0f)
                 newPos.Y = -1.0f;
 
-            if (camera.Position.Z < -1024.0f)
-                newPos.Z = -1024.0f;
+            if (camera.Position.Z < -1070.0f)
+                newPos.Z = -1070.0f;
 
-            if (camera.Position.Z > 1024.0f)
-                newPos.Z = 1024.0f;
+            if (camera.Position.Z > 1070.0f)
+                newPos.Z = 1070.0f;
 
             camera.Position = newPos;
         }
@@ -602,7 +607,7 @@ namespace Cluck
 
                 fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x), 
                     0, 
-                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
+                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), (float)Math.PI));
                 fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition(), fenceEntityBottom.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityBottom.AddComponent(new FenceComponent());
 
@@ -623,7 +628,7 @@ namespace Cluck
 
                 fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
                     0, 
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2 + (float)Math.PI));
                 fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityRight.GetComponent<PositionComponent>().GetPosition(), fenceEntityRight.GetComponent<PositionComponent>().GetOrientation())));
                 fenceEntityRight.AddComponent(new FenceComponent());
 
