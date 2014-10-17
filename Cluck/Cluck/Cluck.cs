@@ -67,7 +67,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 100;
+        public const int TOTAL_NUM_OF_CHICKENS = 10;
         public static int remainingChickens;
 
         public Cluck()
@@ -187,7 +187,7 @@ namespace Cluck
 
                 Vector3 randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
 
-                PositionComponent chickenPos = new PositionComponent(randomPos, (float)Math.PI / 2);
+                PositionComponent chickenPos = new PositionComponent(randomPos, (float)(Util.RandomClamped() * Math.PI));
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
@@ -206,8 +206,10 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence)));
-            testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
+            Vector3 fencePos = new Vector3(-500, 0, -500);
+            testFenceEntity.AddComponent(new PositionComponent(fencePos, 0.0f));
+            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos));
+            testFenceEntity.AddComponent(fenceRenderable);
             testFenceEntity.AddComponent(new FenceComponent());
             
             leftArmEntity.AddComponent(new CollidableComponent());
@@ -431,7 +433,7 @@ namespace Cluck
             return sphere;
         }
 
-        private BoundingBox calBoundingBox(Model mod)
+        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos)
         {
             List<Vector3> points = new List<Vector3>();
             BoundingBox box;
@@ -455,6 +457,10 @@ namespace Cluck
                     {
                         Vector3 point = Vector3.Transform(vertex.Position,
                             boneTransforms[mesh.ParentBone.Index]);
+
+                        Matrix mat = Matrix.CreateTranslation(worldPos);
+
+                        point = Vector3.Transform(point, mat);
 
                         points.Add(point);
                     }

@@ -82,16 +82,17 @@ namespace Cluck.AI
 
           CreateFeelers(agentPos, agentkinematic, agentSteering);
           
-          float? distToThisIP    = 0.0f;
+          float distToThisIP    = 0.0f;
           float distToClosestIP = float.MaxValue;
 
           int ClosestWall = -1;
 
           Vector3 ClosestPoint;
+          int IntersectedFace = -1;
 
           for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
           {
-              agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
+              //agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
               Ray wiskerRay = new Ray(agentPos.GetPosition(), agentSteering.feelers[wisker]);
               //
               //wiskerRay.Direction = agentSteering.feelers[wisker];
@@ -104,16 +105,19 @@ namespace Cluck.AI
                 if (walls[wall].HasComponent((int)component_flags.renderable) && walls[wall].HasComponent((int)component_flags.fence))
                 {
                     BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
-                    distToThisIP = wiskerRay.Intersects(box);
-
-                    if (distToThisIP == null) continue;
+                    int face = -1;
+                    Util.IntersectRayVsBox(box, wiskerRay,out distToThisIP,out face);
 
                     if (distToThisIP < distToClosestIP)
                     {
-                        Console.WriteLine("Interrrrsectiionnn1" + agentPos.GetPosition());
-                        distToClosestIP = (float)distToThisIP;
+                        Console.WriteLine("Interrrrsectiionnn1 " + agentPos.GetPosition());
+                        distToClosestIP = distToThisIP;
 
                         ClosestWall = wall;
+
+                        IntersectedFace = face;
+
+                        Console.WriteLine("Interrrrsectiionnn Face: " + IntersectedFace);
 
                         //ClosestPoint = point;
                     }
@@ -127,7 +131,6 @@ namespace Cluck.AI
 	  
                 //SteeringForce = walls[ClosestWall].Normal() * OverShoot.Length();
 
-                Console.WriteLine("Interrrrsectiionnn2");
             }
 
           }
