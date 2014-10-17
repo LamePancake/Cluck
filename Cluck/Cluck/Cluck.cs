@@ -51,7 +51,7 @@ namespace Cluck
         private GamePadState oldGPState;
         private GamePadState curGPState;
         private static int winState;
-        private BoundingBox testBox;
+        //private BoundingBox testBox;
 
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -65,6 +65,11 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
+        private const int FENCE_LINKS_WIDTH = 11;
+        private const int FENCE_LINKS_HEIGHT = 11;
+        private const int FENCE_WIDTH = 211;
+
+
 
         private FirstPersonCamera camera;
 
@@ -160,7 +165,7 @@ namespace Cluck
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
 
-            fence = Content.Load<Model>(@"Models\fence_bounds");
+            fence = Content.Load<Model>(@"Models\fence");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");            
@@ -188,6 +193,8 @@ namespace Cluck
             GameEntity chickenPenEntity = new GameEntity();
 
             GameEntity testFenceEntity = new GameEntity();
+
+            BuildBounds(fence, null);
 
             int i = 0;
 
@@ -219,7 +226,7 @@ namespace Cluck
 
             testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
             testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence, new Vector3(-500, 0, -500))));
-            testBox = calBoundingBox(testFence, new Vector3(-500, 0, -500));
+            //testBox = calBoundingBox(testFence, new Vector3(-500, 0, -500));
 
             
             leftArmEntity.AddComponent(new CollidableComponent());
@@ -230,10 +237,7 @@ namespace Cluck
             rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse, calBoundingSphere(rightArm)));
             rightArmEntity.AddComponent(new ArmComponent(true));
 
-            fenceEntity.AddComponent(new Renderable(fence, null, fence.Meshes[0].BoundingSphere));
-            //fenceEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
             groundEntity.AddComponent(new Renderable(ground, null, ground.Meshes[0].BoundingSphere));
-            //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
             penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase)));
             penBaseEntity.AddComponent(new CaptureComponent());
@@ -243,7 +247,6 @@ namespace Cluck
             chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
             chickenPenEntity.AddComponent(new CollidableComponent());
 
-            world.Add(fenceEntity);
             world.Add(groundEntity);
 
             world.Add(leftArmEntity);
@@ -341,11 +344,6 @@ namespace Cluck
                     timer -= gameTime.ElapsedGameTime;
                 }
 
-                //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-                //{
-                //    physicsSystem.CatchChicken();
-                //}
-
                 time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
 
                 KeepCameraInBounds();
@@ -389,7 +387,7 @@ namespace Cluck
             renderSystem.Update(world, gameTime);
             drawGUI();
             drawWinState(winState);
-            RenderBox(testBox);
+            //RenderBox(testBox);
             
             base.Draw(gameTime);
         }
@@ -598,6 +596,47 @@ namespace Cluck
                 GraphicsDevice.DrawUserIndexedPrimitives(
                     PrimitiveType.LineList, primitiveList, 0, 8,
                     bBoxIndices, 0, 12);
+            }
+        }
+
+        private void BuildBounds(Model fence, Texture2D texture)
+        {
+            for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
+            {
+                GameEntity fenceEntityTop = new GameEntity();
+                GameEntity fenceEntityBottom = new GameEntity();
+
+                fenceEntityTop.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
+                    0, 
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
+                fenceEntityTop.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityTop.GetComponent<PositionComponent>().GetPosition())));
+
+                fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x), 
+                    0, 
+                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
+                fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition())));
+
+                world.Add(fenceEntityTop);
+                world.Add(fenceEntityBottom);
+            }
+
+            for (int y = 0; y < FENCE_LINKS_HEIGHT; y++)
+            {
+                GameEntity fenceEntityLeft = new GameEntity();
+                GameEntity fenceEntityRight = new GameEntity();
+
+                fenceEntityLeft.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
+                    0, 
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
+                fenceEntityLeft.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityLeft.GetComponent<PositionComponent>().GetPosition())));
+
+                fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
+                    0, 
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
+                fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityRight.GetComponent<PositionComponent>().GetPosition())));
+
+                world.Add(fenceEntityLeft);
+                world.Add(fenceEntityRight);
             }
         }
     }
