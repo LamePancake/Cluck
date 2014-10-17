@@ -51,7 +51,7 @@ namespace Cluck
         private GamePadState oldGPState;
         private GamePadState curGPState;
         private static int winState;
-        //private BoundingBox testBox;
+        private BoundingBox testBox;
 
         private const float CAMERA_FOVX = 85f;
         private const float CAMERA_ZNEAR = 0.01f;
@@ -69,8 +69,6 @@ namespace Cluck
         private const int FENCE_LINKS_HEIGHT = 11;
         private const int FENCE_WIDTH = 211;
 
-
-
         private FirstPersonCamera camera;
 
         private int windowWidth;
@@ -84,9 +82,9 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 20;
+        public const int TOTAL_NUM_OF_CHICKENS = 13;
         public static int remainingChickens;
-
+        
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -174,7 +172,7 @@ namespace Cluck
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
 
             testFence = Content.Load<Model>(@"Models\fence");
-            testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
+            //testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
 
             time = timer.ToString();
 
@@ -183,7 +181,6 @@ namespace Cluck
             playerEntitiy.AddComponent(new PositionComponent(camera.Position, camera.Orientation.W));
             world.Add(playerEntitiy);
 
-            GameEntity fenceEntity = new GameEntity();
             GameEntity groundEntity = new GameEntity();
             
             GameEntity leftArmEntity = new GameEntity();
@@ -193,7 +190,6 @@ namespace Cluck
             GameEntity chickenPenEntity = new GameEntity();
 
             GameEntity testFenceEntity = new GameEntity();
-
             BuildBounds(fence, null);
 
             int i = 0;
@@ -205,7 +201,10 @@ namespace Cluck
 
                 // create chicken components
                 KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
-                PositionComponent chickenPos = new PositionComponent(new Vector3(0, 0, 0), (float)Math.PI / 2);
+
+                Vector3 randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
+
+                PositionComponent chickenPos = new PositionComponent(randomPos, (float)(Util.RandomClamped() * Math.PI));
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
@@ -224,11 +223,12 @@ namespace Cluck
                 world.Add(chickenEntity);
             }
 
-            testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
-            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence, new Vector3(-500, 0, -500))));
-            //testBox = calBoundingBox(testFence, new Vector3(-500, 0, -500));
+            Vector3 fencePos = new Vector3(-500, 0, -500);
+            testFenceEntity.AddComponent(new PositionComponent(fencePos, 0.0f));
+            Renderable fenceRenderable = new Renderable(testFence, null, calBoundingBox(testFence, fencePos));
+            testFenceEntity.AddComponent(fenceRenderable);
+            testFenceEntity.AddComponent(new FenceComponent());
 
-            
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
             leftArmEntity.AddComponent(new ArmComponent(false));
@@ -238,6 +238,7 @@ namespace Cluck
             rightArmEntity.AddComponent(new ArmComponent(true));
 
             groundEntity.AddComponent(new Renderable(ground, null, ground.Meshes[0].BoundingSphere));
+            //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
             penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase)));
             penBaseEntity.AddComponent(new CaptureComponent());
@@ -283,7 +284,7 @@ namespace Cluck
                 }
             }
             // Plays  Lacrimosa Dominae
-            MediaPlayer.Play(testSong);
+            //MediaPlayer.Play(testSong);
         }
 
         /// <summary>
@@ -343,6 +344,11 @@ namespace Cluck
                 {
                     timer -= gameTime.ElapsedGameTime;
                 }
+
+                //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
+                //{
+                //    physicsSystem.CatchChicken();
+                //}
 
                 time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
 
@@ -598,7 +604,6 @@ namespace Cluck
                     bBoxIndices, 0, 12);
             }
         }
-
         private void BuildBounds(Model fence, Texture2D texture)
         {
             for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
@@ -610,11 +615,13 @@ namespace Cluck
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
                 fenceEntityTop.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityTop.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityTop.AddComponent(new FenceComponent());
 
                 fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x), 
                     0, 
                     (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
                 fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityBottom.AddComponent(new FenceComponent());
 
                 world.Add(fenceEntityTop);
                 world.Add(fenceEntityBottom);
@@ -629,11 +636,13 @@ namespace Cluck
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
                 fenceEntityLeft.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityLeft.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityLeft.AddComponent(new FenceComponent());
 
                 fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
                     0, 
                     (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
                 fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, fenceEntityRight.GetComponent<PositionComponent>().GetPosition())));
+                fenceEntityRight.AddComponent(new FenceComponent());
 
                 world.Add(fenceEntityLeft);
                 world.Add(fenceEntityRight);

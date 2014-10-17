@@ -19,8 +19,8 @@ namespace Cluck
         caught = 0x00080,
         camera = 0x00400,
         capture = 0x00800,
-        /*          
-         = 0x01000,
+        fence = 0x01000,
+        /*
          = 0x02000,
          = 0x04000,
          = 0x08000,

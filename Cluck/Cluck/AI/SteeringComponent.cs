@@ -19,8 +19,11 @@ namespace Cluck.AI
         public float wanderJitter = 3.5f;
         private bool wanderOn;
         private bool fleeOn;
+        public List<Vector3> feelers;
+        public float feelerLength = 100;
 
-        public SteeringComponent(PositionComponent targetPos) : base((int)component_flags.aiSteering)
+        public SteeringComponent(PositionComponent targetPos)
+            : base((int)component_flags.aiSteering)
         {
             wanderOn = true;
             fleeOn = false;
@@ -29,19 +32,22 @@ namespace Cluck.AI
 
             Random rando = new Random();
 
-            double theta = rando.NextDouble() * (2*Math.PI);
+            double theta = rando.NextDouble() * (2 * Math.PI);
 
             wanderTarget = new Vector3((float)(wanderRadius * Math.Cos(theta)), 0, (float)(wanderRadius * Math.Sin(theta)));
 
             steeringBehaviours = new SteeringBehaviours();
 
             scaryPos = Vector3.Zero;
+
+            feelers = new List<Vector3>();
         }
 
-        public SteeringOutput Calculate(PositionComponent position, KinematicComponent kinematics, float deltaTime)
+        public SteeringOutput Calculate(List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)
         {
             float weightWander = 0.7f;
             float weightFlee = 0.4f;
+            float weightWallAvoid = 1f;
             SteeringOutput steeringTot = new SteeringOutput();
             SteeringOutput steering = new SteeringOutput();
 
@@ -65,6 +71,10 @@ namespace Cluck.AI
                 //    return steeringTot;
             }
 
+            steering = steeringBehaviours.WallAvoidance(entities, position, kinematics, this);
+
+            steeringTot.linear += (steering.linear * weightWallAvoid);
+
             return steeringTot;
         }
 
@@ -79,7 +89,7 @@ namespace Cluck.AI
             if (MagnitudeRemaining <= 0.0) return false;
 
             double MagnitudeToAdd = ForceToAdd.Length();
-  
+
             if (MagnitudeToAdd < MagnitudeRemaining)
             {
                 RunningTot += ForceToAdd;
@@ -88,7 +98,7 @@ namespace Cluck.AI
             {
                 //add it to the steering force
                 ForceToAdd.Normalize();
-                RunningTot += (ForceToAdd * (float)MagnitudeRemaining); 
+                RunningTot += (ForceToAdd * (float)MagnitudeRemaining);
             }
             return true;
         }
