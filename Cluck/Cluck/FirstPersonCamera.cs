@@ -45,6 +45,10 @@ namespace Cluck
         private const float DEFAULT_SPEED_ROTATION = 0.3f;
         private const float HEIGHT_MULTIPLIER_CROUCHING = 0.5f;
         private const int MOUSE_SMOOTHING_CACHE_SIZE = 10;
+        private const float BOBBINGSPEED_RUNNING = 0.30f;
+        private const float BOBBINGSPEED_WALKING = 0.25f;
+        private const float BOBBINGAMOUNT_RUNNING = 0.05f;
+        private const float BOBBINGAMOUNT_WALKING = 0.02f;
 
         private float fovx;
         private float aspectRatio;
@@ -83,7 +87,7 @@ namespace Cluck
         private const float ARM_SCALE = 0.03f;
         private const float RIGHT_ARM_X_OFFSET = 20;
         private const float ARM_Y_OFFSET = -15;
-        private const float ARM_Z_OFFSET = 37;
+        private const float ARM_Z_OFFSET = 35;
         private const float LEFT_ARM_X_OFFSET = -20;
         private const float MIN_RIGHT_ARM_X_OFFSET = 15.0f;
         private const float MIN_LEFT_ARM_X_OFFSET = -15.0f;
@@ -100,6 +104,7 @@ namespace Cluck
         private bool isClapping;
 
         public bool chickenCaught;
+        HeadBob head;
 
         public FirstPersonCamera(Game game) : base(game)
         {
@@ -144,6 +149,7 @@ namespace Cluck
             leftXOffset = LEFT_ARM_X_OFFSET;
             rightXOffset = RIGHT_ARM_X_OFFSET;
             chickenCaught = false;
+            head = new HeadBob();
         }
 
         public override void Initialize()
@@ -277,6 +283,18 @@ namespace Cluck
             }
 
             UpdateCamera(gameTime, i);
+
+            if (!i.IsJumping() || posture != Posture.Jumping || posture != Posture.Rising)
+            {
+                if (i.IsSprinting() && !i.IsCrouching())
+                {
+                    eye = head.Update(i.GetLeft() + i.GetRight(), i.GetForward() + i.GetBackward(), eye, (float)gameTime.ElapsedGameTime.Milliseconds, BOBBINGSPEED_RUNNING, BOBBINGAMOUNT_RUNNING);
+                }
+                else
+                {
+                    eye = head.Update(i.GetLeft() + i.GetRight(), i.GetForward() + i.GetBackward(), eye, (float)gameTime.ElapsedGameTime.Milliseconds, BOBBINGSPEED_WALKING, BOBBINGAMOUNT_WALKING);
+                }
+            }
 
             base.Update(gameTime);
         }

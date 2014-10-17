@@ -84,7 +84,7 @@ namespace Cluck
 
         public const int TOTAL_NUM_OF_CHICKENS = 13;
         public static int remainingChickens;
-
+        
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
