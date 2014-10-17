@@ -17,6 +17,8 @@ namespace Cluck.AI
         public float wanderOffset = 900;
         public float wanderRadius = 50;
         public float wanderJitter = 3.5f;
+        public float feelerLength = 5f;
+        public List<Vector3> feelers;
         private bool wanderOn;
         private bool fleeOn;
 
@@ -34,11 +36,11 @@ namespace Cluck.AI
             wanderTarget = new Vector3((float)(wanderRadius * Math.Cos(theta)), 0, (float)(wanderRadius * Math.Sin(theta)));
 
             steeringBehaviours = new SteeringBehaviours();
-
+            feelers = new List<Vector3>();
             scaryPos = Vector3.Zero;
         }
 
-        public SteeringOutput Calculate(PositionComponent position, KinematicComponent kinematics, float deltaTime)
+        public SteeringOutput Calculate(List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)
         {
             float weightWander = 0.7f;
             float weightFlee = 0.4f;
@@ -64,6 +66,8 @@ namespace Cluck.AI
                 //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightFlee))
                 //    return steeringTot;
             }
+
+            steeringBehaviours.WallAvoidance(entities, position, kinematics, this);
 
             return steeringTot;
         }

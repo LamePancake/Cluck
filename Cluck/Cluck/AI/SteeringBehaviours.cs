@@ -19,6 +19,8 @@ namespace Cluck.AI
         {
         }
 
+
+
         public SteeringOutput Seek(Vector3 target, Vector3 agentPos, KinematicComponent agent)
 	    {
 		    SteeringOutput steering = new SteeringOutput();
@@ -54,6 +56,83 @@ namespace Cluck.AI
             steering = Seek(targetWorld, agentPos.GetPosition(), agentkinematic);
 
             return steering;
+        }
+
+        private void CreateFeelers(PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
+        {
+            agentSteering.feelers.Clear();
+
+            //feeler pointing straight in front
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength * agentkinematic.heading));
+
+            //feeler to left
+            Vector3 temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 2) * 3.5f));
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+
+            //feeler to right
+            temp = agentkinematic.heading;
+            temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
+            agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
+        }
+
+        public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
+        {
+            SteeringOutput steering = new SteeringOutput();
+
+          CreateFeelers(agentPos, agentkinematic, agentSteering);
+          
+          float? distToThisIP    = 0.0f;
+          float distToClosestIP = float.MaxValue;
+
+          int ClosestWall = -1;
+
+          Vector3 ClosestPoint;
+
+          for (int wisker = 0; wisker < agentSteering.feelers.Count; ++wisker)
+          {
+              agentSteering.feelers[wisker] = agentSteering.feelers[wisker] / agentSteering.feelers[wisker].Length();
+              Ray wiskerRay = new Ray(agentPos.GetPosition(), agentSteering.feelers[wisker]);
+              //
+              //wiskerRay.Direction = agentSteering.feelers[wisker];
+              //Console.WriteLine("Dir: " + wiskerRay.Direction);
+              //wiskerRay.Position = agentPos.GetPosition();
+              //Console.WriteLine("Pos: " + wiskerRay.Position);
+
+            for (int wall = 0; wall < walls.Count; ++wall)
+            {
+                if (walls[wall].HasComponent((int)component_flags.renderable) && walls[wall].HasComponent((int)component_flags.fence))
+                {
+                    BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
+                    distToThisIP = wiskerRay.Intersects(box);
+
+                    if (distToThisIP == null) continue;
+
+                    if (distToThisIP < distToClosestIP)
+                    {
+                        Console.WriteLine("Interrrrsectiionnn1" + agentPos.GetPosition());
+                        distToClosestIP = (float)distToThisIP;
+
+                        ClosestWall = wall;
+
+                        //ClosestPoint = point;
+                    }
+                }
+            }
+
+  
+            if (ClosestWall >= 0)
+            {
+                //Vector3 OverShoot = m_Feelers[wisker] - ClosestPoint;
+	  
+                //SteeringForce = walls[ClosestWall].Normal() * OverShoot.Length();
+
+                Console.WriteLine("Interrrrsectiionnn2");
+            }
+
+          }
+
+          return steering;
         }
         
         public SteeringOutput Align(float targetOrientation, PositionComponent agentPos, KinematicComponent agentKinematic)

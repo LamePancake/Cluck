@@ -29,6 +29,7 @@ namespace Cluck
         private Model chicken;
         private Model penBase;
         private Model chickenPen;
+        private Model testFence;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -66,7 +67,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 10;
+        public const int TOTAL_NUM_OF_CHICKENS = 100;
         public static int remainingChickens;
 
         public Cluck()
@@ -149,11 +150,12 @@ namespace Cluck
             fence = Content.Load<Model>(@"Models\fence_bounds");
             ground = Content.Load<Model>(@"Models\ground");
 
-            chicken = Content.Load<Model>(@"Models\chicken");
-
+            chicken = Content.Load<Model>(@"Models\chicken");            
 
             penBase = Content.Load<Model>(@"Models\pen_base");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
+
+            testFence = Content.Load<Model>(@"Models\fence");
 
             time = timer.ToString();
 
@@ -170,6 +172,8 @@ namespace Cluck
 
             GameEntity penBaseEntity = new GameEntity();
             GameEntity chickenPenEntity = new GameEntity();
+
+            GameEntity testFenceEntity = new GameEntity();
 
             int i = 0;
 
@@ -201,6 +205,10 @@ namespace Cluck
 
                 world.Add(chickenEntity);
             }
+
+            testFenceEntity.AddComponent(new Renderable(testFence, null, calBoundingBox(testFence)));
+            testFenceEntity.AddComponent(new PositionComponent(new Vector3(-500, 0, -500), 0.0f));
+            testFenceEntity.AddComponent(new FenceComponent());
             
             leftArmEntity.AddComponent(new CollidableComponent());
             leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm)));
@@ -230,6 +238,14 @@ namespace Cluck
             world.Add(rightArmEntity);
             world.Add(penBaseEntity);
             world.Add(chickenPenEntity);
+
+            world.Add(testFenceEntity);
+            
+            Vector3[] testFenceCorners = testFenceEntity.GetComponent<Renderable>().GetBoundingBox().GetCorners();
+            foreach (Vector3 v3 in testFenceCorners)
+            {
+                Console.Write("Boundingbox Corner: " + v3.X + ", " + v3.Y + ", " + v3.Z + "\n");
+            }
 
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =
@@ -415,6 +431,41 @@ namespace Cluck
             return sphere;
         }
 
+        private BoundingBox calBoundingBox(Model mod)
+        {
+            List<Vector3> points = new List<Vector3>();
+            BoundingBox box;
+
+            Matrix[] boneTransforms = new Matrix[mod.Bones.Count];
+            mod.CopyAbsoluteBoneTransformsTo(boneTransforms);
+
+            foreach (ModelMesh mesh in mod.Meshes)
+            {
+                Console.WriteLine("mesh count " + mod.Meshes.Count);
+
+                foreach (ModelMeshPart mmp in mesh.MeshParts)
+                {
+                    Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
+                    VertexPositionNormalTexture[] vertices =
+                        new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
+
+                    mmp.VertexBuffer.GetData<VertexPositionNormalTexture>(vertices);
+
+                    foreach (VertexPositionNormalTexture vertex in vertices)
+                    {
+                        Vector3 point = Vector3.Transform(vertex.Position,
+                            boneTransforms[mesh.ParentBone.Index]);
+
+                        points.Add(point);
+                    }
+                }
+            }
+            Console.WriteLine("point count " + points.Count);
+            box = BoundingBox.CreateFromPoints(points);
+            //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
+            return box;
+        }
+
         private void SetBoundingSphereSize(int size)
         {
             boundingSphereSize.M11 = size;
@@ -439,32 +490,32 @@ namespace Cluck
 
         }
 
-        protected BoundingSphere CalculateBoundingSphere(Model mod)
-        {
-            BoundingSphere mergedSphere = new BoundingSphere();
-            BoundingSphere[] boundingSpheres;
-            int index = 0;
-            int meshCount = mod.Meshes.Count;
+        //protected BoundingSphere CalculateBoundingSphere(Model mod)
+        //{
+        //    BoundingSphere mergedSphere = new BoundingSphere();
+        //    BoundingSphere[] boundingSpheres;
+        //    int index = 0;
+        //    int meshCount = mod.Meshes.Count;
 
-            boundingSpheres = new BoundingSphere[meshCount];
-            foreach (ModelMesh mesh in mod.Meshes)
-            {
-                boundingSpheres[index++] = mesh.BoundingSphere;
-            }
+        //    boundingSpheres = new BoundingSphere[meshCount];
+        //    foreach (ModelMesh mesh in mod.Meshes)
+        //    {
+        //        boundingSpheres[index++] = mesh.BoundingSphere;
+        //    }
 
-            mergedSphere = boundingSpheres[0];
-            if ((mod.Meshes.Count) > 1)
-            {
-                index = 1;
-                do
-                {
-                    mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
-                        boundingSpheres[index]);
-                    index++;
-                } while (index < mod.Meshes.Count);
-            }
-            mergedSphere.Center.Y = 0;
-            return mergedSphere;
-        }
+        //    mergedSphere = boundingSpheres[0];
+        //    if ((mod.Meshes.Count) > 1)
+        //    {
+        //        index = 1;
+        //        do
+        //        {
+        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
+        //                boundingSpheres[index]);
+        //            index++;
+        //        } while (index < mod.Meshes.Count);
+        //    }
+        //    mergedSphere.Center.Y = 0;
+        //    return mergedSphere;
+        //}
     }
 }

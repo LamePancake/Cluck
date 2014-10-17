@@ -62,6 +62,20 @@ namespace Cluck
 	        return TransPoint;
         }
 
+        public static Vector3 Vec3RotateAroundOrigin(Vector3 vec, float ang)
+        {
+            //create a transformation matrix
+	        Matrix matTransform = Matrix.Identity;
+  
+            //rotate
+            matTransform *= Matrix.CreateRotationY(ang);
+	
+            //now transform the object's vertices
+            vec = Vector3.Transform(vec, matTransform);
+
+            return vec;
+        }
+
         public static Vector3 PerpInZPlane(Vector3 vec)
         {
             return new Vector3(-vec.Z, vec.Y, vec.X);

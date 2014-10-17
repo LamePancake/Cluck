@@ -49,7 +49,7 @@ namespace Cluck.AI
                     //    sensory.PlayerSpotted(false);
                     //}
 
-                    SteeringOutput output = steering.Calculate(position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
+                    SteeringOutput output = steering.Calculate(world, position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
                     //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
