@@ -40,7 +40,7 @@ namespace Cluck.AI
 
             scaryPos = Vector3.Zero;
 
-            feelers = new Ray[3];
+            feelers = new Ray[2];
         }
 
         public SteeringOutput Calculate(List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)

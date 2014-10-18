@@ -60,15 +60,15 @@ namespace Cluck.AI
         {
             //feeler pointing straight in front
             //Ray front = new Ray(agentPos.GetPosition(), agentkinematic.heading);
-            agentSteering.feelers[0].Position = agentPos.GetPosition();
-            agentSteering.feelers[0].Direction = agentkinematic.heading;
+            //agentSteering.feelers[0].Position = agentPos.GetPosition();
+            //agentSteering.feelers[0].Direction = agentkinematic.heading;
 
             ////feeler to left
             Vector3 temp = agentkinematic.heading;
             temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 3f)));
 
-            agentSteering.feelers[1].Position = agentPos.GetPosition();
-            agentSteering.feelers[1].Direction = temp;
+            agentSteering.feelers[0].Position = agentPos.GetPosition();
+            agentSteering.feelers[0].Direction = temp;
 
             ////feeler to right
             //temp = agentkinematic.heading;
@@ -77,8 +77,8 @@ namespace Cluck.AI
             temp = agentkinematic.heading;
             temp = Util.Vec3RotateAroundOrigin(temp, -(float)(Math.PI / 3f));
             
-            agentSteering.feelers[2].Position = agentPos.GetPosition();
-            agentSteering.feelers[2].Direction = temp;
+            agentSteering.feelers[1].Position = agentPos.GetPosition();
+            agentSteering.feelers[1].Direction = temp;
         }
 
         public SteeringOutput WallAvoidance(List<GameEntity> walls, PositionComponent agentPos, KinematicComponent agentkinematic, SteeringComponent agentSteering)
@@ -102,29 +102,24 @@ namespace Cluck.AI
 
                 for (int wall = 0; wall < walls.Count; ++wall)
                 {
-                    if (walls[wall].HasComponent((int)component_flags.renderable) 
-                        && walls[wall].HasComponent((int)component_flags.fence)
-                        && walls[wall].HasComponent((int)component_flags.position))
+                    PositionComponent pos = walls[wall].GetComponent<PositionComponent>();
+                    BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
+                    int face = -1;
+                    Util.IntersectRayVsBox(box, wiskerRay, out distToThisIP, out face);
+
+                    if (distToThisIP > agentSteering.feelerLength) continue;
+
+                    if (distToThisIP < distToClosestIP)
                     {
-                        PositionComponent pos = walls[wall].GetComponent<PositionComponent>();
-                        BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
-                        int face = -1;
-                        Util.IntersectRayVsBox(box, wiskerRay, out distToThisIP, out face);
+                        distToClosestIP = distToThisIP;
 
-                        if (distToThisIP > agentSteering.feelerLength) continue;
+                        ClosestWall = wall;
 
-                        if (distToThisIP < distToClosestIP)
-                        {
-                            distToClosestIP = distToThisIP;
+                        IntersectedFace = face;
 
-                            ClosestWall = wall;
+                        orientationOfWall = pos.GetOrientation();
 
-                            IntersectedFace = face;
-
-                            orientationOfWall = pos.GetOrientation();
-
-                            ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
-                        }
+                        ClosestPoint = wiskerRay.Position + (wiskerRay.Direction * agentSteering.feelerLength);
                     }
                 }
 

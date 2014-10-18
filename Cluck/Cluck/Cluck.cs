@@ -82,7 +82,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 15;
+        public const int TOTAL_NUM_OF_CHICKENS = 10;
         public static int remainingChickens;
         
         public Cluck()
@@ -113,7 +113,6 @@ namespace Cluck
             world = new List<GameEntity>(INIT_WORLD_SIZE);
             winState = 0;
 
-            aiSystem = new AISystem();
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem(camera);
 
@@ -249,6 +248,9 @@ namespace Cluck
             world.Add(rightArmEntity);
             world.Add(penBaseEntity);
             world.Add(chickenPenEntity);
+
+            // now create the AI system.
+            aiSystem = new AISystem(world);
             
             SkySphereEffect = Content.Load<Effect>("SkySphere");
             TextureCube SkyboxTexture =
