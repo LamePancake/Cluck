@@ -10,10 +10,21 @@ namespace Cluck.AI
     {
 
         SteeringBehaviours steeringBehaviours;
+        List<GameEntity> walls;
 
-        public AISystem() : base((int)component_flags.aiThinking)
+        public AISystem(List<GameEntity> world) : base((int)component_flags.aiThinking)
         {
             steeringBehaviours = new SteeringBehaviours();
+
+            walls = new List<GameEntity>();
+
+            foreach (GameEntity entity in world)
+            {
+                if (entity.HasComponent((int)component_flags.renderable) && entity.HasComponent((int)component_flags.position))
+                {
+                    walls.Add(entity);
+                }
+            }
         }
 
         public void Update(List<GameEntity> world, GameTime deltaTime, Vector3 playerPos)
@@ -49,7 +60,7 @@ namespace Cluck.AI
                     //    sensory.PlayerSpotted(false);
                     //}
 
-                    SteeringOutput output = steering.Calculate(world, position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
+                    SteeringOutput output = steering.Calculate(walls, position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
                     //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
