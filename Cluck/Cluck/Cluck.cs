@@ -65,9 +65,9 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
-        private const int FENCE_LINKS_WIDTH = 11;
-        private const int FENCE_LINKS_HEIGHT = 11;
-        private const int FENCE_WIDTH = 211;
+        private const int FENCE_LINKS_WIDTH = 1;
+        private const int FENCE_LINKS_HEIGHT = 1;
+        private const int FENCE_WIDTH = 211 * 11;
 
         private FirstPersonCamera camera;
 
@@ -167,7 +167,7 @@ namespace Cluck
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
 
-            fence = Content.Load<Model>(@"Models\fence");
+            fence = Content.Load<Model>(@"Models\fence_side");
             ground = Content.Load<Model>(@"Models\ground");
 
             chicken = Content.Load<Model>(@"Models\chicken");            
