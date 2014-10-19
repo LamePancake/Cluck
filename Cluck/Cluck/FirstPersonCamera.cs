@@ -284,7 +284,7 @@ namespace Cluck
 
             UpdateCamera(gameTime, i);
 
-            if (!i.IsJumping() || posture != Posture.Jumping || posture != Posture.Rising)
+            if (posture != Posture.Jumping)
             {
                 if (i.IsSprinting() && !i.IsCrouching())
                 {
