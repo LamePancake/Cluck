@@ -586,6 +586,11 @@ namespace Cluck
         /// <param name="elapsedTimeSec">Elapsed game time.</param>
         private void UpdateVelocity(ref Vector3 direction, float elapsedTimeSec)
         {
+            if (direction.LengthSquared() > 1)
+            {
+                velocity *= 0.7071f;
+            }
+
             if (direction.X != 0.0f)
             {
                 // Camera is moving along the x axis.
