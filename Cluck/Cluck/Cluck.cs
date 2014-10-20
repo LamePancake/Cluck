@@ -33,6 +33,7 @@ namespace Cluck
             };
 
         private Model ground;
+        private Model forest;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
@@ -181,7 +182,8 @@ namespace Cluck
             fence = Content.Load<Model>(@"Models\fence_side");
             ground = Content.Load<Model>(@"Models\ground");
 
-            chicken = Content.Load<Model>(@"Models\chicken");            
+            chicken = Content.Load<Model>(@"Models\chicken");
+            forest = Content.Load<Model>(@"Models\tree_side");
 
             penBase = Content.Load<Model>(@"Models\pen_base");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen_side");
@@ -262,6 +264,8 @@ namespace Cluck
             penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
 
             BuildPen(chickenPen, null);
+
+            BuildForest(forest, null);
             //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
             //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
             //chickenPenEntity.AddComponent(new CollidableComponent());
@@ -707,6 +711,47 @@ namespace Cluck
 
                 world.Add(penEntityLeft);
                 world.Add(penEntityRight);
+            }
+        }
+
+        private void BuildForest(Model trees, Texture2D texture)
+        {
+            for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
+            {
+                GameEntity fenceEntityTop = new GameEntity();
+                GameEntity fenceEntityBottom = new GameEntity();
+
+                fenceEntityTop.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
+                    0,
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
+                fenceEntityTop.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, fenceEntityTop.GetComponent<PositionComponent>().GetPosition(), fenceEntityTop.GetComponent<PositionComponent>().GetOrientation())));
+
+                fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
+                    0,
+                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), (float)Math.PI));
+                fenceEntityBottom.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, fenceEntityBottom.GetComponent<PositionComponent>().GetPosition(), fenceEntityBottom.GetComponent<PositionComponent>().GetOrientation())));
+
+                world.Add(fenceEntityTop);
+                world.Add(fenceEntityBottom);
+            }
+
+            for (int y = 0; y < FENCE_LINKS_HEIGHT; y++)
+            {
+                GameEntity fenceEntityLeft = new GameEntity();
+                GameEntity fenceEntityRight = new GameEntity();
+
+                fenceEntityLeft.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2),
+                    0,
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
+                fenceEntityLeft.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, fenceEntityLeft.GetComponent<PositionComponent>().GetPosition(), fenceEntityLeft.GetComponent<PositionComponent>().GetOrientation())));
+
+                fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2),
+                    0,
+                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2 + (float)Math.PI));
+                fenceEntityRight.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, fenceEntityRight.GetComponent<PositionComponent>().GetPosition(), fenceEntityRight.GetComponent<PositionComponent>().GetOrientation())));
+
+                world.Add(fenceEntityLeft);
+                world.Add(fenceEntityRight);
             }
         }
     }
