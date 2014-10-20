@@ -134,16 +134,16 @@ namespace Cluck
                                 CatchChicken();
                             }
                         }
-                        else if ((physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.aiSteering) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.capture))
-                            || (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.capture) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.aiSteering)))
+                        else if ((physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free) && (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.aiSteering)) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.capture))
+                            || (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.capture) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free) && (physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.aiSteering))))
                         {
-                            if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.aiSteering))
+                            if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free))
                             {
-                                physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<SteeringComponent>();
+                                physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<FreeComponent>();
                             }
                             else
                             {
-                                physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<SteeringComponent>();
+                                physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>();
                             }
                             
                             Cluck.AddTime(new TimeSpan(0, 0, 10));
