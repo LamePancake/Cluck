@@ -113,7 +113,7 @@ namespace Cluck
                     if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
                     {
-                        if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00010))
+                        if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free))
                         {
                             //Console.WriteLine("arm " + i + ", chicken " + j);
                             catchable = true;
@@ -123,7 +123,7 @@ namespace Cluck
                                 CatchChicken();
                             }
                         }
-                        else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00010) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
+                        else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
                         {
                             //Console.WriteLine("chicken " + i + ", arm " + j);
                             catchable = true;
