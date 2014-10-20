@@ -11,7 +11,7 @@ namespace Cluck.AI
 
         SteeringBehaviours steeringBehaviours;
         List<GameEntity> walls;
-        public AISystem() : base((int)component_flags.aiThinking)
+        public AISystem() : base((int)component_flags.aiThinking) { }
         public AISystem(List<GameEntity> world) : base((int)component_flags.aiThinking)
         {
             steeringBehaviours = new SteeringBehaviours();
