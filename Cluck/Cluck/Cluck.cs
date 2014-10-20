@@ -258,13 +258,13 @@ namespace Cluck
             groundEntity.AddComponent(new Renderable(ground, null, ground.Meshes[0].BoundingSphere));
             //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
-            //penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale)));
-            //penBaseEntity.AddComponent(new CaptureComponent());
-            //penBaseEntity.AddComponent(new CollidableComponent());
-            //penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
+            penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale)));
+            penBaseEntity.AddComponent(new CaptureComponent());
+            penBaseEntity.AddComponent(new CollidableComponent());
+            penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
 
             BuildPen(chickenPen, null);
-            BuildPenBase(penBase, null);
+            //BuildPenBase(penBase, null);
 
             BuildForest(forest, null);
             //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
@@ -276,7 +276,7 @@ namespace Cluck
 
             world.Add(leftArmEntity);
             world.Add(rightArmEntity);
-            //world.Add(penBaseEntity);
+            world.Add(penBaseEntity);
             world.Add(chickenPenEntity);
 
             // now create the AI system.
