@@ -17,6 +17,9 @@ namespace Cluck
     /// </summary>
     public class Cluck : Microsoft.Xna.Framework.Game
     {
+        public static int NUM_CHICKEN_SOUNDS = 8;
+        public SoundEffect[] CHICKEN_SOUNDS = new SoundEffect[NUM_CHICKEN_SOUNDS];
+
         public const Int32 INIT_WORLD_SIZE = 1024;
 
         GraphicsDeviceManager graphics;
@@ -173,6 +176,15 @@ namespace Cluck
 
             penBase = Content.Load<Model>(@"Models\pen_base");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen");
+
+            CHICKEN_SOUNDS[0] = Content.Load<SoundEffect>(@"Audio\Cluck1");
+            CHICKEN_SOUNDS[1] = Content.Load<SoundEffect>(@"Audio\Cluck2");
+            CHICKEN_SOUNDS[2] = Content.Load<SoundEffect>(@"Audio\Cluck3");
+            CHICKEN_SOUNDS[3] = Content.Load<SoundEffect>(@"Audio\Cluck4");
+            CHICKEN_SOUNDS[4] = Content.Load<SoundEffect>(@"Audio\Cluck5");
+            CHICKEN_SOUNDS[5] = Content.Load<SoundEffect>(@"Audio\Cluck6");
+            CHICKEN_SOUNDS[6] = Content.Load<SoundEffect>(@"Audio\Cluck7");
+            CHICKEN_SOUNDS[7] = Content.Load<SoundEffect>(@"Audio\Cluck8");
             
             time = timer.ToString();
 

@@ -20,8 +20,8 @@ namespace Cluck
         camera = 0x00400,
         capture = 0x00800,
         fence = 0x01000,
+        audio = 0x02000
         /*
-         = 0x02000,
          = 0x04000,
          = 0x08000,
          = 0x10000,*/
