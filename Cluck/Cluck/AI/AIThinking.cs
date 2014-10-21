@@ -11,6 +11,11 @@ namespace Cluck.AI
         private State currentState;
         private GameEntity myOwner;
 
+        /// <summary>
+        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
+        /// </summary>
+        public AIThinking() : base((int)component_flags.aiThinking) { }
+
         public AIThinking(GameEntity owner, State initialState)
             : base((int)component_flags.aiThinking)
         {

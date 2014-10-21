@@ -32,10 +32,10 @@ namespace Cluck
             }
         }
 
-        public void RemoveComponent<T>() where T : Component
+        public void RemoveComponent<T>() where T : Component, new()
         {
             Component component = GetComponent<T>();
-
+            
             if (HasComponent(component.GetFlag()))
             {
                 components.Remove(component);
@@ -48,9 +48,11 @@ namespace Cluck
             return (componentFlags & cFlag) == cFlag; 
         }
 
-        public T GetComponent<T>() where T: Component
+        public T GetComponent<T>() where T: Component, new()
         {
             T temp = null;
+            // T comp = (T)ComponentLists.GetComponent(this.ID, new T().getFlag());
+            // return comp;
             foreach(Component c in components)
             {
                 temp = c as T;

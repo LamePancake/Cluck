@@ -15,7 +15,17 @@ Content\Models\fence_bounds.xnb
 Content\Models\ground.xnb
 Content\Models\pen_base.xnb
 Content\SkySphere.xnb
-Content\chicken_diffuse_0.xnb
 Content\Audio\Lacrimosa Dominae.xnb
+Content\chicken_diffuse_0.xnb
 Content\Models\fence_side.xnb
+Content\Audio\Cluck1.xnb
+Content\Audio\Cluck2.xnb
+Content\Audio\Cluck3.xnb
+Content\Audio\Cluck4.xnb
+Content\Audio\Cluck5.xnb
+Content\Audio\Cluck6.xnb
+Content\Audio\Cluck7.xnb
+Content\Audio\Cluck8.xnb
+Content\Models\chicken_pen_side.xnb
+Content\Models\tree_side.xnb
 Content\Audio\Lacrimosa Dominae.wma

@@ -22,6 +22,11 @@ namespace Cluck.AI
         public Ray[] feelers;
         public float feelerLength = 60;
 
+        /// <summary>
+        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
+        /// </summary>
+        public SteeringComponent() : base((int)component_flags.aiSteering) { }
+
         public SteeringComponent(PositionComponent targetPos)
             : base((int)component_flags.aiSteering)
         {

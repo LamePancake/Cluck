@@ -16,6 +16,7 @@ namespace Cluck
         public AudioComponent()
             : base((int)component_flags.audio)
         {
+            
             _soundEffects = new Dictionary<string, SoundEffectInstance>();
         }
 

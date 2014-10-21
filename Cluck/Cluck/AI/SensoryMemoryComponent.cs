@@ -36,6 +36,11 @@ namespace Cluck.AI
         double totalTime;
         //private bool playerSpotted;
 
+        /// <summary>
+        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
+        /// </summary>
+        public SensoryMemoryComponent() : base((int)component_flags.sensory) { }
+
         public SensoryMemoryComponent(PositionComponent ownersPosition, KinematicComponent ownersKinematic)
             : base((int)component_flags.sensory)
         {

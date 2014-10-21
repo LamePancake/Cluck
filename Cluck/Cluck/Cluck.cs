@@ -9,6 +9,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
+using System.IO;
 
 namespace Cluck
 {
@@ -92,9 +93,18 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 15;
+        public const int TOTAL_NUM_OF_CHICKENS = 5;
         public static int remainingChickens;
-        
+
+        // The current high score, if there is one, is stored in "highscore".
+        // The FileStream will read this and set the current high score.
+        private FileStream highScoreFile;
+        private Int64 curHighScore;
+
+        // Shown upon achieving a new high score (in case that wasn't obvious).
+        private string highScoreMsg = "New high score!";
+        private bool showHighScoreMsg = false;
+
         public Cluck()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -200,6 +210,8 @@ namespace Cluck
             
             time = timer.ToString();
 
+            LoadHighScore();
+
             GameEntity playerEntitiy = new GameEntity();
             playerEntitiy.AddComponent(new CameraComponent(camera));
             playerEntitiy.AddComponent(new PositionComponent(camera.Position, camera.Orientation.W));
@@ -302,9 +314,30 @@ namespace Cluck
                     part.Effect = SkySphereEffect;
                 }
             }
-            // Plays  Lacrimosa Dominae
+            // Plays Lacrimosa Dominae
             MediaPlayer.Play(testSong);
             MediaPlayer.IsRepeating = true;
+        }
+
+        /// <summary>
+        /// Gets the current high score.
+        /// </summary>
+        private void LoadHighScore()
+        {
+            highScoreFile = new FileStream("highscore", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            FileInfo info = new FileInfo("highscore");
+
+            if (info.Length == 0)
+            {
+                curHighScore = 0x01111111;
+            }
+            else
+            {
+
+                byte[] rawHighScore = new byte[8];
+                highScoreFile.Read(rawHighScore, 0, 8);
+                curHighScore = BitConverter.ToInt32(rawHighScore, 0);
+            }
         }
 
         /// <summary>
@@ -332,7 +365,6 @@ namespace Cluck
         protected override void Update(GameTime gameTime)
         {
             timeStart = true;
-
             // Allows the game to exit
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 this.Exit();
@@ -344,7 +376,6 @@ namespace Cluck
             {
                 winState = 0;
                 curKeyState = Keyboard.GetState();
-
 
 
                 // TODO: Add your update logic here
@@ -385,9 +416,27 @@ namespace Cluck
             else
             {
                 winState = 1;
+                UpdateHighScore(gameTime);
             }
 
             base.Update(gameTime);
+        }
+
+        /// <summary>
+        /// Updates the current high score.
+        /// </summary>
+        /// <param name="gameTime">The total time until the chickens were all caught.</param>
+        private void UpdateHighScore(GameTime gameTime)
+        {
+            // Write the new high score if we beat it
+            Int64 elapsedMillis = (Int64)gameTime.TotalGameTime.TotalMilliseconds;
+            if (elapsedMillis < curHighScore)
+            {
+                showHighScoreMsg = true;
+                byte[] bytes = BitConverter.GetBytes(elapsedMillis);
+                highScoreFile.Seek(0, SeekOrigin.Begin);
+                highScoreFile.Write(bytes, 0, 8);
+            }
         }
 
         /// <summary>
@@ -422,8 +471,12 @@ namespace Cluck
         {
             if (state == 1)
             {
+                string winMsg = "You've prevented Cluck's wrath!";
+                if (showHighScoreMsg)
+                    winMsg += '\n' + highScoreMsg;
+
                 spriteBatch.Begin();
-                spriteBatch.DrawString(timerFont, "You've prevented Cluck's wrath!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
+                spriteBatch.DrawString(timerFont, winMsg, new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
                 spriteBatch.End();
             }
             else if (state == -1)
