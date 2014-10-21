@@ -215,8 +215,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\yoshi.mp3">
-      <Name>yoshi</Name>
+    <Compile Include="Audio\Yoshi_looped.mp3">
+      <Name>Yoshi_looped</Name>
       <Importer>Mp3Importer</Importer>
       <Processor>SongProcessor</Processor>
     </Compile>
