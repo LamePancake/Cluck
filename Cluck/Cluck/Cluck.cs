@@ -51,6 +51,7 @@ namespace Cluck
         private string time;
         private Texture2D armsDiffuse;
         private Texture2D chickenDiffuse;
+        private Texture2D grassDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
         private GamePadState oldGPState;
@@ -189,6 +190,7 @@ namespace Cluck
             // TODO: use this.Content to load your game content here
             armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
             chickenDiffuse = Content.Load<Texture2D>(@"Textures\chicken_diffuse");
+            grassDiffuse = Content.Load<Texture2D>(@"Textures\grassplaceholder");
 
             leftArm = Content.Load<Model>(@"Models\arm_left");
             rightArm = Content.Load<Model>(@"Models\arm_right");
@@ -271,7 +273,7 @@ namespace Cluck
             rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse, calBoundingSphere(rightArm, boundingArmScale)));
             rightArmEntity.AddComponent(new ArmComponent(true));
 
-            groundEntity.AddComponent(new Renderable(ground, null, ground.Meshes[0].BoundingSphere));
+            groundEntity.AddComponent(new Renderable(ground, grassDiffuse, ground.Meshes[0].BoundingSphere));
             //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
             penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale)));
