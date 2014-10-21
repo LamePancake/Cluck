@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 
 namespace Cluck
-{
+{/*
     /// <summary>
     /// Holds lists of all components and their associated entities.
     /// </summary>
@@ -37,7 +37,7 @@ namespace Cluck
         /// <param name="entityID">The ID of the entity to whom the component belongs.</param>
         /// <param name="componentFlag">The flag identifying the component to get.</param>
         /// <returns>The Component corresponding to the given entity ID and component type. Returns null if there is no associated component.</returns>
-        public static Component GetComponent(ulong entityID, int componentFlag)
+        static Component GetComponent(ulong entityID, int componentFlag)
         {
             int whichList = GetListIndex(componentFlag);
             Component c;
@@ -86,5 +86,5 @@ namespace Cluck
         
             return whichList - 1;
         }
-    }
+    }*/
 }
