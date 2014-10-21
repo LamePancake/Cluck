@@ -34,7 +34,7 @@ namespace Cluck
         /// Removes a component from this entity.
         /// </summary>
         /// <typeparam name="T">The component to be removed.</typeparam>
-        public void RemoveComponent<T>(component_flags cFlag) where T : Component, new()
+        public void RemoveComponent<T>(component_flags cFlag) where T : Component
         {
             if (HasComponent((int)cFlag))
             {
@@ -58,7 +58,7 @@ namespace Cluck
         /// </summary>
         /// <typeparam name="T">The type of component to get.</typeparam>
         /// <returns>The component of type T, if this entity has one.</returns>
-        public T GetComponent<T>(component_flags cFlag) where T: Component, new()
+        public T GetComponent<T>(component_flags cFlag) where T: Component
         {
             T comp = (T)ComponentLists.GetComponent(this.myID, (int)cFlag);
             return comp;

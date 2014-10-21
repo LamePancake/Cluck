@@ -15,11 +15,6 @@ namespace Cluck
         private BoundingSphere entitySphere;
         private BoundingBox entityBox;
 
-        /// <summary>
-        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
-        /// </summary>
-        public Renderable() : base((int)component_flags.renderable) { }
-
         public Renderable(Model model, Texture2D texture, BoundingSphere sphere)
             : base((int)component_flags.renderable)
         {

@@ -11,10 +11,6 @@ namespace Cluck
         private Vector3 pos;
         private float orient;
 
-        /// <summary>
-        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
-        /// </summary>
-        public PositionComponent() : base((int)component_flags.position) { }
         public PositionComponent(Vector3 position, float orientation) : base((int)component_flags.position)
         {
             pos = position;
