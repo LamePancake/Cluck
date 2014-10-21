@@ -29,11 +29,11 @@ namespace Cluck
             {
                 Renderable renderable;
 
-                //if (entity.HasComponent((int)component_flags.capture))
-                //{
-                //    continue;
-                //}
-                 if(entity.HasComponent((int)component_flags.caught))
+                if (entity.HasComponent((int)component_flags.capture))
+                {
+                    continue;
+                }
+                else if(entity.HasComponent((int)component_flags.caught))
                 {
                     PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
                     position.SetPosition(camera.GetChickenPosition());
