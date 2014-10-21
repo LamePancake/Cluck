@@ -202,7 +202,7 @@ namespace Cluck
             penBase = Content.Load<Model>(@"Models\pen_base_large");
             chickenPen = Content.Load<Model>(@"Models\chicken_pen_side_large");
 
-            testSong = Content.Load<Song>(@"Audio\Lacrimosa Dominae");
+            testSong = Content.Load<Song>(@"Audio\yoshi");
             CHICKEN_SOUNDS[0] = Content.Load<SoundEffect>(@"Audio\Cluck1");
             CHICKEN_SOUNDS[1] = Content.Load<SoundEffect>(@"Audio\Cluck2");
             CHICKEN_SOUNDS[2] = Content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -319,8 +319,8 @@ namespace Cluck
                 }
             }
             // Plays Lacrimosa Dominae
-            //MediaPlayer.Play(testSong);
-            //MediaPlayer.IsRepeating = true;
+            MediaPlayer.Play(testSong);
+            MediaPlayer.IsRepeating = true;
         }
 
         private Vector3 GetRandomChickenSpawn()
