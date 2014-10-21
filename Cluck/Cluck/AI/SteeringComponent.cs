@@ -52,7 +52,7 @@ namespace Cluck.AI
         {
             float weightWander = 1f;
             float weightFlee = 0.4f;
-            float weightWallAvoid = 0.5f;
+            float weightWallAvoid = 0.005f;
             SteeringOutput steeringTot = new SteeringOutput();
             SteeringOutput steering = new SteeringOutput();
 
