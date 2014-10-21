@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace Cluck
 {
@@ -20,8 +21,9 @@ namespace Cluck
         /// </summary>
         static ComponentLists()
         {
-            int size = Enum.GetValues(typeof(component_flags)).Length;
-        
+            FieldInfo[] info = typeof(component_flags).GetFields(BindingFlags.Static | BindingFlags.Public);
+            int size = info.Length;
+
             // size - 1 because we don't need a list to hold the "none" components of each entity
             size -= 1;
         

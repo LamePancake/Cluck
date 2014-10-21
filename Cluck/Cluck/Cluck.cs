@@ -94,7 +94,7 @@ namespace Cluck
         Model SkySphere;
         Effect SkySphereEffect;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 150;
+        public const int TOTAL_NUM_OF_CHICKENS = 100;
         public static int remainingChickens;
 
         // The current high score, if there is one, is stored in "highscore".
