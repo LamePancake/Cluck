@@ -7,7 +7,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cluck
 {
-    class Renderable : Component
+    public class Renderable : Component
     {
         private Model entityModel;
         private Matrix worldMatrix;

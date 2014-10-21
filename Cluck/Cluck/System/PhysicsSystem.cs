@@ -48,16 +48,17 @@ namespace Cluck
             {
                 if (g.HasComponent((int)component_flags.camera) && g.HasComponent((int)component_flags.position))
                 {
-                    g.GetComponent<PositionComponent>().SetPosition(camera.Position);
-                    g.GetComponent<PositionComponent>().SetOrientation(camera.Orientation.W);
+                    PositionComponent cameraPos = g.GetComponent<PositionComponent>(component_flags.position);
+                    cameraPos.SetPosition(camera.Position);
+                    cameraPos.SetOrientation(camera.Orientation.W);
                 }
 
                 if (g.HasComponent((int)component_flags.kinematic) || g.HasComponent((int)component_flags.collidable))
                 {
                     if (g.HasComponent((int)component_flags.caught) && !camera.chickenCaught)
                     {
-                        g.RemoveComponent<CaughtComponent>();
-                        PositionComponent p = g.GetComponent<PositionComponent>();
+                        g.RemoveComponent<CaughtComponent>(component_flags.caught);
+                        PositionComponent p = g.GetComponent<PositionComponent>(component_flags.position);
                         p.SetPosition(new Vector3(p.GetPosition().X, 0, p.GetPosition().Z));
 
                         SteeringComponent steering = new SteeringComponent(p);
@@ -139,11 +140,11 @@ namespace Cluck
                         {
                             if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free))
                             {
-                                physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<FreeComponent>();
+                                physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<FreeComponent>(component_flags.free);
                             }
                             else
                             {
-                                physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>();
+                                physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                             }
                             
                             Cluck.AddTime(new TimeSpan(0, 0, 10));
@@ -178,8 +179,8 @@ namespace Cluck
         /// TODO: Remove dependency on Renderable component (Collidable should contain all info).
         private bool Colliding(GameEntity ent1, GameEntity ent2)
         {
-            Renderable c1 = ent1.GetComponent<Renderable>();
-            Renderable c2 = ent2.GetComponent<Renderable>();
+            Renderable c1 = ent1.GetComponent<Renderable>(component_flags.renderable);
+            Renderable c2 = ent2.GetComponent<Renderable>(component_flags.renderable);
 
             // Get the bounding sphere
             // Translate it to the entity's position
@@ -192,7 +193,7 @@ namespace Cluck
                 // Translate the bounding sphere to the appropriate place (hack to deal with arms' lack of position component)
                 if (ent1.HasComponent((int)component_flags.position))
                 {
-                    c1BoundingSphere.Center = ent1.GetComponent<PositionComponent>().GetPosition();
+                    c1BoundingSphere.Center = ent1.GetComponent<PositionComponent>(component_flags.position).GetPosition();
                     //c1BoundingSphere.Radius = ent1.GetComponent<Renderable>().GetModel().Meshes[0].BoundingSphere.Radius;
                 }
                 else
@@ -208,7 +209,7 @@ namespace Cluck
                     // Translate the bounding sphere to the appropriate place
                     if (ent2.HasComponent((int)component_flags.position))
                     {
-                        c2BoundingSphere.Center = ent2.GetComponent<PositionComponent>().GetPosition();
+                        c2BoundingSphere.Center = ent2.GetComponent<PositionComponent>(component_flags.position).GetPosition();
                         //c2BoundingSphere.Radius = ent2.GetComponent<Renderable>().GetModel().Meshes[0].BoundingSphere.Radius;
                     }
                     else
@@ -233,7 +234,7 @@ namespace Cluck
         {
             if (catchable && physicalObjects.ElementAt<GameEntity>(chickenInRange).HasComponent(0x00010))
             {
-                physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>();
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>(component_flags.aiSteering);
                 physicalObjects.ElementAt<GameEntity>(chickenInRange).AddComponent(new CaughtComponent());
                 camera.chickenCaught = true;
             }

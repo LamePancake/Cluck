@@ -8,58 +8,60 @@ namespace Cluck
 {
     class GameEntity
     {
+        private static ulong currentID = 0;
+
+        private readonly ulong myID;
         private int componentFlags;
-        private List<Component> components;
          
         public GameEntity()
         {
+            myID = currentID++;
             componentFlags = (int)component_flags.none;
-            components = new List<Component>();
         }
 
+        /// <summary>
+        /// Adds a component to this entity.
+        /// </summary>
+        /// <param name="component">The component to add.</param>
         public void AddComponent(Component component)
         {
-            components.Add(component);
+            ComponentLists.AddComponent(this.myID, component);
             componentFlags |= component.GetFlag();
         }
 
-        public void RemoveComponent(Component component)
+
+        /// <summary>
+        /// Removes a component from this entity.
+        /// </summary>
+        /// <typeparam name="T">The component to be removed.</typeparam>
+        public void RemoveComponent<T>(component_flags cFlag) where T : Component, new()
         {
-            if (HasComponent(component.GetFlag()))
+            if (HasComponent((int)cFlag))
             {
-                components.Remove(component);
-                componentFlags ^= component.GetFlag();
+                ComponentLists.RemoveComponent(this.myID, (int)cFlag);
+                componentFlags ^= (int)cFlag;
             }
         }
 
-        public void RemoveComponent<T>() where T : Component, new()
-        {
-            Component component = GetComponent<T>();
-            
-            if (HasComponent(component.GetFlag()))
-            {
-                components.Remove(component);
-                componentFlags ^= component.GetFlag();
-            }
-        }
-
+        /// <summary>
+        /// Determines whether this entity has a particular component.
+        /// </summary>
+        /// <param name="cFlag">The type of component for which to check.</param>
+        /// <returns></returns>
         public bool HasComponent(int cFlag)
         {
             return (componentFlags & cFlag) == cFlag; 
         }
 
-        public T GetComponent<T>() where T: Component, new()
+        /// <summary>
+        /// Gets a component of the specified type if this entity has one.
+        /// </summary>
+        /// <typeparam name="T">The type of component to get.</typeparam>
+        /// <returns>The component of type T, if this entity has one.</returns>
+        public T GetComponent<T>(component_flags cFlag) where T: Component, new()
         {
-            T temp = null;
-            // T comp = (T)ComponentLists.GetComponent(this.ID, new T().getFlag());
-            // return comp;
-            foreach(Component c in components)
-            {
-                temp = c as T;
-                if(temp != null)
-                    return temp;
-            }
-            return temp;
+            T comp = (T)ComponentLists.GetComponent(this.myID, (int)cFlag);
+            return comp;
         }
     }
 }

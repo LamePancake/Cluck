@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cluck
 {
-    class CameraComponent : Component
+    public class CameraComponent : Component
     {
         FirstPersonCamera camera;
 

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Cluck
 {
-    class AudioComponent : Component
+    public class AudioComponent : Component
     {
         private Dictionary<string, SoundEffectInstance> _soundEffects;
 

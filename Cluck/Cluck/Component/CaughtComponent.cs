@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cluck
 {
-    class CaughtComponent : Component
+    public class CaughtComponent : Component
     {
         public CaughtComponent()
             : base((int)component_flags.caught)

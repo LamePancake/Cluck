@@ -33,7 +33,7 @@ namespace Cluck.AI
             {
                 if (entity.HasComponent(myFlag))
                 {
-                    AIThinking thinking = entity.GetComponent<AIThinking>();
+                    AIThinking thinking = entity.GetComponent<AIThinking>(component_flags.aiThinking);
                     thinking.Update(deltaTime);
                 }
 
@@ -42,13 +42,13 @@ namespace Cluck.AI
                     && entity.HasComponent((int)component_flags.position)
                     && entity.HasComponent((int)component_flags.sensory))
                 {
-                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
+                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>(component_flags.kinematic);
 
-                    SteeringComponent steering = entity.GetComponent<SteeringComponent>();
+                    SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
-                    PositionComponent position = entity.GetComponent<PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
-                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
                     // this is a hack!! Here be dragons.
                     //if (sensory.WithinView(position.GetPosition(), kinematics.velocity, playerPos))
@@ -110,11 +110,11 @@ namespace Cluck.AI
 
                 if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.kinematic))
                 {
-                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+                    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
-                    PositionComponent position = entity.GetComponent<PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
-                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>();
+                    KinematicComponent kinematics = entity.GetComponent <KinematicComponent>(component_flags.kinematic);
 
                     sensory.UpdateSenses(world, deltaTime);
 

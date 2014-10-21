@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cluck
 {
-    class ArmComponent : Component
+    public class ArmComponent : Component
     {
         //False = left arm
         //True = right arm

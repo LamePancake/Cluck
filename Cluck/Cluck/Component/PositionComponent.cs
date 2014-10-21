@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cluck
 {
-    class PositionComponent : Component
+    public class PositionComponent : Component
     {
         private Vector3 pos;
         private float orient;

@@ -53,7 +53,7 @@ namespace Cluck
         /// </summary>
         /// <param name="entityID">The ID of the entity to whom the component belongs.</param>
         /// <param name="componentFlag">The flag identifying the component to set.</param>
-        public static void SetComponent(ulong entityID, Component component)
+        public static void AddComponent(ulong entityID, Component component)
         {
             int whichList = GetListIndex(component.GetFlag());
             lists[whichList].Add(entityID, component);
@@ -84,7 +84,9 @@ namespace Cluck
                 whichList++;
             }
         
-            return whichList - 1;
+            // Subtract 1 for a zero-based array, and another 1
+            // because whichList will get incremented once extra when the component becomes 0
+            return whichList - 2;
         }
     }
 }

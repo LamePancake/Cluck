@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cluck
 {
-    class KinematicComponent : Component
+    public class KinematicComponent : Component
     {
         public float maxAcceleration;
         public float maxRunSpeed;

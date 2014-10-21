@@ -35,9 +35,9 @@ namespace Cluck
                 //}
                  if(entity.HasComponent((int)component_flags.caught))
                 {
-                    entity.GetComponent<PositionComponent>().SetPosition(camera.GetChickenPosition());
-                    renderable = entity.GetComponent<Renderable>();
-                    PositionComponent position = entity.GetComponent<PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
+                    position.SetPosition(camera.GetChickenPosition());
+                    renderable = entity.GetComponent<Renderable>(component_flags.renderable);
                     Matrix final = Matrix.CreateRotationX(MathHelper.ToRadians(camera.PitchDegrees)) * Matrix.CreateRotationY(MathHelper.ToRadians(camera.HeadingDegrees)) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
@@ -46,9 +46,9 @@ namespace Cluck
                 }
                 else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    PositionComponent position = entity.GetComponent<PositionComponent>();
+                    PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
-                    renderable = entity.GetComponent<Renderable>();
+                    renderable = entity.GetComponent<Renderable>(component_flags.renderable);
 
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
@@ -58,14 +58,14 @@ namespace Cluck
                 }
                 else if (entity.HasComponent((int)component_flags.renderable) && !entity.HasComponent((int)component_flags.arm))
                 {
-                    renderable = entity.GetComponent<Renderable>();
+                    renderable = entity.GetComponent<Renderable>(component_flags.renderable);
 
                     Render(renderable);
                 }
                 else if (entity.HasComponent((int)component_flags.arm) && entity.HasComponent((int)component_flags.renderable))
                 {
-                    renderable = entity.GetComponent<Renderable>();
-                    ArmComponent arms = entity.GetComponent<ArmComponent>();
+                    renderable = entity.GetComponent<Renderable>(component_flags.renderable);
+                    ArmComponent arms = entity.GetComponent<ArmComponent>(component_flags.arm);
 
                     if (arms.WhichArm())
                     {

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cluck
 {
-    enum component_flags
+    public enum component_flags
     {
         none = 0x00000,
         aiThinking = 0x00002,
