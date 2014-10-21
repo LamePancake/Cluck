@@ -80,6 +80,9 @@ namespace Cluck
         private const int PEN_LINKS_WIDTH = 1;
         private const int PEN_LINKS_HEIGHT = 1;
         private const int PEN_BASE_WIDTH = 110;
+        private const int PEN_YCOORD = 500;
+        private const int PEN_XCOORD = 500;
+        private const int PEN_SPAWNBUFFER = 100;
 
         private FirstPersonCamera camera;
 
@@ -238,9 +241,9 @@ namespace Cluck
                 // create chicken components
                 KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
 
-                Vector3 randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
+                Vector3 chickenPosition = GetRandomChickenSpawn();
 
-                PositionComponent chickenPos = new PositionComponent(randomPos, (float)(Util.RandomClamped() * Math.PI));
+                PositionComponent chickenPos = new PositionComponent(chickenPosition, (float)(Util.RandomClamped() * Math.PI));
                 SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
                 chickenSteering.SetScaryEntity(playerEntitiy);
                 SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
@@ -318,6 +321,29 @@ namespace Cluck
             // Plays Lacrimosa Dominae
             //MediaPlayer.Play(testSong);
             //MediaPlayer.IsRepeating = true;
+        }
+
+        private Vector3 GetRandomChickenSpawn()
+        {
+            Vector3 randomPos;
+
+            Boolean inPen = true;
+
+            do
+            {
+                randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
+
+                if ((randomPos.X > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_XCOORD)
+                    || (randomPos.X < PEN_XCOORD - PEN_SPAWNBUFFER)) &&
+                    (randomPos.Y > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_YCOORD)
+                    || (randomPos.Y < PEN_YCOORD - PEN_SPAWNBUFFER)))
+                {
+                    inPen = false;
+                }
+            }
+            while (inPen);
+
+            return randomPos;
         }
 
         /// <summary>
@@ -744,16 +770,16 @@ namespace Cluck
                 PositionComponent topPos;
                 PositionComponent bottomPos;
 
-                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + 500,
+                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + 500), 0f));
+                    (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), 0f));
                 topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
                 penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation())));
                 penEntityTop.AddComponent(new FenceComponent());
 
-                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + 500,
+                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
                     0,
-                    (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + 500), (float)Math.PI));
+                    (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), (float)Math.PI));
                 bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
                 penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation())));
                 penEntityBottom.AddComponent(new FenceComponent());
@@ -770,16 +796,16 @@ namespace Cluck
                 PositionComponent leftPos;
                 PositionComponent rightPos;
 
-                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + 500,
+                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + 500), (float)Math.PI / 2));
+                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2));
                 leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
                 penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation())));
                 penEntityLeft.AddComponent(new FenceComponent());
 
-                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + 500,
+                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + 500), (float)Math.PI / 2 + (float)Math.PI));
+                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2 + (float)Math.PI));
                 rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
                 penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation())));
                 penEntityRight.AddComponent(new FenceComponent());
@@ -799,17 +825,17 @@ namespace Cluck
                 PositionComponent topPos;
                 PositionComponent bottomPos;
 
-                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + 500,
+                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + 500), 0f));
+                    (-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + PEN_YCOORD), 0f));
                 topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
                 penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation())));
                 penEntityTop.AddComponent(new CaptureComponent());
                 penEntityTop.AddComponent(new CollidableComponent());
 
-                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + 500,
+                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + PEN_XCOORD,
                     0,
-                    (PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + 500), (float)Math.PI));
+                    (PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + PEN_YCOORD), (float)Math.PI));
                 bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
                 penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation())));
                 penEntityBottom.AddComponent(new CaptureComponent());
@@ -827,17 +853,17 @@ namespace Cluck
                 PositionComponent leftPos;
                 PositionComponent rightPos;
 
-                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + 500,
+                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + 500), (float)Math.PI / 2));
+                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2));
                 leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
                 penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation())));
                 penEntityLeft.AddComponent(new CaptureComponent());
                 penEntityLeft.AddComponent(new CollidableComponent());
 
-                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + 500,
+                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + PEN_XCOORD,
                     0,
-                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + 500), (float)Math.PI / 2 + (float)Math.PI));
+                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2 + (float)Math.PI));
                 rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
                 penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation())));
                 penEntityRight.AddComponent(new CaptureComponent());
