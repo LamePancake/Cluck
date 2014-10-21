@@ -83,6 +83,7 @@
     <Compile Include="Component\CollidableComponent.cs" />
     <Compile Include="Component\Component.cs" />
     <Compile Include="Component\ComponentID.cs" />
+    <Compile Include="Component\ComponentList.cs" />
     <Compile Include="Component\FenceComponent.cs" />
     <Compile Include="Component\FreeComponent.cs" />
     <Compile Include="FirstPersonCamera.cs" />
