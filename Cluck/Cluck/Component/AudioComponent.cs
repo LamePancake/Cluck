@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Audio;
 
 namespace Cluck
 {
-    class AudioComponent : Component
+    public class AudioComponent : Component
     {
         private Dictionary<string, SoundEffectInstance> _soundEffects;
 
@@ -14,7 +14,7 @@ namespace Cluck
         private AudioListener _listener;
 
         public AudioComponent()
-            : base((int)component_flags.audio)
+            : base((int)component_flags.audioEmitter)
         {
             
             _soundEffects = new Dictionary<string, SoundEffectInstance>();
@@ -25,7 +25,7 @@ namespace Cluck
         { }
 
         public AudioComponent(string[] names, SoundEffect[] sounds, AudioEmitter emitter, AudioListener listener)
-            : base((int)component_flags.audio)
+            : base((int)component_flags.audioEmitter)
         {
             if (names.Length != sounds.Length)
                 throw new ArgumentException("The names array must be the same length as the sounds array.");

@@ -102,8 +102,8 @@ namespace Cluck.AI
 
                 for (int wall = 0; wall < walls.Count; ++wall)
                 {
-                    PositionComponent pos = walls[wall].GetComponent<PositionComponent>();
-                    BoundingBox box = walls[wall].GetComponent<Renderable>().GetBoundingBox();
+                    PositionComponent pos = walls[wall].GetComponent<PositionComponent>(component_flags.position);
+                    BoundingBox box = walls[wall].GetComponent<Renderable>(component_flags.renderable).GetBoundingBox();
                     int face = -1;
                     Util.IntersectRayVsBox(box, wiskerRay, out distToThisIP, out face);
 

@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cluck
 {
-    class KinematicComponent : Component
+    public class KinematicComponent : Component
     {
         public float maxAcceleration;
         public float maxRunSpeed;
@@ -20,11 +20,6 @@ namespace Cluck
 
         public Vector3 heading;
         public Vector3 side;
-
-        /// <summary>
-        /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
-        /// </summary>
-        public KinematicComponent() : base((int)component_flags.kinematic) { }
 
         public KinematicComponent(float maxAccel, float maximumSpeed, float maximumRotation, float maxAngularAccel) 
             : base((int)component_flags.kinematic)

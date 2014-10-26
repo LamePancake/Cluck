@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework;
 
 namespace Cluck
 {
-    class Component
+    public class Component
     {
         private int myFlag;
 

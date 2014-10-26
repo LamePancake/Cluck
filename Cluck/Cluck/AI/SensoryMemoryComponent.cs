@@ -57,7 +57,7 @@ namespace Cluck.AI
            {
                if (entity.HasComponent((int)component_flags.position))
                {
-                   PositionComponent entityPos = entity.GetComponent<PositionComponent>();
+                   PositionComponent entityPos = entity.GetComponent<PositionComponent>(component_flags.position);
 
                    if (memories.ContainsKey(entity))
                    {

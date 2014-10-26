@@ -59,8 +59,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CluckContent\CluckContent.contentproj">
-      <Name>CluckContent</Name>
+      <Name>CluckContent %28Content%29</Name>
       <XnaReferenceType>Content</XnaReferenceType>
+      <Project>{AA253374-6004-49CE-B1C4-FA7F556EE1DC}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +78,8 @@
     <Compile Include="BoundingSphereRenderer.cs" />
     <Compile Include="Component\ArmComponent.cs" />
     <Compile Include="Component\AudioComponent.cs" />
+    <Compile Include="Component\AudioEmitterComponent.cs" />
+    <Compile Include="Component\AudioListenerComponent.cs" />
     <Compile Include="Component\CameraComponent.cs" />
     <Compile Include="Component\CaptureComponent.cs" />
     <Compile Include="Component\CaughtComponent.cs" />
@@ -89,6 +92,7 @@
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="HeadBob.cs" />
+    <Compile Include="System\AudioSystem.cs" />
     <Compile Include="System\PhysicsSystem.cs" />
     <Compile Include="System\GameSystem.cs" />
     <Compile Include="System\RenderSystem.cs" />

@@ -30,8 +30,8 @@ namespace Cluck.AI
             if (entity.HasComponent((int)component_flags.aiSteering)
                 && entity.HasComponent((int)component_flags.kinematic))
             {
-                SteeringComponent steer = entity.GetComponent<SteeringComponent>();
-                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>();
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
                 kinematic.maxSpeed = kinematic.maxWalkSpeed;
                 steer.SetWander(true);
             }
@@ -42,9 +42,9 @@ namespace Cluck.AI
 
             if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
             {
-                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
-                SteeringComponent steering = entity.GetComponent<SteeringComponent>();
+                SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
                 GameEntity scary = steering.GetScaryEntity();
 
@@ -81,7 +81,7 @@ namespace Cluck.AI
             //Console.WriteLine("State Exited: Meander");
             if (entity.HasComponent((int)component_flags.aiSteering))
             {
-                SteeringComponent steer = entity.GetComponent<SteeringComponent>();
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
                 //steer.SetWander(false);
             }
@@ -113,8 +113,8 @@ namespace Cluck.AI
             if (entity.HasComponent((int)component_flags.aiSteering)
                 && entity.HasComponent((int)component_flags.kinematic))
             {
-                SteeringComponent steer = entity.GetComponent<SteeringComponent>();
-                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>();
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
                 kinematic.maxSpeed = kinematic.maxRunSpeed;
                 
                 steer.SetFlee(true);
@@ -126,9 +126,9 @@ namespace Cluck.AI
 
             if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
             {
-                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>();
+                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
-                SteeringComponent steering = entity.GetComponent<SteeringComponent>();
+                SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
                 GameEntity scary = steering.GetScaryEntity();
 
@@ -157,7 +157,7 @@ namespace Cluck.AI
 
             if (entity.HasComponent((int)component_flags.aiSteering))
             {
-                SteeringComponent steer = entity.GetComponent<SteeringComponent>();
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
                 steer.SetFlee(false);
             }
