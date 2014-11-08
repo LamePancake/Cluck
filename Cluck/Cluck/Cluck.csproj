@@ -60,18 +60,6 @@
     <XnaCompressContent>true</XnaCompressContent>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Net" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="AI\AISystem.cs" />
     <Compile Include="AI\AIThinking.cs" />
     <Compile Include="AI\ChickenEntity.cs" />
@@ -99,6 +87,21 @@
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="HeadBob.cs" />
+    <Compile Include="ScreenFactory.cs" />
+    <Compile Include="Screens\BackgroundScreen.cs" />
+    <Compile Include="Screens\Button.cs" />
+    <Compile Include="Screens\GameplayScreen.cs" />
+    <Compile Include="Screens\LoadingScreen.cs" />
+    <Compile Include="Screens\MainMenuScreen.cs" />
+    <Compile Include="Screens\MenuEntry.cs" />
+    <Compile Include="Screens\MenuScreen.cs" />
+    <Compile Include="Screens\MessageBoxScreen.cs" />
+    <Compile Include="Screens\OptionsMenuScreen.cs" />
+    <Compile Include="Screens\PauseMenuScreen.cs" />
+    <Compile Include="Screens\PhoneMainMenuScreen.cs" />
+    <Compile Include="Screens\PhoneMenuScreen.cs" />
+    <Compile Include="Screens\PhonePauseScreen.cs" />
+    <Compile Include="Screens\PlayerIndexEventArgs.cs" />
     <Compile Include="System\AudioSystem.cs" />
     <Compile Include="System\PhysicsSystem.cs" />
     <Compile Include="System\GameSystem.cs" />
@@ -115,16 +118,24 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Background.png" />
     <Content Include="Game.ico" />
     <Content Include="GameThumbnail.png">
       <XnaPlatformSpecific>true</XnaPlatformSpecific>
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\GameStateManagement\GameStateManagement %28Windows%29.csproj">
+      <Project>{0A551D79-F37E-4529-9CA0-3FD2E9EA715E}</Project>
+      <Name>GameStateManagement %28Windows%29</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\SkinnedModel\SkinnedModel.csproj">
+      <Project>{7DC6A5C9-09A0-4BDC-B9B3-1086D98975D4}</Project>
+      <Name>SkinnedModel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CluckContent\CluckContent.contentproj">
-      <Name>CluckContent %28Content%29</Name>
+      <Name>CluckContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
-      <Project>{AA253374-6004-49CE-B1C4-FA7F556EE1DC}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -153,6 +164,12 @@
       <ProductName>Microsoft XNA Framework Redistributable 4.0</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Xna.Framework, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.Game, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
+    <Reference Include="Microsoft.Xna.Framework.GamerServices, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Xna.Framework.Graphics, Version=4.0.0.0, Culture=neutral, PublicKeyToken=842cf8be1de50553, processorArchitecture=x86" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\Microsoft.Xna.GameStudio.targets" />

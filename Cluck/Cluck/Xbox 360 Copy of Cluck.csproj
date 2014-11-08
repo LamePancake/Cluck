@@ -59,9 +59,8 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CluckContent\CluckContent.contentproj">
-      <Name>CluckContent %28Content%29</Name>
+      <Name>CluckContent</Name>
       <XnaReferenceType>Content</XnaReferenceType>
-      <Project>{AA253374-6004-49CE-B1C4-FA7F556EE1DC}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -92,6 +91,21 @@
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="HeadBob.cs" />
+    <Compile Include="ScreenFactory.cs" />
+    <Compile Include="Screens\BackgroundScreen.cs" />
+    <Compile Include="Screens\Button.cs" />
+    <Compile Include="Screens\GameplayScreen.cs" />
+    <Compile Include="Screens\LoadingScreen.cs" />
+    <Compile Include="Screens\MainMenuScreen.cs" />
+    <Compile Include="Screens\MenuEntry.cs" />
+    <Compile Include="Screens\MenuScreen.cs" />
+    <Compile Include="Screens\MessageBoxScreen.cs" />
+    <Compile Include="Screens\OptionsMenuScreen.cs" />
+    <Compile Include="Screens\PauseMenuScreen.cs" />
+    <Compile Include="Screens\PhoneMainMenuScreen.cs" />
+    <Compile Include="Screens\PhoneMenuScreen.cs" />
+    <Compile Include="Screens\PhonePauseScreen.cs" />
+    <Compile Include="Screens\PlayerIndexEventArgs.cs" />
     <Compile Include="System\AudioSystem.cs" />
     <Compile Include="System\PhysicsSystem.cs" />
     <Compile Include="System\GameSystem.cs" />
@@ -108,6 +122,7 @@
     <Compile Include="Util.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Background.png" />
     <Content Include="Game.ico" />
   </ItemGroup>
   <ItemGroup>

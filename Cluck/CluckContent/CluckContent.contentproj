@@ -147,6 +147,69 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="background.png">
+      <Name>background</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="blank.png">
+      <Name>blank</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="gradient.png">
+      <Name>gradient</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="gamefont.spritefont">
+      <Name>gamefont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+    <Compile Include="menufont.spritefont">
+      <Name>menufont</Name>
+      <Importer>FontDescriptionImporter</Importer>
+      <Processor>FontDescriptionProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Textures\grassplaceholder.jpg">
+      <Name>grassplaceholder</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+    <Compile Include="Textures\tree_diffuse.dds">
+      <Name>tree_diffuse</Name>
+      <Importer>TextureImporter</Importer>
+      <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\chicken_pen_side.fbx">
+      <Name>chicken_pen_side</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\chicken_pen_side_large.fbx">
+      <Name>chicken_pen_side_large</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\pen_base_large.fbx">
+      <Name>pen_base_large</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
+    <Compile Include="Models\tree_side.fbx">
+      <Name>tree_side</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>ModelProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
     <Compile Include="Audio\Cluck1.mp3">
       <Name>Cluck1</Name>
       <Importer>Mp3Importer</Importer>
@@ -187,34 +250,11 @@
       <Importer>Mp3Importer</Importer>
       <Processor>SoundEffectProcessor</Processor>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Models\chicken_pen_side.fbx">
-      <Name>chicken_pen_side</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
+    <Compile Include="Audio\yoshi.mp3">
+      <Name>yoshi</Name>
+      <Importer>Mp3Importer</Importer>
+      <Processor>SongProcessor</Processor>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Models\tree_side.fbx">
-      <Name>tree_side</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Models\chicken_pen_side_large.fbx">
-      <Name>chicken_pen_side_large</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-    <Compile Include="Models\pen_base_large.fbx">
-      <Name>pen_base_large</Name>
-      <Importer>FbxImporter</Importer>
-      <Processor>ModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Audio\Yoshi_looped.mp3">
       <Name>Yoshi_looped</Name>
       <Importer>Mp3Importer</Importer>
@@ -222,17 +262,37 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Textures\grassplaceholder.jpg">
-      <Name>grassplaceholder</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
+    <Compile Include="Models\chicken_anim.fbx">
+      <Name>chicken_anim</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>SkinnedModelProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Textures\tree_diffuse.dds">
-      <Name>tree_diffuse</Name>
-      <Importer>TextureImporter</Importer>
-      <Processor>TextureProcessor</Processor>
+    <ProjectReference Include="..\..\SkinnedModelPipeline\SkinnedModelPipeline.csproj">
+      <Project>{E8D42DDD-BB76-4CA9-A19C-239FB2B55F21}</Project>
+      <Name>SkinnedModelPipeline</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Models\chicken_animv2.fbx">
+      <Name>chicken_animv2</Name>
+      <Importer>FbxImporter</Importer>
+      <Processor>SkinnedModelProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\Toon.fx">
+      <Name>Toon</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Effects\ToonNoAnimation.fx">
+      <Name>ToonNoAnimation</Name>
+      <Importer>EffectImporter</Importer>
+      <Processor>EffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

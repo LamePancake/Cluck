@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SkinnedModel;
 
 namespace Cluck
 {
@@ -42,6 +43,13 @@ namespace Cluck
 
                     renderable.SetMatrix(final);
 
+                    renderable.SetMatrix(final);
+
+                    if (renderable.GetAnimationPlayer() != null)
+                    {
+                        renderable.GetAnimationPlayer().Update(gameTime.ElapsedGameTime, true, final);
+                    }
+
                     Render(renderable);
                 }
                 else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
@@ -49,10 +57,15 @@ namespace Cluck
                     PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
                     renderable = entity.GetComponent<Renderable>(component_flags.renderable);
-
+                    
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
+
+                    if (renderable.GetAnimationPlayer() != null)
+                    {
+                        renderable.GetAnimationPlayer().Update(gameTime.ElapsedGameTime, true, final);
+                    }
 
                     Render(renderable);
                 }
@@ -67,6 +80,7 @@ namespace Cluck
                     renderable = entity.GetComponent<Renderable>(component_flags.renderable);
                     ArmComponent arms = entity.GetComponent<ArmComponent>(component_flags.arm);
 
+                    renderable.SetBorderMutable(true);
                     if (arms.WhichArm())
                     {
                         renderable.SetMatrix(camera.GetRightArmWorldMatrix((float)gameTime.ElapsedGameTime.TotalSeconds));
@@ -91,26 +105,93 @@ namespace Cluck
 
             Matrix[] groundMatrix = new Matrix[model.Bones.Count];
             model.CopyAbsoluteBoneTransformsTo(groundMatrix);
+
+            Matrix[] bones = null;
+            if(rend.GetAnimationPlayer() != null)
+                 bones = rend.GetAnimationPlayer().GetSkinTransforms();
+
             foreach (ModelMesh mm in model.Meshes)
             {
                 foreach (ModelMeshPart mmp in mm.MeshParts)
                 {
                     //mmp.VertexBuffer;
-                }
-                foreach (BasicEffect be in mm.Effects)
-                {
-                    if (texture != null)
+                    mmp.Effect = rend.GetEffect();
+                    Matrix worldInverseTransposeMatrix = Matrix.Transpose(Matrix.Invert(groundMatrix[mm.ParentBone.Index]));
+                    mmp.Effect.Parameters["World"].SetValue(groundMatrix[mm.ParentBone.Index] * world);
+                    mmp.Effect.Parameters["WorldInverseTranspose"].SetValue(worldInverseTransposeMatrix);
+                    mmp.Effect.Parameters["View"].SetValue(camera.ViewMatrix);
+                    mmp.Effect.Parameters["Projection"].SetValue(camera.ProjectionMatrix);
+                    mmp.Effect.Parameters["Texture"].SetValue(rend.GetTexture());
+                    
+                    if (bones != null)
                     {
-                        be.TextureEnabled = true;
-                        be.Texture = texture;
+                        mmp.Effect.Parameters["Bones"].SetValue(bones);
                     }
 
-                    be.EnableDefaultLighting();
-                    be.World = groundMatrix[mm.ParentBone.Index] * world;
-                    be.View = camera.ViewMatrix;
-                    be.Projection = camera.ProjectionMatrix;
-                    //BoundingSphereRenderer.Render(rend.GetBoundingSphere(), graphicsDevice, be.View, be.Projection, be.World, Color.Red, Color.Green, Color.Blue);
+                    if (rend.GetInRange())
+                    {
+                        mmp.Effect.Parameters["LineColor"].SetValue(new Vector4(1, 1, 0, 1));
+                    }
+                    else
+                    {
+                        mmp.Effect.Parameters["LineColor"].SetValue(new Vector4(0, 0, 0, 1));
+                    }
+
+                    if (rend.GetBorderMutable())
+                    {
+                        mmp.Effect.Parameters["LineThickness"].SetValue(0.0125f);
+                    }
+                    else
+                    {
+                        mmp.Effect.Parameters["LineThickness"].SetValue(0.2f);
+                    }
                 }
+                //if (bones == null)
+                //{
+                //    foreach (BasicEffect be in mm.Effects)
+                //    {
+                //        if (texture != null)
+                //        {
+                //            be.TextureEnabled = true;
+                //            be.Texture = texture;
+                //        }
+
+                //        be.EnableDefaultLighting();
+                //        be.World = groundMatrix[mm.ParentBone.Index] * world;
+                //        be.View = camera.ViewMatrix;
+                //        be.Projection = camera.ProjectionMatrix;
+                //        //BoundingSphereRenderer.Render(rend.GetBoundingSphere(), graphicsDevice, be.View, be.Projection, be.World, Color.Red, Color.Green, Color.Blue);
+                //    }
+                //}
+                //else
+                //{
+                //    foreach (SkinnedEffect effect in mm.Effects)
+                //    {
+                //        effect.SetBoneTransforms(bones);
+
+                //        effect.View = camera.ViewMatrix; ;
+                //        effect.Projection = camera.ProjectionMatrix;
+
+                //        effect.EnableDefaultLighting();
+
+                //        effect.SpecularColor = new Vector3(0.25f);
+                //        effect.SpecularPower = 16;
+                //    }
+                //}
+                //foreach (BasicEffect be in mm.Effects)
+                //{
+                //    if (texture != null)
+                //    {
+                //        be.TextureEnabled = true;
+                //        be.Texture = texture;
+                //    }
+
+                //    be.EnableDefaultLighting();
+                //    be.World = groundMatrix[mm.ParentBone.Index] * world;
+                //    be.View = camera.ViewMatrix;
+                //    be.Projection = camera.ProjectionMatrix;
+                //    //BoundingSphereRenderer.Render(rend.GetBoundingSphere(), graphicsDevice, be.View, be.Projection, be.World, Color.Red, Color.Green, Color.Blue);
+                //}
                 mm.Draw();
             }
         }

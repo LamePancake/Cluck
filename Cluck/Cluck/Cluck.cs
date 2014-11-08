@@ -9,7 +9,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
 using Cluck.AI;
-using System.IO;
+using GameStateManagement;
+using SkinnedModel;
 
 namespace Cluck
 {
@@ -18,931 +19,124 @@ namespace Cluck
     /// </summary>
     public class Cluck : Microsoft.Xna.Framework.Game
     {
-        public static int NUM_CHICKEN_SOUNDS = 8;
-        public SoundEffect[] CHICKEN_SOUNDS = new SoundEffect[NUM_CHICKEN_SOUNDS];
 
-        public const Int32 INIT_WORLD_SIZE = 1024;
-
-        GraphicsDeviceManager graphics;
-        SpriteBatch spriteBatch;
-
-        // Initialize an array of indices for the box. 12 lines require 24 indices
-        short[] bBoxIndices = {
-                0, 1, 1, 2, 2, 3, 3, 0, // Front edges
-                4, 5, 5, 6, 6, 7, 7, 4, // Back edges
-                0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
-            };
-
-        private Model ground;
-        private Model forest;
-        private Model fence;
-        private Model leftArm;
-        private Model rightArm;
-        private Model chicken;
-        private Model penBase;
-        private Model chickenPen;
-        private Model testFence;
-        private Song testSong;
-        private Matrix boundingSphereSize;
-        private int boundingSize;
-        private SpriteFont timerFont;
-        private static TimeSpan timer;
-        private Boolean timeStart;
-        private string time;
-        private Texture2D armsDiffuse;
-        private Texture2D chickenDiffuse;
-        private Texture2D grassDiffuse;
-        private Texture2D woodDiffuse;
-        private Texture2D treeDiffuse;
-        private KeyboardState oldKeyState;
-        private KeyboardState curKeyState;
-        private GamePadState oldGPState;
-        private GamePadState curGPState;
-        private static int winState;
-        private BoundingBox testBox;
-        private float boundingArmScale;
-        private float boundingPenScale;
-        private float boundingChickenScale;
-
-        private const float CAMERA_FOVX = 85f;
-        private const float CAMERA_ZNEAR = 0.01f;
-        private const float CAMERA_ZFAR = 2048.0f * 2.0f;
-        private const float CAMERA_PLAYER_EYE_HEIGHT = 100;
-        private const float CAMERA_ACCELERATION_X = 900.0f;
-        private const float CAMERA_ACCELERATION_Y = 900.0f;
-        private const float CAMERA_ACCELERATION_Z = 900.0f;
-        private const float CAMERA_VELOCITY_X = 300.0f;
-        private const float CAMERA_VELOCITY_Y = 300.0f;
-        private const float CAMERA_VELOCITY_Z = 300.0f;
-        private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
-        private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
-        private const int FENCE_LINKS_WIDTH = 1;
-        private const int FENCE_LINKS_HEIGHT = 1;
-        private const int FENCE_WIDTH = 211 * 11;
-        private const int PEN_WIDTH = 0;//118;
-        private const int PEN_LINKS_WIDTH = 1;
-        private const int PEN_LINKS_HEIGHT = 1;
-        private const int PEN_BASE_WIDTH = 110;
-        private const int PEN_YCOORD = 500;
-        private const int PEN_XCOORD = 500;
-        private const int PEN_SPAWNBUFFER = 100;
-
-        private FirstPersonCamera camera;
-
-        private int windowWidth;
-        private int windowHeight;
-
-        private List<GameEntity> world;
-        private AISystem aiSystem;
-        private RenderSystem renderSystem;
-        private PhysicsSystem physicsSystem;
-        private AudioSystem audioSystem;
-
-        Model SkySphere;
-        Effect SkySphereEffect;
-
-        public const int TOTAL_NUM_OF_CHICKENS = 15;
-        public static int remainingChickens;
-
-        // The current high score, if there is one, is stored in "highscore".
-        // The FileStream will read this and set the current high score.
-        private FileStream highScoreFile;
-        private Int64 curHighScore;
-
-        // Shown upon achieving a new high score (in case that wasn't obvious).
-        private string highScoreMsg = "New high score!";
-        private bool showHighScoreMsg = false;
-
+        static public FirstPersonCamera camera;
+        public static GraphicsDeviceManager graphics;
+        ScreenManager screenManager;
+        ScreenFactory screenFactory;
+        float curTime;
+       
+        /// <summary>
+        /// The main game constructor.
+        /// </summary>
         public Cluck()
         {
-            graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
+            graphics = new GraphicsDeviceManager(this);
+            TargetElapsedTime = TimeSpan.FromTicks(333333);
 
             graphics.PreferredBackBufferHeight = 720;
             graphics.PreferredBackBufferWidth = 1280;
             graphics.ApplyChanges();
 
+#if WINDOWS_PHONE
+            graphics.IsFullScreen = true;
+
+            // Choose whether you want a landscape or portait game by using one of the two helper functions.
+            InitializeLandscapeGraphics();
+            // InitializePortraitGraphics();
+#endif
+
+            // Create the screen factory and add it to the Services
+            screenFactory = new ScreenFactory();
+            Services.AddService(typeof(IScreenFactory), screenFactory);
+
+            // Create the screen manager component.
+            screenManager = new ScreenManager(this);
+            Components.Add(screenManager);
+
+
             camera = new FirstPersonCamera(this);
             Components.Add(camera);
+
+#if WINDOWS_PHONE
+            // Hook events on the PhoneApplicationService so we're notified of the application's life cycle
+            Microsoft.Phone.Shell.PhoneApplicationService.Current.Launching += 
+                new EventHandler<Microsoft.Phone.Shell.LaunchingEventArgs>(GameLaunching);
+            Microsoft.Phone.Shell.PhoneApplicationService.Current.Activated += 
+                new EventHandler<Microsoft.Phone.Shell.ActivatedEventArgs>(GameActivated);
+            Microsoft.Phone.Shell.PhoneApplicationService.Current.Deactivated += 
+                new EventHandler<Microsoft.Phone.Shell.DeactivatedEventArgs>(GameDeactivated);
+#else
+            // On Windows and Xbox we just add the initial screens
+            AddInitialScreens();
+#endif
         }
-
-        /// <summary>
-        /// Allows the game to perform any initialization it needs to before starting to run.
-        /// This is where it can query for any required services and load any non-graphic
-        /// related content.  Calling base.Initialize will enumerate through any components
-        /// and initialize them as well.
-        /// </summary>
-        protected override void Initialize()
+        
+        private void AddInitialScreens()
         {
-            //set boundingsphere scale
-            boundingSize = 50;
-            SetBoundingSphereSize(boundingSize);
-            // Create the world
-            world = new List<GameEntity>(INIT_WORLD_SIZE);
-            winState = 0;
-            boundingArmScale = 1.2f;
-            boundingPenScale = 0.6f;
-            boundingChickenScale = 1.0f;
+            // Activate the first screens.
+            screenManager.AddScreen(new BackgroundScreen(), null);
 
-            renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
-            physicsSystem = new PhysicsSystem(camera);
-
-            //world = new List<GameEntity>();
-            //aiSystem = new AISystem();
-            //renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
-
-            base.Initialize();
-
-            windowWidth = GraphicsDevice.DisplayMode.Width / 2;
-            windowHeight = GraphicsDevice.DisplayMode.Height / 2;
-
-            timer = new TimeSpan(0, 2, 0);
-            timeStart = false;
-
-            camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
-            camera.Acceleration = new Vector3(
-                CAMERA_ACCELERATION_X,
-                CAMERA_ACCELERATION_Y,
-                CAMERA_ACCELERATION_Z);
-            camera.VelocityWalking = new Vector3(
-                CAMERA_VELOCITY_X,
-                CAMERA_VELOCITY_Y,
-                CAMERA_VELOCITY_Z);
-            camera.VelocityRunning = new Vector3(
-                camera.VelocityWalking.X * CAMERA_RUNNING_MULTIPLIER,
-                camera.VelocityWalking.Y * CAMERA_RUNNING_JUMP_MULTIPLIER,
-                camera.VelocityWalking.Z * CAMERA_RUNNING_MULTIPLIER);
-            camera.Perspective(
-                CAMERA_FOVX,
-                (float)windowWidth / (float)windowHeight,
-                CAMERA_ZNEAR, CAMERA_ZFAR);
-
-            remainingChickens = TOTAL_NUM_OF_CHICKENS;
-        }
-
-        /// <summary>
-        /// LoadContent will be called once per game and is the place to load
-        /// all of your content.
-        /// </summary>
-        protected override void LoadContent()
-        {
-            // Create a new SpriteBatch, which can be used to draw textures.
-            spriteBatch = new SpriteBatch(GraphicsDevice);
-
-            timerFont = Content.Load<SpriteFont>("MessageFont");
-            // TODO: use this.Content to load your game content here
-            armsDiffuse = Content.Load<Texture2D>(@"Textures\arms_diffuse");
-            chickenDiffuse = Content.Load<Texture2D>(@"Textures\chicken_diffuse");
-            grassDiffuse = Content.Load<Texture2D>(@"Textures\grassplaceholder");
-            woodDiffuse = Content.Load<Texture2D>(@"Textures\wood_diffuse");
-            treeDiffuse = Content.Load<Texture2D>(@"Textures\tree_diffuse");
-
-            leftArm = Content.Load<Model>(@"Models\arm_left");
-            rightArm = Content.Load<Model>(@"Models\arm_right");
-
-            fence = Content.Load<Model>(@"Models\fence_side");
-            ground = Content.Load<Model>(@"Models\ground");
-
-            chicken = Content.Load<Model>(@"Models\chicken");
-            forest = Content.Load<Model>(@"Models\tree_side");
-
-            penBase = Content.Load<Model>(@"Models\pen_base_large");
-            chickenPen = Content.Load<Model>(@"Models\chicken_pen_side_large");
-
-            testSong = Content.Load<Song>(@"Audio\Yoshi_looped");
-            CHICKEN_SOUNDS[0] = Content.Load<SoundEffect>(@"Audio\Cluck1");
-            CHICKEN_SOUNDS[1] = Content.Load<SoundEffect>(@"Audio\Cluck2");
-            CHICKEN_SOUNDS[2] = Content.Load<SoundEffect>(@"Audio\Cluck3");
-            CHICKEN_SOUNDS[3] = Content.Load<SoundEffect>(@"Audio\Cluck4");
-            CHICKEN_SOUNDS[4] = Content.Load<SoundEffect>(@"Audio\Cluck5");
-            CHICKEN_SOUNDS[5] = Content.Load<SoundEffect>(@"Audio\Cluck6");
-            CHICKEN_SOUNDS[6] = Content.Load<SoundEffect>(@"Audio\Cluck7");
-            CHICKEN_SOUNDS[7] = Content.Load<SoundEffect>(@"Audio\Cluck8");
-            SoundEffect.DistanceScale = 100f;
-
-            audioSystem = new AudioSystem(CHICKEN_SOUNDS);
-
-            time = timer.ToString();
-
-            //LoadHighScore();
-
-            GameEntity playerEntitiy = new GameEntity();
-            playerEntitiy.AddComponent(new CameraComponent(camera));
-            playerEntitiy.AddComponent(new PositionComponent(camera.Position, camera.Orientation.W));
-            playerEntitiy.AddComponent(new AudioListenerComponent());
-            world.Add(playerEntitiy);
-
-            //GameEntity testChicken = new GameEntity();
-            //testChicken.AddComponent(new PositionComponent(new Vector3(0, 0, 0), 0));
-            //testChicken.AddComponent(new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken, 1)));
-            //testChicken.AddComponent(new AudioEmitterComponent());
-            //world.Add(testChicken);
-
-            GameEntity groundEntity = new GameEntity();
-            
-            GameEntity leftArmEntity = new GameEntity();
-            GameEntity rightArmEntity = new GameEntity();
-
-            GameEntity penBaseEntity = new GameEntity();
-            GameEntity chickenPenEntity = new GameEntity();
-
-            BuildBounds(fence, woodDiffuse);
-
-            int i = 0;
-
-            for (i = 0; i < TOTAL_NUM_OF_CHICKENS; ++i)
-            {
-                // new chicken entity
-                GameEntity chickenEntity = new GameEntity();
-
-                // create chicken components
-                KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
-
-                Vector3 chickenPosition = GetRandomChickenSpawn();
-
-                PositionComponent chickenPos = new PositionComponent(chickenPosition, (float)(Util.RandomClamped() * Math.PI));
-                SteeringComponent chickenSteering = new SteeringComponent(chickenPos);
-                chickenSteering.SetScaryEntity(playerEntitiy);
-                SensoryMemoryComponent chickenSensory = new SensoryMemoryComponent(chickenPos, chickinematics);
-                AIThinking chickenThink = new AIThinking(chickenEntity, Meander.Instance);
-                Renderable chickenRenderable = new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken, boundingChickenScale));
-
-                // add chicken components to chicken
-                chickenEntity.AddComponent(chickenRenderable);
-                chickenEntity.AddComponent(chickinematics);
-                chickenEntity.AddComponent(chickenSteering);
-                chickenEntity.AddComponent(chickenPos);
-                chickenEntity.AddComponent(chickenSensory);
-                chickenEntity.AddComponent(chickenThink);
-                chickenEntity.AddComponent(new CollidableComponent());
-                chickenEntity.AddComponent(new FreeComponent());
-                chickenEntity.AddComponent(new AudioEmitterComponent(CHICKEN_SOUNDS[0].CreateInstance()));
-
-                world.Add(chickenEntity);
-            }
-
-            leftArmEntity.AddComponent(new CollidableComponent());
-            leftArmEntity.AddComponent(new Renderable(leftArm, armsDiffuse, calBoundingSphere(leftArm, boundingArmScale)));
-            leftArmEntity.AddComponent(new ArmComponent(false));
-
-            rightArmEntity.AddComponent(new CollidableComponent());
-            rightArmEntity.AddComponent(new Renderable(rightArm, armsDiffuse, calBoundingSphere(rightArm, boundingArmScale)));
-            rightArmEntity.AddComponent(new ArmComponent(true));
-
-            groundEntity.AddComponent(new Renderable(ground, grassDiffuse, ground.Meshes[0].BoundingSphere));
-            //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
-
-            penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale)));
-            penBaseEntity.AddComponent(new CaptureComponent());
-            penBaseEntity.AddComponent(new CollidableComponent());
-            penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-
-            BuildPen(chickenPen, woodDiffuse);
-            //BuildPenBase(penBase, null);
-
-            BuildForest(forest, treeDiffuse);
-            //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-            //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
-            //chickenPenEntity.AddComponent(new CollidableComponent());
-            //chickenPenEntity.AddComponent(new FenceComponent());
-
-            world.Add(groundEntity);
-
-            world.Add(leftArmEntity);
-            world.Add(rightArmEntity);
-            world.Add(penBaseEntity);
-            world.Add(chickenPenEntity);
-
-            // now create the AI system.
-            aiSystem = new AISystem(world);
-            
-            SkySphereEffect = Content.Load<Effect>("SkySphere");
-            TextureCube SkyboxTexture =
-                Content.Load<TextureCube>(@"Textures\sky");
-            SkySphere = Content.Load<Model>(@"Models\SphereHighPoly");
-
-            // Set the parameters of the effect
-            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                camera.ViewMatrix);
-            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                camera.ProjectionMatrix);
-            SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
-                SkyboxTexture);
-            // Set the Skysphere Effect to each part of the Skysphere model
-            foreach (ModelMesh mesh in SkySphere.Meshes)
-            {
-                foreach (ModelMeshPart part in mesh.MeshParts)
-                {
-                    part.Effect = SkySphereEffect;
-                }
-            }
-            // Plays  Yoshi's island
-            MediaPlayer.Play(testSong);
-            MediaPlayer.IsRepeating = true;
-            MediaPlayer.Volume = 0.45f;
-        }
-
-        private Vector3 GetRandomChickenSpawn()
-        {
-            Vector3 randomPos;
-
-            Boolean inPen = true;
-
-            do
-            {
-                randomPos = new Vector3((float)(Util.RandomClamped() * INIT_WORLD_SIZE), 0, (float)(Util.RandomClamped() * INIT_WORLD_SIZE));
-
-                if ((randomPos.X > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_XCOORD)
-                    || (randomPos.X < PEN_XCOORD - PEN_SPAWNBUFFER)) &&
-                    (randomPos.Y > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_YCOORD)
-                    || (randomPos.Y < PEN_YCOORD - PEN_SPAWNBUFFER)))
-                {
-                    inPen = false;
-                }
-            }
-            while (inPen);
-
-            return randomPos;
-        }
-
-        /// <summary>
-        /// Gets the current high score.
-        /// </summary>
-        private void LoadHighScore()
-        {
-            highScoreFile = new FileStream("highscore", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            FileInfo info = new FileInfo("highscore");
-
-            if (info.Length == 0)
-            {
-                curHighScore = 0x01111111;
-            }
-            else
-            {
-
-                byte[] rawHighScore = new byte[8];
-                highScoreFile.Read(rawHighScore, 0, 8);
-                curHighScore = BitConverter.ToInt32(rawHighScore, 0);
-            }
-        }
-
-        /// <summary>
-        /// UnloadContent will be called once per game and is the place to unload
-        /// all content.
-        /// </summary>
-        protected override void UnloadContent()
-        {
-            // TODO: Unload any non ContentManager content here
-        }
-
-        //
-        // Adds time on to TimeSpan timer
-        //
-        public static void AddTime(TimeSpan addition)
-        {
-            timer += addition;
-        }
-
-        /// <summary>
-        /// Allows the game to run logic such as updating the world,
-        /// checking for collisions, gathering input, and playing audio.
-        /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        protected override void Update(GameTime gameTime)
-        {
-            timeStart = true;
-            // Allows the game to exit
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                this.Exit();
-
-            if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-                this.Exit();
-
-            if (timer > TimeSpan.Zero && remainingChickens > 0)
-            {
-                winState = 0;
-                curKeyState = Keyboard.GetState();
-
-
-                // TODO: Add your update logic here
-                //if (Keyboard.GetState().IsKeyDown(Keys.F1) && oldKeyState != curKeyState)
-                //{
-                //    if (!timeStart)
-                //    {
-                //        timeStart = true;
-                //    }
-                //    else
-                //    {
-                //        timeStart = false;
-                //    }
-                //}
-
-                if (timer > TimeSpan.Zero && timeStart)
-                {
-                    timer -= gameTime.ElapsedGameTime;
-                }
-
-                //if (Keyboard.GetState().IsKeyDown(Keys.F) && oldKeyState != curKeyState)
-                //{
-                //    physicsSystem.CatchChicken();
-                //}
-
-                time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-                KeepCameraInBounds();
-
-                aiSystem.Update(world, gameTime, camera.Position);
-                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                oldKeyState = curKeyState;
-            }
-            else if (timer <= TimeSpan.Zero && remainingChickens > 0)
-            {
-                winState = -1;
-            }
-            else
-            {
-                winState = 1;
-                //UpdateHighScore(gameTime);
-            }
-
-            base.Update(gameTime);
-        }
-
-        /// <summary>
-        /// Updates the current high score.
-        /// </summary>
-        /// <param name="gameTime">The total time until the chickens were all caught.</param>
-        private void UpdateHighScore(GameTime gameTime)
-        {
-            // Write the new high score if we beat it
-            Int64 elapsedMillis = (Int64)gameTime.TotalGameTime.TotalMilliseconds;
-            if (elapsedMillis < curHighScore)
-            {
-                showHighScoreMsg = true;
-                byte[] bytes = BitConverter.GetBytes(elapsedMillis);
-                highScoreFile.Seek(0, SeekOrigin.Begin);
-                highScoreFile.Write(bytes, 0, 8);
-            }
+            // We have different menus for Windows Phone to take advantage of the touch interface
+#if WINDOWS_PHONE
+            screenManager.AddScreen(new PhoneMainMenuScreen(), null);
+#else
+            screenManager.AddScreen(new MainMenuScreen(), null);
+#endif
         }
 
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
-        /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Draw(GameTime gameTime)
         {
-            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;
-            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                camera.ViewMatrix);
-            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                camera.ProjectionMatrix);
-            // Draw the sphere model that the effect projects onto
-            foreach (ModelMesh mesh in SkySphere.Meshes)
-            {
-                mesh.Draw();
-            }
+            graphics.GraphicsDevice.Clear(Color.Black);
 
-            graphics.GraphicsDevice.DepthStencilState = DepthStencilState.Default;           
-            // TODO: Add your drawing code here
-
-            renderSystem.Update(world, gameTime);
-            drawGUI();
-            drawWinState(winState);
-            //RenderBox(testBox);
-            
+            // The real drawing happens inside the screen manager component.
             base.Draw(gameTime);
         }
 
-        private void drawWinState(int state)
+#if WINDOWS_PHONE
+        /// <summary>
+        /// Helper method to the initialize the game to be a portrait game.
+        /// </summary>
+        private void InitializePortraitGraphics()
         {
-            if (state == 1)
-            {
-                string winMsg = "You've prevented Cluck's wrath!";
-                if (showHighScoreMsg)
-                    winMsg += '\n' + highScoreMsg;
+            graphics.PreferredBackBufferWidth = 480;
+            graphics.PreferredBackBufferHeight = 800;
+        }
 
-                spriteBatch.Begin();
-                spriteBatch.DrawString(timerFont, winMsg, new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
-                spriteBatch.End();
-            }
-            else if (state == -1)
+        /// <summary>
+        /// Helper method to initialize the game to be a landscape game.
+        /// </summary>
+        private void InitializeLandscapeGraphics()
+        {
+            graphics.PreferredBackBufferWidth = 800;
+            graphics.PreferredBackBufferHeight = 480;
+        }
+
+        void GameLaunching(object sender, Microsoft.Phone.Shell.LaunchingEventArgs e)
+        {
+            AddInitialScreens();
+        }
+
+        void GameActivated(object sender, Microsoft.Phone.Shell.ActivatedEventArgs e)
+        {
+            // Try to deserialize the screen manager
+            if (!screenManager.Activate(e.IsApplicationInstancePreserved))
             {
-                spriteBatch.Begin();
-                spriteBatch.DrawString(timerFont, "You failed to collect all the chickens before Cluck arrived!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
-                spriteBatch.End();
+                // If the screen manager fails to deserialize, add the initial screens
+                AddInitialScreens();
             }
         }
 
-        private void drawGUI()
+        void GameDeactivated(object sender, Microsoft.Phone.Shell.DeactivatedEventArgs e)
         {
-            spriteBatch.Begin();
-            spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
-            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
-            spriteBatch.End();
+            // Serialize the screen manager when the game deactivated
+            screenManager.Deactivate();
         }
-
-        private void KeepCameraInBounds()
-        {
-            Vector3 newPos = camera.Position;
-
-            if (camera.Position.X < -1070.0f)
-                newPos.X = -1070.0f;
-
-            if (camera.Position.X > 1070.0f)
-                newPos.X = 1070.0f;
-
-            if (camera.Position.Y > 1070.0f)
-                newPos.Y = 1070.0f;
-
-            if (camera.Position.Y < -1.0f)
-                newPos.Y = -1.0f;
-
-            if (camera.Position.Z < -1070.0f)
-                newPos.Z = -1070.0f;
-
-            if (camera.Position.Z > 1070.0f)
-                newPos.Z = 1070.0f;
-
-            camera.Position = newPos;
-        }
-
-        private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
-        {
-            List<Vector3> points = new List<Vector3>();
-            BoundingSphere sphere;
-
-            Matrix[] boneTransforms = new Matrix[mod.Bones.Count];
-            mod.CopyAbsoluteBoneTransformsTo(boneTransforms);
-
-            foreach (ModelMesh mesh in mod.Meshes)
-            {
-                //Console.WriteLine("mesh count " + mod.Meshes.Count);
-
-                foreach (ModelMeshPart mmp in mesh.MeshParts)
-                {
-                    //Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
-                    VertexPositionNormalTexture[] vertices =
-                        new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
-
-                    mmp.VertexBuffer.GetData<VertexPositionNormalTexture>(vertices);
-
-                    foreach (VertexPositionNormalTexture vertex in vertices)
-                    {
-                        Vector3 point = Vector3.Transform(vertex.Position,
-                            boneTransforms[mesh.ParentBone.Index]);
-
-                        points.Add(point);
-                    }
-                }
-            }
-            //Console.WriteLine("point count " + points.Count);
-            sphere = BoundingSphere.CreateFromPoints(points);
-            sphere = sphere.Transform(Matrix.CreateScale(boundingScale));
-            //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
-            return sphere;
-        }
-
-        private BoundingBox calBoundingBox(Model mod, Vector3 worldPos, float orientation)
-        {
-            List<Vector3> points = new List<Vector3>();
-            BoundingBox box;
-
-            Matrix[] boneTransforms = new Matrix[mod.Bones.Count];
-            mod.CopyAbsoluteBoneTransformsTo(boneTransforms);
-
-            foreach (ModelMesh mesh in mod.Meshes)
-            {
-                //Console.WriteLine("mesh count " + mod.Meshes.Count);
-
-                foreach (ModelMeshPart mmp in mesh.MeshParts)
-                {
-                    //Console.WriteLine("meshpart count " + mesh.MeshParts.Count);
-                    VertexPositionNormalTexture[] vertices =
-                        new VertexPositionNormalTexture[mmp.VertexBuffer.VertexCount];
-
-                    mmp.VertexBuffer.GetData<VertexPositionNormalTexture>(vertices);
-
-                    foreach (VertexPositionNormalTexture vertex in vertices)
-                    {
-                        Vector3 point = Vector3.Transform(vertex.Position,
-                            boneTransforms[mesh.ParentBone.Index]);
-
-                        Matrix mat = Matrix.CreateRotationY(orientation) * Matrix.CreateTranslation(worldPos);
-                        //mat *= Matrix.CreateRotationY(orientation);
-
-                        point = Vector3.Transform(point, mat);
-
-                        points.Add(point);
-                    }
-                }
-            }
-            //Console.WriteLine("point count " + points.Count);
-            box = BoundingBox.CreateFromPoints(points);
-            //sphere = sphere.Transform(Matrix.CreateTranslation(new Vector3(0,0,-800000)));
-            return box;
-        }
-
-        private void SetBoundingSphereSize(int size)
-        {
-            boundingSphereSize.M11 = size;
-            boundingSphereSize.M12 = 0;
-            boundingSphereSize.M13 = 0;
-            boundingSphereSize.M14 = 0;
-
-            boundingSphereSize.M21 = 0;
-            boundingSphereSize.M22 = size;
-            boundingSphereSize.M23 = 0;
-            boundingSphereSize.M24 = 0;
-
-            boundingSphereSize.M31 = 0;
-            boundingSphereSize.M32 = 0;
-            boundingSphereSize.M33 = size;
-            boundingSphereSize.M34 = 0;
-
-            boundingSphereSize.M41 = 0;
-            boundingSphereSize.M42 = 0;
-            boundingSphereSize.M43 = 0;
-            boundingSphereSize.M44 = 1;
-
-        }
-
-        //protected BoundingSphere CalculateBoundingSphere(Model mod)
-        //{
-        //    BoundingSphere mergedSphere = new BoundingSphere();
-        //    BoundingSphere[] boundingSpheres;
-        //    int index = 0;
-        //    int meshCount = mod.Meshes.Count;
-
-        //    boundingSpheres = new BoundingSphere[meshCount];
-        //    foreach (ModelMesh mesh in mod.Meshes)
-        //    {
-        //        boundingSpheres[index++] = mesh.BoundingSphere;
-        //    }
-
-        //    mergedSphere = boundingSpheres[0];
-        //    if ((mod.Meshes.Count) > 1)
-        //    {
-        //        index = 1;
-        //        do
-        //        {
-        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
-        //                boundingSpheres[index]);
-        //            index++;
-        //        } while (index < mod.Meshes.Count);
-        //    }
-        //    mergedSphere.Center.Y = 0;
-        //    return mergedSphere;
-        //}
-
-        private void RenderBox(BoundingBox box)
-        {
-
-            Vector3[] corners = box.GetCorners();
-
-            VertexPositionColor[] primitiveList = new VertexPositionColor[corners.Length];
-
-            // Assign the 8 box vertices
-            for (int i = 0; i < corners.Length; i++)
-            {
-                primitiveList[i] = new VertexPositionColor(corners[i], Color.White);
-            }
-
-            /* Set your own effect parameters here */
-            BasicEffect boxEffect = new BasicEffect(graphics.GraphicsDevice);
-
-            boxEffect.World = Matrix.Identity;
-            boxEffect.View = camera.ViewMatrix;
-            boxEffect.Projection = camera.ProjectionMatrix;
-            boxEffect.TextureEnabled = false;
-
-            // Draw the box with a LineList
-            foreach (EffectPass pass in boxEffect.CurrentTechnique.Passes)
-            {
-                pass.Apply();
-                GraphicsDevice.DrawUserIndexedPrimitives(
-                    PrimitiveType.LineList, primitiveList, 0, 8,
-                    bBoxIndices, 0, 12);
-            }
-        }
-        private void BuildBounds(Model fence, Texture2D texture)
-        {
-            for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
-            {
-                GameEntity fenceEntityTop = new GameEntity();
-                GameEntity fenceEntityBottom = new GameEntity();
-                PositionComponent topPos;
-                PositionComponent bottomPos;
-
-                fenceEntityTop.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
-                    0, 
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
-                topPos = fenceEntityTop.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityTop.AddComponent(new Renderable(fence, texture, 
-                                                           calBoundingBox(fence, topPos.GetPosition(), topPos.GetOrientation())));
-                fenceEntityTop.AddComponent(new FenceComponent());
-
-                fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x), 
-                    0, 
-                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), (float)Math.PI));
-                bottomPos = fenceEntityBottom.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityBottom.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, bottomPos.GetPosition(), bottomPos.GetOrientation())));
-                fenceEntityBottom.AddComponent(new FenceComponent());
-
-                world.Add(fenceEntityTop);
-                world.Add(fenceEntityBottom);
-            }
-
-            for (int y = 0; y < FENCE_LINKS_HEIGHT; y++)
-            {
-                GameEntity fenceEntityLeft = new GameEntity();
-                GameEntity fenceEntityRight = new GameEntity();
-
-                PositionComponent leftPos;
-                PositionComponent rightPos;
-
-                fenceEntityLeft.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
-                    0, 
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
-                leftPos = fenceEntityLeft.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityLeft.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, leftPos.GetPosition(), leftPos.GetOrientation())));
-                fenceEntityLeft.AddComponent(new FenceComponent());
-
-                fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2), 
-                    0, 
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2 + (float)Math.PI));
-                rightPos = fenceEntityRight.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityRight.AddComponent(new Renderable(fence, texture, calBoundingBox(fence, rightPos.GetPosition(), rightPos.GetOrientation())));
-                fenceEntityRight.AddComponent(new FenceComponent());
-
-                world.Add(fenceEntityLeft);
-                world.Add(fenceEntityRight);
-            }
-        }
-
-        private void BuildPen(Model pen, Texture2D texture)
-        {
-            for (int x = 0; x < PEN_LINKS_WIDTH; x++)
-            {
-                GameEntity penEntityTop = new GameEntity();
-                GameEntity penEntityBottom = new GameEntity();
-
-                PositionComponent topPos;
-                PositionComponent bottomPos;
-
-                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), 0f));
-                topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
-                penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation())));
-                penEntityTop.AddComponent(new FenceComponent());
-
-                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
-                    0,
-                    (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), (float)Math.PI));
-                bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
-                penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation())));
-                penEntityBottom.AddComponent(new FenceComponent());
-
-                world.Add(penEntityTop);
-                world.Add(penEntityBottom);
-            }
-
-            for (int y = 0; y < PEN_LINKS_HEIGHT; y++)
-            {
-                GameEntity penEntityLeft = new GameEntity();
-                GameEntity penEntityRight = new GameEntity();
-
-                PositionComponent leftPos;
-                PositionComponent rightPos;
-
-                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2));
-                leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
-                penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation())));
-                penEntityLeft.AddComponent(new FenceComponent());
-
-                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2 + (float)Math.PI));
-                rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
-                penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation())));
-                penEntityRight.AddComponent(new FenceComponent());
-
-                world.Add(penEntityLeft);
-                world.Add(penEntityRight);
-            }
-        }
-
-        private void BuildPenBase(Model pen, Texture2D texture)
-        {
-            for (int x = 0; x < PEN_LINKS_WIDTH; x++)
-            {
-                GameEntity penEntityTop = new GameEntity();
-                GameEntity penEntityBottom = new GameEntity();
-
-                PositionComponent topPos;
-                PositionComponent bottomPos;
-
-                penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + PEN_YCOORD), 0f));
-                topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
-                penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation())));
-                penEntityTop.AddComponent(new CaptureComponent());
-                penEntityTop.AddComponent(new CollidableComponent());
-
-                penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * x) + PEN_XCOORD,
-                    0,
-                    (PEN_LINKS_WIDTH * PEN_BASE_WIDTH / 2) + PEN_YCOORD), (float)Math.PI));
-                bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
-                penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation())));
-                penEntityBottom.AddComponent(new CaptureComponent());
-                penEntityBottom.AddComponent(new CollidableComponent());
-
-                world.Add(penEntityTop);
-                world.Add(penEntityBottom);
-            }
-
-            for (int y = 0; y < PEN_LINKS_HEIGHT; y++)
-            {
-                GameEntity penEntityLeft = new GameEntity();
-                GameEntity penEntityRight = new GameEntity();
-
-                PositionComponent leftPos;
-                PositionComponent rightPos;
-
-                penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2));
-                leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
-                penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation())));
-                penEntityLeft.AddComponent(new CaptureComponent());
-                penEntityLeft.AddComponent(new CollidableComponent());
-
-                penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + PEN_XCOORD,
-                    0,
-                    (-PEN_LINKS_HEIGHT * PEN_BASE_WIDTH / 2) + (PEN_BASE_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2 + (float)Math.PI));
-                rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
-                penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation())));
-                penEntityRight.AddComponent(new CaptureComponent());
-                penEntityRight.AddComponent(new CollidableComponent());
-
-                world.Add(penEntityLeft);
-                world.Add(penEntityRight);
-            }
-        }
-
-        private void BuildForest(Model trees, Texture2D texture)
-        {
-            for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
-            {
-                GameEntity fenceEntityTop = new GameEntity();
-                GameEntity fenceEntityBottom = new GameEntity();
-
-                PositionComponent topPos;
-                PositionComponent bottomPos;
-
-                fenceEntityTop.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
-                    0,
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), 0f));
-                topPos = fenceEntityTop.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityTop.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, topPos.GetPosition(), topPos.GetOrientation())));
-
-                fenceEntityBottom.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2) + (FENCE_WIDTH / 2) + (FENCE_WIDTH * x),
-                    0,
-                    (FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2)), (float)Math.PI));
-                bottomPos = fenceEntityBottom.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityBottom.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, bottomPos.GetPosition(), bottomPos.GetOrientation())));
-
-                world.Add(fenceEntityTop);
-                world.Add(fenceEntityBottom);
-            }
-
-            for (int y = 0; y < FENCE_LINKS_HEIGHT; y++)
-            {
-                GameEntity fenceEntityLeft = new GameEntity();
-                GameEntity fenceEntityRight = new GameEntity();
-
-                PositionComponent leftPos;
-                PositionComponent rightPos;
-
-                fenceEntityLeft.AddComponent(new PositionComponent(new Vector3((-FENCE_LINKS_WIDTH * FENCE_WIDTH / 2),
-                    0,
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2));
-                leftPos = fenceEntityLeft.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityLeft.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, leftPos.GetPosition(), leftPos.GetOrientation())));
-
-                fenceEntityRight.AddComponent(new PositionComponent(new Vector3((FENCE_LINKS_WIDTH * FENCE_WIDTH / 2),
-                    0,
-                    (-FENCE_LINKS_HEIGHT * FENCE_WIDTH / 2) + (FENCE_WIDTH * y) + (FENCE_WIDTH / 2)), (float)Math.PI / 2 + (float)Math.PI));
-                rightPos = fenceEntityRight.GetComponent<PositionComponent>(component_flags.position);
-                fenceEntityRight.AddComponent(new Renderable(trees, texture, calBoundingBox(trees, rightPos.GetPosition(), rightPos.GetOrientation())));
-
-                world.Add(fenceEntityLeft);
-                world.Add(fenceEntityRight);
-            }
-        }
+#endif
     }
 }

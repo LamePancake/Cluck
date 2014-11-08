@@ -98,6 +98,7 @@ namespace Cluck
                 return;
 
             // Loop through the remaining entities to check for collisions
+
             for (; i < physicalObjects.Count(); i++)
             {
                 if (!physicalObjects.ElementAt<GameEntity>(i)
@@ -111,6 +112,9 @@ namespace Cluck
                         .HasComponent((int)component_flags.collidable))
                         continue;
 
+                    //physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetInRange(false);
+                    //physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetInRange(false);
+
                     if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
                     {
@@ -119,6 +123,7 @@ namespace Cluck
                             //Console.WriteLine("arm " + i + ", chicken " + j);
                             catchable = true;
                             chickenInRange = j;
+                            //physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetInRange(true);
                             if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
@@ -130,6 +135,7 @@ namespace Cluck
                             catchable = true;
                             chickenInRange = i;
                             armIndex = j;
+                            //physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetInRange(true);
                             if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
@@ -147,8 +153,8 @@ namespace Cluck
                                 physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                             }
                             
-                            Cluck.AddTime(new TimeSpan(0, 0, 10));
-                            Cluck.remainingChickens--;
+                            GameplayScreen.AddTime(new TimeSpan(0, 0, 10));
+                            GameplayScreen.remainingChickens--;
                         }
                         else
                         {
