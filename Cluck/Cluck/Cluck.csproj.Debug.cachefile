@@ -9,6 +9,7 @@ Content\blank.xnb
 Content\gradient.xnb
 Content\Textures\grassplaceholder.xnb
 Content\Textures\tree_diffuse.xnb
+Content\Textures\HealthBar.xnb
 Content\MessageFont.xnb
 Content\gamefont.xnb
 Content\menufont.xnb
@@ -26,7 +27,11 @@ Content\Models\chicken_pen_side.xnb
 Content\Models\chicken_pen_side_large.xnb
 Content\Models\pen_base_large.xnb
 Content\Models\tree_side.xnb
+Content\Models\chicken_anim.xnb
+Content\Models\chicken_animv2.xnb
 Content\SkySphere.xnb
+Content\Effects\Toon.xnb
+Content\Effects\ToonNoAnimation.xnb
 Content\Audio\Lacrimosa Dominae.xnb
 Content\Audio\Cluck1.xnb
 Content\Audio\Cluck2.xnb
@@ -39,6 +44,8 @@ Content\Audio\Cluck8.xnb
 Content\Audio\yoshi.xnb
 Content\Audio\Yoshi_looped.xnb
 Content\chicken_diffuse_0.xnb
+Content\chicken_diffuse_1.xnb
+Content\chicken_diffuse_2.xnb
 Content\Audio\Lacrimosa Dominae.wma
 Content\Audio\yoshi.wma
 Content\Audio\Yoshi_looped.wma
