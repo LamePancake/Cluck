@@ -108,6 +108,27 @@ namespace Cluck
                 // Check the collidable entity against every other collidable entity
                 for (int j = i + 1; j < physicalObjects.Count(); j++)
                 {
+
+                    if (catchable)
+                    {
+                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(1, 1, 0, 1));
+                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.4f);
+                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 0, 1));
+                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.4f);
+
+                    }
+                    else
+                    {
+                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(0, 0, 0, 1));
+                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.2f);
+                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.1f);
+                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(0, 0, 0, 1));
+                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.2f);
+                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.1f);
+                    }
+                    
                     if(!physicalObjects.ElementAt<GameEntity>(j)
                         .HasComponent((int)component_flags.collidable))
                         continue;
@@ -120,10 +141,9 @@ namespace Cluck
                     {
                         if (physicalObjects.ElementAt<GameEntity>(i).HasComponent(0x00200) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free))
                         {
-                            //Console.WriteLine("arm " + i + ", chicken " + j);
                             catchable = true;
                             chickenInRange = j;
-                            //physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetInRange(true);
+
                             if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
@@ -131,11 +151,10 @@ namespace Cluck
                         }
                         else if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free) && physicalObjects.ElementAt<GameEntity>(j).HasComponent(0x00200))
                         {
-                            //Console.WriteLine("chicken " + i + ", arm " + j);
                             catchable = true;
                             chickenInRange = i;
                             armIndex = j;
-                            //physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetInRange(true);
+
                             if (camera.IsClapping() && !camera.chickenCaught)
                             {
                                 CatchChicken();
@@ -152,7 +171,7 @@ namespace Cluck
                             {
                                 physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                             }
-                            
+
                             GameplayScreen.AddTime(new TimeSpan(0, 0, 10));
                             GameplayScreen.remainingChickens--;
                         }

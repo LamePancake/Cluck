@@ -74,6 +74,7 @@ namespace Cluck
         private Texture2D grassDiffuse;
         private Texture2D woodDiffuse;
         private Texture2D treeDiffuse;
+        private Texture2D healthBar;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
         private GamePadState oldGPState;
@@ -95,6 +96,8 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Y = 300.0f;
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
+        private const float CAMERA_SLIDING_MULTIPLIER = 2.5f;
+        private const float CAMERA_CROUCHING_MULTIPLIER = 0.85f;
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
         private const int FENCE_LINKS_WIDTH = 1;
         private const int FENCE_LINKS_HEIGHT = 1;
@@ -194,6 +197,18 @@ namespace Cluck
                 camera.VelocityWalking.X * CAMERA_RUNNING_MULTIPLIER,
                 camera.VelocityWalking.Y * CAMERA_RUNNING_JUMP_MULTIPLIER,
                 camera.VelocityWalking.Z * CAMERA_RUNNING_MULTIPLIER);
+            camera.VelocityRunning = new Vector3(
+               camera.VelocityWalking.X * CAMERA_RUNNING_MULTIPLIER,
+               camera.VelocityWalking.Y * CAMERA_RUNNING_JUMP_MULTIPLIER,
+               camera.VelocityWalking.Z * CAMERA_RUNNING_MULTIPLIER);
+            camera.VelocitySliding = new Vector3(
+               camera.VelocityWalking.X * CAMERA_SLIDING_MULTIPLIER,
+               camera.VelocityWalking.Y,
+               camera.VelocityWalking.Z * CAMERA_SLIDING_MULTIPLIER);
+            camera.VelocityCrouching = new Vector3(
+               camera.VelocityWalking.X * CAMERA_CROUCHING_MULTIPLIER,
+               camera.VelocityWalking.Y * CAMERA_CROUCHING_MULTIPLIER,
+               camera.VelocityWalking.Z * CAMERA_CROUCHING_MULTIPLIER);
             camera.Perspective(
                 CAMERA_FOVX,
                 (float)windowWidth / (float)windowHeight,
@@ -228,6 +243,7 @@ namespace Cluck
                 grassDiffuse = content.Load<Texture2D>(@"Textures\grassplaceholder");
                 woodDiffuse = content.Load<Texture2D>(@"Textures\wood_diffuse");
                 treeDiffuse = content.Load<Texture2D>(@"Textures\tree_diffuse");
+                healthBar = content.Load<Texture2D>(@"Textures\HealthBar");
 
                 leftArm = content.Load<Model>(@"Models\arm_left");
                 rightArm = content.Load<Model>(@"Models\arm_right");
@@ -528,6 +544,16 @@ namespace Cluck
 
                     KeepCameraInBounds();
 
+                    if (camera.chickenCaught)
+                    {
+                        Random r = new Random();
+                        GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
+                    }
+                    else
+                    {
+                        GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
+                    }
+
                     aiSystem.Update(world, gameTime, camera.Position);
                     physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                     audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
@@ -683,6 +709,14 @@ namespace Cluck
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+
+            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Gray);
+
+            //Draw the current health level based on the current Health
+            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), (int)(healthBar.Width * (camera.GetStaminaRatio())), 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Blue);
+
+            //Draw the box around the health bar
+            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 0, healthBar.Width, 44), Color.White);
             spriteBatch.End();
         }
 

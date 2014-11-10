@@ -27,7 +27,9 @@ namespace Cluck
 
         public InputManager()
         {
+#if WINDOWS
             currentMouseState = Mouse.GetState();
+#endif
             currentKeyboardState = Keyboard.GetState();
             currentGamePadState = GamePad.GetState(PlayerIndex.One);
         }
@@ -39,8 +41,9 @@ namespace Cluck
         public Input Update(Rectangle client)
         {
             Input i = new Input();
-
+#if WINDOWS
             ProcessMouse(ref i, client);
+#endif
             ProcessController(ref i);
             ProcessKeyboard(ref i);
 
@@ -54,6 +57,8 @@ namespace Cluck
 
             float x = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X;
             float y = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y;
+
+            i.SetClap(GamePad.GetState(PlayerIndex.One).Triggers.Right);
 
             if (x > 0)
             {
@@ -90,7 +95,14 @@ namespace Cluck
 
             if (currentGamePadState.IsButtonDown(Buttons.LeftStick))
             {
-                i.SetSprinting(true);
+                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                {
+                    i.SetSprinting(true);
+                }
+                else
+                {
+                    i.SetSprinting(false);
+                }
             }
 
             if (GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.X != 0)
@@ -101,6 +113,22 @@ namespace Cluck
             if (GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.Y != 0)
             {
                 i.SetViewY(GamePad.GetState(PlayerIndex.One).ThumbSticks.Right.Y * sensitivity);
+            }
+
+            if (currentGamePadState.IsButtonDown(Buttons.LeftStick) && currentGamePadState.IsButtonDown(Buttons.LeftShoulder) && previousGamePadState.IsButtonUp(Buttons.LeftShoulder))
+            {
+                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                {
+                    i.SetSliding(true);
+                    i.SetSprinting(false);
+                    i.SetCrouching(false);
+                }
+                else
+                {
+                    i.SetSliding(false);
+                    i.SetSprinting(false);
+                    i.SetCrouching(false);
+                }
             }
         }
 
@@ -141,7 +169,30 @@ namespace Cluck
 
             if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
             {
-                i.SetSprinting(true);
+                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                {
+                    i.SetSprinting(true);
+                }
+                else
+                {
+                    i.SetSprinting(false);
+                }
+            }
+
+            if (currentKeyboardState.IsKeyDown(Keys.LeftShift) && currentKeyboardState.IsKeyDown(Keys.C) && previousKeyboardState.IsKeyUp(Keys.C))
+            {
+                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                {
+                    i.SetSliding(true);
+                    i.SetSprinting(false);
+                    i.SetCrouching(false);
+                }
+                else
+                {
+                    i.SetSliding(false);
+                    i.SetSprinting(false);
+                    i.SetCrouching(false);
+                }
             }
         }
 

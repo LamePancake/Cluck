@@ -45,6 +45,11 @@ namespace Cluck
 
                     renderable.SetMatrix(final);
 
+                    renderable.SetBorderSize(0.2f);
+                    renderable.SetLineColor(new Vector4(0, 0, 0, 1));
+                    renderable.SetAmbientColor(new Vector4(1, 1, 1, 1));
+                    renderable.SetAmbientIntensity(0.1f);
+
                     if (renderable.GetAnimationPlayer() != null)
                     {
                         renderable.GetAnimationPlayer().Update(gameTime.ElapsedGameTime, true, final);
@@ -80,7 +85,7 @@ namespace Cluck
                     renderable = entity.GetComponent<Renderable>(component_flags.renderable);
                     ArmComponent arms = entity.GetComponent<ArmComponent>(component_flags.arm);
 
-                    renderable.SetBorderMutable(true);
+                    renderable.SetBorderSize(0.0125f);
                     if (arms.WhichArm())
                     {
                         renderable.SetMatrix(camera.GetRightArmWorldMatrix((float)gameTime.ElapsedGameTime.TotalSeconds));
@@ -122,28 +127,14 @@ namespace Cluck
                     mmp.Effect.Parameters["View"].SetValue(camera.ViewMatrix);
                     mmp.Effect.Parameters["Projection"].SetValue(camera.ProjectionMatrix);
                     mmp.Effect.Parameters["Texture"].SetValue(rend.GetTexture());
+                    mmp.Effect.Parameters["LineThickness"].SetValue(rend.GetBorderSize());
+                    mmp.Effect.Parameters["LineColor"].SetValue(rend.GetLineColor());
+                    mmp.Effect.Parameters["AmbientColor"].SetValue(rend.GetAmbientColor());
+                    mmp.Effect.Parameters["AmbientIntensity"].SetValue(rend.GetAmbientIntensity());
                     
                     if (bones != null)
                     {
                         mmp.Effect.Parameters["Bones"].SetValue(bones);
-                    }
-
-                    if (rend.GetInRange())
-                    {
-                        mmp.Effect.Parameters["LineColor"].SetValue(new Vector4(1, 1, 0, 1));
-                    }
-                    else
-                    {
-                        mmp.Effect.Parameters["LineColor"].SetValue(new Vector4(0, 0, 0, 1));
-                    }
-
-                    if (rend.GetBorderMutable())
-                    {
-                        mmp.Effect.Parameters["LineThickness"].SetValue(0.0125f);
-                    }
-                    else
-                    {
-                        mmp.Effect.Parameters["LineThickness"].SetValue(0.2f);
                     }
                 }
                 //if (bones == null)

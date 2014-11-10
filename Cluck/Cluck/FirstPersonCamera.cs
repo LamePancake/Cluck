@@ -23,8 +23,11 @@ namespace Cluck
             Standing,
             Crouching,
             Rising,
-            Jumping
+            Jumping,
+			Sliding
         };
+
+        public const float MAX_SPRINTING_TIME = 5;
 
         public const float DEFAULT_FOVX = 90.0f;
         public const float DEFAULT_ZNEAR = 0.1f;
@@ -40,11 +43,12 @@ namespace Cluck
         private const float DEFAULT_VELOCITY_Y = 1.0f;
         private const float DEFAULT_VELOCITY_Z = 1.0f;
         private const float DEFAULT_RUNNING_MULTIPLIER = 2.0f;
-        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.75f;
-        private const float DEFAULT_MOUSE_SMOOTHING_SENSITIVITY = 0.5f;
+        private const float DEFAULT_SLIDING_MULTIPLIER = 2.5f;
+        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.85f;
         private const float DEFAULT_SPEED_ROTATION = 0.3f;
         private const float HEIGHT_MULTIPLIER_CROUCHING = 0.6f;
-        private const int MOUSE_SMOOTHING_CACHE_SIZE = 10;
+		private const float HEIGHT_MULTIPLIER_SLIDING = 0.67f;
+
         private const float BOBBINGSPEED_RUNNING = 0.30f;
         private const float BOBBINGSPEED_WALKING = 0.25f;
         private const float BOBBINGAMOUNT_RUNNING = 0.05f;
@@ -58,6 +62,7 @@ namespace Cluck
         private float accumPitchDegrees;
         private float eyeHeightStanding;
         private float eyeHeightCrouching;
+		private float eyeHeightSliding;
         private Vector3 eye;
         private Vector3 target;
         private Vector3 targetYAxis;
@@ -70,6 +75,7 @@ namespace Cluck
         private Vector3 velocity;
         private Vector3 velocityWalking;
         private Vector3 velocityRunning;
+		private Vector3 velocitySliding;
         private Vector3 velocityCrouching;
         private Quaternion orientation;
         private Matrix viewMatrix;
@@ -80,9 +86,6 @@ namespace Cluck
         private float rotationSpeed;
 
         private InputManager inputManager;
-
-        private Matrix[] leftArmMatrix;
-        private Matrix[] rightArmMatrix;
 
         private const float ARM_SCALE = 0.03f;
         private const float RIGHT_ARM_X_OFFSET = 20;
@@ -106,6 +109,13 @@ namespace Cluck
         public bool chickenCaught;
         HeadBob head;
 
+		private float slideElapsedSeconds;
+        private bool isSliding;
+
+        private float clap = 0;
+
+        private float sprintingTime = MAX_SPRINTING_TIME;
+
         public FirstPersonCamera(Game game) : base(game)
         {
             UpdateOrder = 1;
@@ -118,6 +128,7 @@ namespace Cluck
             accumPitchDegrees = 0.0f;
             eyeHeightStanding = 0.0f;
             eyeHeightCrouching = 0.0f;
+			eyeHeightSliding = 0.0f;
             eye = Vector3.Zero;
             target = Vector3.Zero;
             targetYAxis = Vector3.UnitY;
@@ -128,7 +139,7 @@ namespace Cluck
             acceleration = new Vector3(DEFAULT_ACCELERATION_X, DEFAULT_ACCELERATION_Y, DEFAULT_ACCELERATION_Z);
             velocityWalking = new Vector3(DEFAULT_VELOCITY_X, DEFAULT_VELOCITY_Y, DEFAULT_VELOCITY_Z);
             velocityRunning = velocityWalking * DEFAULT_RUNNING_MULTIPLIER;
-            
+			velocitySliding = velocityWalking * DEFAULT_SLIDING_MULTIPLIER;
             velocityCrouching = velocityWalking * DEFAULT_CROUCHING_MULTIPLIER;
 
             velocity = velocityWalking;
@@ -150,6 +161,9 @@ namespace Cluck
             rightXOffset = RIGHT_ARM_X_OFFSET;
             chickenCaught = false;
             head = new HeadBob();
+
+			slideElapsedSeconds = 0.0f;
+            isSliding = false;
         }
 
         public override void Initialize()
@@ -157,7 +171,9 @@ namespace Cluck
             base.Initialize();
 
             Rectangle clientBounds = Game.Window.ClientBounds;
+#if WINDOWS
             Mouse.SetPosition(clientBounds.Width / 2, clientBounds.Height / 2);
+#endif
         }
 
         /// <summary>
@@ -279,14 +295,27 @@ namespace Cluck
             }
             else if (i.IsClapping() && chickenCaught)
             {
+
                 isClapping = false;
             }
+
+            if ((i.IsSprinting() || i.IsSliding()) && sprintingTime > 0)
+            {
+                float elaspedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
+                sprintingTime -= elaspedSeconds;
+            }
+            else if (!i.IsSprinting() && !i.IsSliding() && sprintingTime < MAX_SPRINTING_TIME)
+            {
+                sprintingTime += ((float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
+            }
+
+            sprintingTime = MathHelper.Clamp(sprintingTime, 0, MAX_SPRINTING_TIME);
 
             UpdateCamera(gameTime, i);
 
             if (posture != Posture.Jumping)
             {
-                if (i.IsSprinting() && !i.IsCrouching())
+                if (i.IsSprinting() && !i.IsCrouching() && sprintingTime > 0)
                 {
                     eye = head.Update(i.GetLeft() + i.GetRight(), i.GetForward() + i.GetBackward(), eye, (float)gameTime.ElapsedGameTime.Milliseconds, BOBBINGSPEED_RUNNING, BOBBINGAMOUNT_RUNNING);
                 }
@@ -294,6 +323,12 @@ namespace Cluck
                 {
                     eye = head.Update(i.GetLeft() + i.GetRight(), i.GetForward() + i.GetBackward(), eye, (float)gameTime.ElapsedGameTime.Milliseconds, BOBBINGSPEED_WALKING, BOBBINGAMOUNT_WALKING);
                 }
+            }
+
+
+			if (isSliding && !chickenCaught)
+            {
+                GamePad.SetVibration(PlayerIndex.One, 0.1f, 0.2f);
             }
 
             base.Update(gameTime);
@@ -328,10 +363,13 @@ namespace Cluck
             else
             {
                 if (leftXOffset > LEFT_ARM_X_OFFSET)
+
                 {
                     leftXOffset -= ARM_MOVEMENT * gameTime;
+
                 }
                 chickenCaught = false;
+
             }
 
             leftArmPos += viewDir * ARM_Z_OFFSET;
@@ -342,6 +380,7 @@ namespace Cluck
                 * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(leftArmPos);
+
         }
 
         public Vector3 GetChickenPosition()
@@ -387,10 +426,13 @@ namespace Cluck
             else 
             {
                 if (rightXOffset < RIGHT_ARM_X_OFFSET)
+
                 {
                     rightXOffset += ARM_MOVEMENT * gameTime;
+
                 }
                 chickenCaught = false;
+
             }
 
             rightArmPos += viewDir * ARM_Z_OFFSET;
@@ -417,6 +459,52 @@ namespace Cluck
 
             direction.Z += i.GetForward() + i.GetBackward();
             direction.X += i.GetRight() + i.GetLeft();
+
+            if (isSliding)
+            {
+                if ((direction.X != 0 || direction.Z != 0))
+                {
+                    switch (posture)
+                    {
+                        case Posture.Standing:
+                            posture = Posture.Sliding;
+                            direction.Y -= 1.0f;
+                            currentVelocity.Y = 0.0f;
+                            break;
+
+                        case Posture.Sliding:
+                            direction.Y -= 1.0f;
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    isSliding = false;
+                }
+            }
+            else
+            {
+                isSliding = false;
+                switch (posture)
+                {
+                    case Posture.Sliding:
+                        posture = Posture.Rising;
+                        direction.Y += 1.0f;
+                        currentVelocity.Y = 0.0f;
+                        break;
+
+                    case Posture.Rising:
+                        direction.Y += 1.0f;
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+			
 
             if (i.IsCrouching())
             {
@@ -492,14 +580,27 @@ namespace Cluck
             float elapsedTimeSec = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 direction = new Vector3();
 
-            if (i.IsSprinting() && posture != Posture.Crouching)
+            if (i.IsSliding() && !isSliding && posture != Posture.Rising && sprintingTime > 0)
+            {
+                //Quaternion tilt = Quaternion.Identity;
+                //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(3), out tilt);
+                //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                isSliding = true;
+            }
+
+            if (isSliding)
+                velocity = velocitySliding;
+            else if (i.IsSprinting() && !i.IsCrouching() && sprintingTime > 0)
                 velocity = velocityRunning;
+            else if (i.IsCrouching())
+                velocity = velocityCrouching;
             else
                 velocity = velocityWalking;
 
-            direction = GetMovementDirection(direction, i);
+			 direction = GetMovementDirection(direction, i);
 
             Rotate(i.GetViewX(), i.GetViewY()); 
+			UpdateVelocity(ref direction, elapsedTimeSec);
             UpdatePosition(ref direction, elapsedTimeSec);
         }
 
@@ -566,6 +667,23 @@ namespace Cluck
                         currentVelocity.Y = 0.0f;
                     }
                     break;
+				case Posture.Sliding:
+                    if (eye.Y <= eyeHeightSliding)
+                    {
+                        eye.Y = eyeHeightSliding;
+
+                        slideElapsedSeconds += elapsedTimeSec;
+                        if (slideElapsedSeconds >= 0.55f)
+                        {
+                            posture = Posture.Rising;
+                            isSliding = false;
+                            //Quaternion tilt = Quaternion.Identity;
+                            //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-3), out tilt);
+                            //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                            slideElapsedSeconds = 0;
+                        }
+                    }
+                    break;
                 }
             }
 
@@ -574,7 +692,8 @@ namespace Cluck
             // longer being moved the camera is decelerating back to its
             // stationary state.
 
-            UpdateVelocity(ref direction, elapsedTimeSec);
+
+            //UpdateVelocity(ref direction, elapsedTimeSec);
         }
 
         /// <summary>
@@ -708,10 +827,23 @@ namespace Cluck
             viewDir.X = -zAxis.X;
             viewDir.Y = -zAxis.Y;
             viewDir.Z = -zAxis.Z;
+
+
         }
 
+        public float GetStaminaRatio()
+        {
+            float ratio = (sprintingTime / MAX_SPRINTING_TIME);
+            ratio = MathHelper.Clamp(ratio, 0, 1);
+            return ratio;
+        }
 
     #region Properties
+
+
+
+
+
 
         public Vector3 Acceleration
         {
@@ -738,6 +870,7 @@ namespace Cluck
             {
                 eyeHeightStanding = value;
                 eyeHeightCrouching = value * HEIGHT_MULTIPLIER_CROUCHING;
+				eyeHeightSliding = value * HEIGHT_MULTIPLIER_SLIDING;
                 eye.Y = eyeHeightStanding;
                 UpdateViewMatrix();
             }
@@ -790,6 +923,12 @@ namespace Cluck
         {
             get { return velocityRunning; }
             set { velocityRunning = value; }
+        }
+
+		public Vector3 VelocitySliding
+        {
+            get { return velocitySliding; }
+            set { velocitySliding = value; }
         }
 
         public Vector3 VelocityCrouching

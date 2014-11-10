@@ -16,8 +16,10 @@ namespace Cluck
         private BoundingSphere entitySphere;
         private BoundingBox entityBox;
         private Effect customEffect;
-        private Boolean borderMutable;
-        private Boolean inRange;
+        private float borderSize;
+        private Vector4 lineColor;
+        private float ambientIntensity;
+        private Vector4 ambientColor;
 
         private AnimationPlayer animationPlayer;
 
@@ -30,8 +32,10 @@ namespace Cluck
             entitySphere = sphere;
             animationPlayer = a;
             customEffect = effect;
-            borderMutable = false;
-            inRange = false;
+            borderSize = 0.2f;
+            lineColor = new Vector4(0, 0, 0, 1);
+            ambientIntensity = 0.1f;
+            ambientColor = new Vector4(1, 1, 1, 1);
         }
 
         public Renderable(Model model, Texture2D texture, BoundingSphere sphere, Effect effect)
@@ -43,8 +47,10 @@ namespace Cluck
             entitySphere = sphere;
             animationPlayer = null;
             customEffect = effect;
-            borderMutable = false;
-            inRange = false;
+            borderSize = 0.2f;
+            lineColor = new Vector4(0, 0, 0, 1);
+            ambientIntensity = 0.1f;
+            ambientColor = new Vector4(1, 1, 1, 1);
         }
 
         public Renderable(Model model, Texture2D texture, BoundingBox box, Effect effect)
@@ -56,8 +62,10 @@ namespace Cluck
             entityBox = box;
             animationPlayer = null;
             customEffect = effect;
-            borderMutable = false;
-            inRange = false;
+            borderSize = 0.2f;
+            lineColor = new Vector4(0, 0, 0, 1);
+            ambientIntensity = 0.1f;
+            ambientColor = new Vector4(1, 1, 1, 1);
         }
 
         public Model GetModel()
@@ -120,24 +128,44 @@ namespace Cluck
             return customEffect;
         }
 
-        public void SetBorderMutable(Boolean bm)
+        public void SetBorderSize(float f)
         {
-            borderMutable = bm;
+            borderSize = f;
         }
 
-        public Boolean GetBorderMutable()
+        public float GetBorderSize()
         {
-            return borderMutable;
+            return borderSize;
         }
 
-        public void SetInRange(Boolean ir)
+        public Vector4 GetLineColor()
         {
-            inRange = ir;
+            return lineColor;
         }
 
-        public Boolean GetInRange()
+        public void SetLineColor(Vector4 c)
         {
-            return inRange;
+            lineColor = c;
+        }
+
+        public void SetAmbientIntensity(float f)
+        {
+            ambientIntensity = f;
+        }
+
+        public float GetAmbientIntensity()
+        {
+            return ambientIntensity;
+        }
+
+        public Vector4 GetAmbientColor()
+        {
+            return ambientColor;
+        }
+
+        public void SetAmbientColor(Vector4 c)
+        {
+            ambientColor = c;
         }
     }
 }
