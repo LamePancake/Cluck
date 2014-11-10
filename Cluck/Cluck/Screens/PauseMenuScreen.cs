@@ -69,7 +69,7 @@ namespace Cluck
         /// </summary>
         void ConfirmQuitMessageBoxAccepted(object sender, PlayerIndexEventArgs e)
         {
-            CurrentLevel = 1;
+            Cluck.currentLevel = 1;
             LoadingScreen.Load(ScreenManager, false, null, new BackgroundScreen(),
                                                            new MainMenuScreen());
         }

@@ -742,7 +742,7 @@ namespace Cluck
             spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Gray);
 
             //Draw the current health level based on the current Health
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), (int)(healthBar.Width * (camera.GetStaminaRatio())), 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Blue);
+            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), (int)(healthBar.Width * (camera.GetStaminaRatio())), 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Yellow);
 
             //Draw the box around the health bar
             spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 0, healthBar.Width, 44), Color.White);

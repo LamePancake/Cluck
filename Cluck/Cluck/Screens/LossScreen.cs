@@ -54,9 +54,9 @@ namespace Cluck
         /// <param name="e"></param>
         void PlayAgainGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            CurrentLevel = 1;
+            Cluck.currentLevel = 1;
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(CurrentLevel));
+                               new GameplayScreen(Cluck.currentLevel));
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Cluck
         /// </summary>
         void ConfirmQuitMessageBoxAccepted(object sender, PlayerIndexEventArgs e)
         {
-            CurrentLevel = 1;
+            Cluck.currentLevel = 1;
             LoadingScreen.Load(ScreenManager, false, null, new BackgroundScreen(),
                                                            new MainMenuScreen());
         }
