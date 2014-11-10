@@ -4,7 +4,14 @@ Content\Textures\wood_diffuse.xnb
 Content\Textures\chicken_diffuse.xnb
 Content\Textures\chicken_normals.xnb
 Content\Textures\sky.xnb
+Content\background.xnb
+Content\blank.xnb
+Content\gradient.xnb
+Content\Textures\grassplaceholder.xnb
+Content\Textures\tree_diffuse.xnb
 Content\MessageFont.xnb
+Content\gamefont.xnb
+Content\menufont.xnb
 Content\Models\SphereHighPoly.xnb
 Content\Models\arm_left.xnb
 Content\Models\arm_right.xnb
@@ -16,9 +23,9 @@ Content\Models\ground.xnb
 Content\Models\pen_base.xnb
 Content\Models\fence_side.xnb
 Content\Models\chicken_pen_side.xnb
-Content\Models\tree_side.xnb
 Content\Models\chicken_pen_side_large.xnb
 Content\Models\pen_base_large.xnb
+Content\Models\tree_side.xnb
 Content\SkySphere.xnb
 Content\Audio\Lacrimosa Dominae.xnb
 Content\Audio\Cluck1.xnb
@@ -29,5 +36,9 @@ Content\Audio\Cluck5.xnb
 Content\Audio\Cluck6.xnb
 Content\Audio\Cluck7.xnb
 Content\Audio\Cluck8.xnb
+Content\Audio\yoshi.xnb
+Content\Audio\Yoshi_looped.xnb
 Content\chicken_diffuse_0.xnb
 Content\Audio\Lacrimosa Dominae.wma
+Content\Audio\yoshi.wma
+Content\Audio\Yoshi_looped.wma

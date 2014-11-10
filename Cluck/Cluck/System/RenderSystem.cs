@@ -60,9 +60,7 @@ namespace Cluck
                 else if (entity.HasComponent((int)component_flags.position) && entity.HasComponent((int)component_flags.renderable))
                 {
                     PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
-
                     renderable = entity.GetComponent<Renderable>(component_flags.renderable);
-                    
                     Matrix final = Matrix.CreateRotationY(position.GetOrientation()) * Matrix.CreateTranslation(position.GetPosition());
 
                     renderable.SetMatrix(final);
