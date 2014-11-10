@@ -25,6 +25,7 @@ namespace Cluck
         ScreenManager screenManager;
         ScreenFactory screenFactory;
         float curTime;
+        static public int currentLevel;
        
         /// <summary>
         /// The main game constructor.
@@ -39,6 +40,7 @@ namespace Cluck
             graphics.PreferredBackBufferHeight = 720;
             graphics.PreferredBackBufferWidth = 1280;
             graphics.ApplyChanges();
+            currentLevel = 1;
 
 #if WINDOWS_PHONE
             graphics.IsFullScreen = true;

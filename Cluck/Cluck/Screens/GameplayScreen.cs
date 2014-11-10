@@ -52,6 +52,9 @@ namespace Cluck
                 4, 5, 5, 6, 6, 7, 7, 4, // Back edges
                 0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
             };
+        private int hoursAllotted;
+        private int minutesAllotted;
+        private int secondsAllotted;
 
         private Model ground;
         private Model forest;
@@ -61,7 +64,6 @@ namespace Cluck
         private Model chicken;
         private Model penBase;
         private Model chickenPen;
-        private Model testFence;
         private Song testSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
@@ -77,10 +79,7 @@ namespace Cluck
         private Texture2D healthBar;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
-        private GamePadState oldGPState;
-        private GamePadState curGPState;
         private static int winState;
-        private BoundingBox testBox;
         private float boundingArmScale;
         private float boundingPenScale;
         private float boundingChickenScale;
@@ -126,7 +125,7 @@ namespace Cluck
         Effect ToonEffect;
         Effect ToonEffectNoAnimation;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 15;
+        public int total_num_of_chickens;
         public static int remainingChickens;
 
         // The current high score, if there is one, is stored in "highscore".
@@ -152,10 +151,28 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public GameplayScreen()
+        public GameplayScreen(int level)
         {
             camera = Cluck.camera;
             graphics = Cluck.graphics;
+
+            if (level < 12)
+            {
+                secondsAllotted = 5 * level;
+                minutesAllotted = 1 + (level / 5);
+            }
+            else if (level > 12)
+            {
+                secondsAllotted = 0;
+                minutesAllotted = 2 + (level / 5);
+            }
+            else
+            {
+                secondsAllotted = 0;
+                minutesAllotted = 1 + (level / 5);
+            }
+
+            total_num_of_chickens = level;
 
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -181,7 +198,7 @@ namespace Cluck
             windowWidth = graphics.GraphicsDevice.DisplayMode.Width / 2;
             windowHeight = graphics.GraphicsDevice.DisplayMode.Height / 2;
 
-            timer = new TimeSpan(0, 2, 0);
+            timer = new TimeSpan(hoursAllotted, minutesAllotted, secondsAllotted);
             timeStart = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
@@ -214,7 +231,7 @@ namespace Cluck
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
 
-            remainingChickens = TOTAL_NUM_OF_CHICKENS;
+            remainingChickens = total_num_of_chickens;
 
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem(camera);
@@ -235,6 +252,7 @@ namespace Cluck
                 spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
 
                 timerFont = content.Load<SpriteFont>("MessageFont");
+
                 // TODO: use this.Content to load your game content here
                 ToonEffect = content.Load<Effect>(@"Effects\Toon");
                 ToonEffectNoAnimation = content.Load<Effect>(@"Effects\ToonNoAnimation");
@@ -296,13 +314,13 @@ namespace Cluck
 
                 int i = 0;
 
-                for (i = 0; i < TOTAL_NUM_OF_CHICKENS; ++i)
+                for (i = 0; i < total_num_of_chickens; ++i)
                 {
                     // new chicken entity
                     GameEntity chickenEntity = new GameEntity();
 
                     // create chicken components
-                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
+                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
 
@@ -568,6 +586,8 @@ namespace Cluck
                     winState = 1;
                 }
             }
+
+            //CheckWinState(winState);
         }
 
         /// <summary>
@@ -611,6 +631,16 @@ namespace Cluck
                                        input.GamePadWasConnected[playerIndex];
 
             PlayerIndex player;
+
+            if (winState == -1)
+            {
+                ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
+            }
+            else if (winState == 1)
+            {
+                ScreenManager.AddScreen(new WinScreen(), ControllingPlayer);
+            }
+
             if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
 #if WINDOWS_PHONE
@@ -669,20 +699,19 @@ namespace Cluck
 
             renderSystem.Update(world, gameTime);
             drawGUI();
-            drawWinState(winState);
+            //drawWinState(winState);
             //RenderBox(testBox);
             
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || pauseAlpha > 0)
             {
-                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, pauseAlpha / 2);
+                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, pauseAlpha);
 
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
 
             base.Draw(gameTime);
         }
-
 
         private void drawWinState(int state)
         {

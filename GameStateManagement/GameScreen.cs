@@ -35,6 +35,14 @@ namespace GameStateManagement
     /// </summary>
     public abstract class GameScreen
     {
+        public int CurrentLevel
+        {
+            get { return level; }
+            set { level = value; }
+        }
+
+        int level = 1;
+
         /// <summary>
         /// Normally when one screen is brought up over the top of another,
         /// the first screen will transition off to make room for the new
