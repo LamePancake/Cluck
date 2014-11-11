@@ -64,6 +64,7 @@ namespace Cluck
         private Model chicken;
         private Model penBase;
         private Model chickenPen;
+        private Model cluck;
         private Song testSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
@@ -270,6 +271,7 @@ namespace Cluck
                 ground = content.Load<Model>(@"Models\ground");
 
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
+                cluck = content.Load<Model>(@"Models\cluck");
                 forest = content.Load<Model>(@"Models\tree_side");
 
                 penBase = content.Load<Model>(@"Models\pen_base_large");
@@ -309,6 +311,20 @@ namespace Cluck
 
                 GameEntity penBaseEntity = new GameEntity();
                 GameEntity chickenPenEntity = new GameEntity();
+
+                GameEntity cluckEntity = new GameEntity();
+                //SkinningData cluckSkinningData = cluck.Tag as SkinningData;
+
+                //if (cluckSkinningData == null)
+                //    throw new InvalidOperationException
+                //        ("This model does not contain a SkinningData tag.");
+
+                //AnimationClip cluckClip = cluckSkinningData.AnimationClips["Take 001"];
+                //Vector3 cluckPosition = new Vector3(0, 1000000, 0);
+                //PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
+                //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
+                //cluckEntity.AddComponent(cluckPos);
+                //cluckEntity.AddComponent(cluckRenderable);
 
                 BuildBounds(fence, woodDiffuse);
 
@@ -386,6 +402,7 @@ namespace Cluck
                 world.Add(rightArmEntity);
                 world.Add(penBaseEntity);
                 world.Add(chickenPenEntity);
+                world.Add(cluckEntity);
 
                 // now create the AI system.
                 aiSystem = new AISystem(world);
