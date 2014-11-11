@@ -533,7 +533,8 @@ namespace Cluck
             {
                 switch (posture)
                 {
-                case Posture.Crouching:
+                case Posture.Crouchin
+                g:
                     posture = Posture.Rising;
                     direction.Y += 1.0f;
                     currentVelocity.Y = 0.0f;
@@ -548,29 +549,29 @@ namespace Cluck
                 }
             }
 
-            if (i.IsJumping())
-            {
-                switch (posture)
-                {
-                case Posture.Standing:
-                    posture = Posture.Jumping;
-                    currentVelocity.Y = velocity.Y;
-                    direction.Y += 1.0f;
-                    break;
+            //if (i.IsJumping())
+            //{
+            //    switch (posture)
+            //    {
+            //    case Posture.Standing:
+            //        posture = Posture.Jumping;
+            //        currentVelocity.Y = velocity.Y;
+            //        direction.Y += 1.0f;
+            //        break;
 
-                case Posture.Jumping:
-                    direction.Y += 1.0f;
-                    break;
+            //    case Posture.Jumping:
+            //        direction.Y += 1.0f;
+            //        break;
 
-                default:
-                    break;
-                }
-            }
-            else
-            {
-                if (posture == Posture.Jumping)
-                    direction.Y += 1.0f;
-            }
+            //    default:
+            //        break;
+            //    }
+            //}
+            //else
+            //{
+            //    if (posture == Posture.Jumping)
+            //        direction.Y += 1.0f;
+            //}
             return direction;
         }
 
