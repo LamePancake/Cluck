@@ -268,7 +268,7 @@ namespace Cluck
                 rightArm = content.Load<Model>(@"Models\arm_right");
 
                 fence = content.Load<Model>(@"Models\fence_side");
-                ground = content.Load<Model>(@"Models\ground");
+                ground = content.Load<Model>(@"Models\ground_v2");
 
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
                 cluck = content.Load<Model>(@"Models\cluck");
