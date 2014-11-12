@@ -144,6 +144,15 @@ namespace Cluck
 
         InputAction pauseAction;
 
+        private float intensityBlue;
+
+        private const int MAX_BUTTON_SCALE = 6;
+        private Texture2D[] qteButtons;
+        private Texture2D[] qteKeys;
+        private int buttonSize = 75;
+        private int buttonScale = MAX_BUTTON_SCALE;
+        private Rectangle buttonPos;
+
         #endregion
 
         #region Initialization
@@ -236,6 +245,10 @@ namespace Cluck
 
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem(camera);
+
+            qteButtons = new Texture2D[4];
+            qteKeys = new Texture2D[4];
+            buttonPos = new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.5) -37, (int)(graphics.GraphicsDevice.Viewport.Height * 0.2 - 37), buttonSize, buttonSize);
         }
 
 
@@ -388,7 +401,7 @@ namespace Cluck
                 penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
 
                 BuildPen(chickenPen, woodDiffuse);
-                BuildPenBase(penBase, null);
+                //BuildPenBase(penBase, null);
 
                 BuildForest(forest, treeDiffuse);
                 //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
@@ -407,18 +420,19 @@ namespace Cluck
                 // now create the AI system.
                 aiSystem = new AISystem(world);
 
+                intensityBlue = 1.0f;
                 SkySphereEffect = content.Load<Effect>("SkySphere");
-                TextureCube SkyboxTexture =
-                    content.Load<TextureCube>(@"Textures\sky");
+                TextureCube SkyboxTexture = content.Load<TextureCube>(@"Textures\sky");
+                TextureCube SkyboxTextureRed = content.Load<TextureCube>(@"Textures\skyRed");
                 SkySphere = content.Load<Model>(@"Models\SphereHighPoly");
 
                 // Set the parameters of the effect
-                SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                    camera.ViewMatrix);
-                SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                    camera.ProjectionMatrix);
-                SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
-                    SkyboxTexture);
+                SkySphereEffect.Parameters["ViewMatrix"].SetValue(camera.ViewMatrix);
+                SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(camera.ProjectionMatrix);
+                SkySphereEffect.Parameters["SkyboxTexture"].SetValue(SkyboxTexture);
+                SkySphereEffect.Parameters["SkyboxTextureRed"].SetValue(SkyboxTextureRed);
+                SkySphereEffect.Parameters["IntensityBlue"].SetValue(intensityBlue);
+
                 // Set the Skysphere Effect to each part of the Skysphere model
                 foreach (ModelMesh mesh in SkySphere.Meshes)
                 {
@@ -431,6 +445,16 @@ namespace Cluck
                 MediaPlayer.Play(testSong);
                 MediaPlayer.IsRepeating = true;
                 MediaPlayer.Volume = 0.45f;
+
+                qteButtons[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\x");
+                qteButtons[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\y");
+                qteButtons[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\b");
+                qteButtons[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\a");
+
+                qteKeys[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\q");
+                qteKeys[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\e");
+                qteKeys[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\r");
+                qteKeys[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\f");
 
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
@@ -579,14 +603,49 @@ namespace Cluck
 
                     KeepCameraInBounds();
 
-                    if (camera.chickenCaught)
+                    //Temp Code to test the shader
+                    if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                    {
+                        intensityBlue -= 0.01f;
+                    }
+                    else if(Keyboard.GetState().IsKeyDown(Keys.Up))
+                    {
+                        intensityBlue += 0.01f;
+                    }
+
+                    intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
+
+                    if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
                     {
                         Random r = new Random();
                         GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
                     }
-                    else
+                    else if(GamePad.GetState(PlayerIndex.One).IsConnected)
                     {
                         GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
+                    }
+
+                    if (camera.chickenCaught)
+                    {
+                        buttonSize += buttonScale;
+                        int x = (int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - (buttonSize / 2);
+                        int y = (int)(graphics.GraphicsDevice.Viewport.Height * 0.2) - (buttonSize / 2);
+
+                        buttonPos = new Rectangle(x, y, buttonSize, buttonSize);
+
+                        if (buttonSize >= 120)
+                        {
+                            buttonScale = -MAX_BUTTON_SCALE;
+                        }
+                        else if (buttonSize <= 75)
+                        {
+                            buttonScale = MAX_BUTTON_SCALE;
+                        }
+                    }
+                    else
+                    {
+                        buttonSize = 75;
+                        buttonScale = MAX_BUTTON_SCALE;
                     }
 
                     aiSystem.Update(world, gameTime, camera.Position);
@@ -701,10 +760,10 @@ namespace Cluck
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
                                                Color.CornflowerBlue, 0, 0);
 
-            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                camera.ViewMatrix);
-            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["IntensityBlue"].SetValue(intensityBlue);
+
             // Draw the sphere model that the effect projects onto
             foreach (ModelMesh mesh in SkySphere.Meshes)
             {
@@ -756,13 +815,31 @@ namespace Cluck
             spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
 
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Gray);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0,healthBar.Width - 44, healthBar.Height),  Color.Yellow);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(0, 0, 44, healthBar.Height), Color.White);
 
-            //Draw the current health level based on the current Health
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), (int)(healthBar.Width * (camera.GetStaminaRatio())), 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Yellow);
+            if (camera.chickenCaught)
+            {
+                int button = camera.GetQTE().getCurrentButton();
+                bool controller = GamePad.GetState(PlayerIndex.One).IsConnected;
+                switch (button)
+                {
+                    case (int)Cluck.buttons.xq:
+                        spriteBatch.Draw(controller? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.ye:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.br:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.af:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                }
+            }
 
-            //Draw the box around the health bar
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 0, healthBar.Width, 44), Color.White);
             spriteBatch.End();
         }
 

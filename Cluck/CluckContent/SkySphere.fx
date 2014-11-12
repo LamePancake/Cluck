@@ -17,6 +17,10 @@ void SkyboxVertexShader( float3 pos : POSITION0,
 //reuse//code//Vertex//
 //reuse//code//Pixel//
 uniform extern texture SkyboxTexture;
+uniform extern texture SkyboxTextureRed;
+
+float IntensityBlue;
+
 sampler SkyboxS = sampler_state
 {
     Texture = <SkyboxTexture>;
@@ -26,10 +30,23 @@ sampler SkyboxS = sampler_state
     AddressU = CLAMP;
     AddressV = CLAMP;
 };
+
+sampler SkyboxSR = sampler_state
+{
+    Texture = <SkyboxTextureRed>;
+    MinFilter = LINEAR;
+    MagFilter = LINEAR;
+    MipFilter = LINEAR;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+
 float4 SkyboxPixelShader( float3 SkyCoord : TEXCOORD0 ) : COLOR
 {
+	float intensityRed = 1 - IntensityBlue;
+
     // grab the pixel color value from the skybox cube map
-    return texCUBE(SkyboxS, SkyCoord);
+    return (texCUBE(SkyboxS, SkyCoord) * IntensityBlue) + (texCUBE(SkyboxSR, SkyCoord) * intensityRed);
 };
 //reuse//code//Pixel//
 //reuse//code//Technique//

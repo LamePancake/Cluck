@@ -44,7 +44,11 @@ namespace Cluck
 #if WINDOWS
             ProcessMouse(ref i, client);
 #endif
-            ProcessController(ref i);
+            if (currentGamePadState.IsConnected)
+            {
+                ProcessController(ref i);
+            }
+
             ProcessKeyboard(ref i);
 
             return i;
@@ -95,7 +99,7 @@ namespace Cluck
 
             if (currentGamePadState.IsButtonDown(Buttons.LeftStick))
             {
-                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                if (i.GetForward() > 0 || i.GetBackward() > 0 || i.GetLeft() < 0 || i.GetRight() > 0)
                 {
                     i.SetSprinting(true);
                 }
@@ -117,7 +121,7 @@ namespace Cluck
 
             if (currentGamePadState.IsButtonDown(Buttons.LeftStick) && currentGamePadState.IsButtonDown(Buttons.LeftShoulder) && previousGamePadState.IsButtonUp(Buttons.LeftShoulder))
             {
-                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                if (i.GetForward() > 0)
                 {
                     i.SetSliding(true);
                     i.SetSprinting(false);
@@ -129,6 +133,26 @@ namespace Cluck
                     i.SetSprinting(false);
                     i.SetCrouching(false);
                 }
+            }
+
+            if(previousGamePadState.IsButtonUp(Buttons.X) && currentGamePadState.IsButtonDown(Buttons.X))
+            {
+                i.SetXButton(true);
+            }
+
+            if (previousGamePadState.IsButtonUp(Buttons.Y) && currentGamePadState.IsButtonDown(Buttons.Y))
+            {
+                i.SetYButton(true);
+            }
+
+            if (previousGamePadState.IsButtonUp(Buttons.B) && currentGamePadState.IsButtonDown(Buttons.B))
+            {
+                i.SetBButton(true);
+            }
+
+            if (previousGamePadState.IsButtonUp(Buttons.A) && currentGamePadState.IsButtonDown(Buttons.A))
+            {
+                i.SetAButton(true);
             }
         }
 
@@ -169,7 +193,7 @@ namespace Cluck
 
             if (currentKeyboardState.IsKeyDown(Keys.LeftShift))
             {
-                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                if (i.GetForward() > 0 || i.GetBackward() < 0 || i.GetLeft() < 0 || i.GetRight() > 0)
                 {
                     i.SetSprinting(true);
                 }
@@ -181,7 +205,7 @@ namespace Cluck
 
             if (currentKeyboardState.IsKeyDown(Keys.LeftShift) && currentKeyboardState.IsKeyDown(Keys.C) && previousKeyboardState.IsKeyUp(Keys.C))
             {
-                if (i.GetForward() > 0 || i.GetBackward() > 0)
+                if (i.GetForward() > 0)
                 {
                     i.SetSliding(true);
                     i.SetSprinting(false);
@@ -193,6 +217,26 @@ namespace Cluck
                     i.SetSprinting(false);
                     i.SetCrouching(false);
                 }
+            }
+
+            if (previousKeyboardState.IsKeyUp(Keys.Q) && currentKeyboardState.IsKeyDown(Keys.Q))
+            {
+                i.SetXButton(true);
+            }
+
+            if (previousKeyboardState.IsKeyUp(Keys.E) && currentKeyboardState.IsKeyDown(Keys.E))
+            {
+                i.SetYButton(true);
+            }
+
+            if (previousKeyboardState.IsKeyUp(Keys.R) && currentKeyboardState.IsKeyDown(Keys.R))
+            {
+                i.SetBButton(true);
+            }
+
+            if (previousKeyboardState.IsKeyUp(Keys.F) && currentKeyboardState.IsKeyDown(Keys.F))
+            {
+                i.SetAButton(true);
             }
         }
 

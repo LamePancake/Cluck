@@ -18,6 +18,11 @@ namespace Cluck
         private bool clap;
         private bool slide;
 
+        private bool x;
+        private bool y;
+        private bool b;
+        private bool a;
+
         private float mouseX;
         private float mouseY;
 
@@ -35,6 +40,10 @@ namespace Cluck
             sprint = false;
             clap = false;
             slide = false;
+            x = false;
+            y = false;
+            b = false;
+            a = false;
 
             mouseX = 0;
             mouseY = 0;
@@ -53,6 +62,11 @@ namespace Cluck
         public bool IsClapping() { return clap; }
         public bool IsSliding() { return slide; }
 
+        public bool IsXPressed() { return x; }
+        public bool IsYPressed() { return y; }
+        public bool IsBPressed() { return b; }
+        public bool IsAPressed() { return a; }
+
         public float GetViewX() { return mouseX; }
         public float GetViewY() { return mouseY; }
 
@@ -68,6 +82,11 @@ namespace Cluck
         public void SetSprinting(bool s) { sprint = s; }
         public void SetClapping(bool c) { clap = c; }
         public void SetSliding(bool s) { slide = s; }
+
+        public void SetXButton(bool d) { x = d; }
+        public void SetYButton(bool d) { y = d; }
+        public void SetBButton(bool d) { b = d; }
+        public void SetAButton(bool d) { a = d; }
 
         public void SetViewX(float x) { mouseX = x; }
         public void SetViewY(float Y) { mouseY = Y; }

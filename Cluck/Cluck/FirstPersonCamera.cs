@@ -116,6 +116,8 @@ namespace Cluck
 
         private float sprintingTime = MAX_SPRINTING_TIME;
 
+        private QuickTimeEvent qte;
+
         public FirstPersonCamera(Game game) : base(game)
         {
             UpdateOrder = 1;
@@ -164,6 +166,8 @@ namespace Cluck
 
 			slideElapsedSeconds = 0.0f;
             isSliding = false;
+
+            qte = new QuickTimeEvent();
         }
 
         public override void Initialize()
@@ -311,6 +315,19 @@ namespace Cluck
 
             sprintingTime = MathHelper.Clamp(sprintingTime, 0, MAX_SPRINTING_TIME);
 
+            if (chickenCaught)
+            {
+                if (!qte.update((float)gameTime.ElapsedGameTime.TotalSeconds, i))
+                {
+                    chickenCaught = false;
+                    qte.reset();
+                }
+            }
+            else
+            {
+                qte.reset();
+            }
+
             UpdateCamera(gameTime, i);
 
             if (posture != Posture.Jumping)
@@ -326,7 +343,7 @@ namespace Cluck
             }
 
 
-			if (isSliding && !chickenCaught)
+			if (isSliding && !chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
             {
                 GamePad.SetVibration(PlayerIndex.One, 0.1f, 0.2f);
             }
@@ -533,8 +550,7 @@ namespace Cluck
             {
                 switch (posture)
                 {
-                case Posture.Crouchin
-                g:
+                case Posture.Crouching:
                     posture = Posture.Rising;
                     direction.Y += 1.0f;
                     currentVelocity.Y = 0.0f;
@@ -652,7 +668,7 @@ namespace Cluck
                     break;
 
                 case Posture.Rising:
-                    if (eye.Y > eyeHeightStanding)
+                    if (eye.Y >= eyeHeightStanding)
                     {
                         eye.Y = eyeHeightStanding;
                         posture = Posture.Standing;
@@ -837,6 +853,11 @@ namespace Cluck
             float ratio = (sprintingTime / MAX_SPRINTING_TIME);
             ratio = MathHelper.Clamp(ratio, 0, 1);
             return ratio;
+        }
+
+        public QuickTimeEvent GetQTE()
+        {
+            return qte;
         }
 
     #region Properties

@@ -26,6 +26,14 @@ namespace Cluck
         ScreenFactory screenFactory;
         float curTime;
         static public int currentLevel;
+
+        public enum buttons
+        {
+            xq, 
+            ye,
+            br,
+            af,
+        }
        
         /// <summary>
         /// The main game constructor.
