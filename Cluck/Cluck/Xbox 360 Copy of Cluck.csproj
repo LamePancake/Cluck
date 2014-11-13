@@ -96,6 +96,7 @@
     <Compile Include="Screens\BackgroundScreen.cs" />
     <Compile Include="Screens\Button.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
+    <Compile Include="Screens\InstructionScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\LossScreen.cs" />
     <Compile Include="Screens\MainMenuScreen.cs" />
@@ -108,6 +109,7 @@
     <Compile Include="Screens\PhoneMenuScreen.cs" />
     <Compile Include="Screens\PhonePauseScreen.cs" />
     <Compile Include="Screens\PlayerIndexEventArgs.cs" />
+    <Compile Include="Screens\TutorialEndScreen.cs" />
     <Compile Include="Screens\TutorialScreen.cs" />
     <Compile Include="Screens\WinScreen.cs" />
     <Compile Include="System\AudioSystem.cs" />

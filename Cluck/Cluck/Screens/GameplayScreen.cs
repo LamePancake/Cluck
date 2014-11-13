@@ -737,7 +737,7 @@ namespace Cluck
                 ScreenManager.AddScreen(new WinScreen(), ControllingPlayer);
             }
 
-            if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
+            if (pauseAction.Evaluate(input, ControllingPlayer, out player))
             {
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);

@@ -44,10 +44,10 @@ namespace Cluck
 #if WINDOWS
             ProcessMouse(ref i, client);
 #endif
-            if (currentGamePadState.IsConnected)
-            {
+            //if (currentGamePadState.IsConnected)
+            //{
                 ProcessController(ref i);
-            }
+            //}
 
             ProcessKeyboard(ref i);
 

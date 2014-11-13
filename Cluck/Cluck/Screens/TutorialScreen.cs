@@ -1,9 +1,7 @@
 ﻿#region File Description
 //-----------------------------------------------------------------------------
-// GameplayScreen.cs
+// TutorialScreen.cs
 //
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -53,6 +51,14 @@ namespace Cluck
                 0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
             };
 
+        private int minutesAllotted;
+        private int secondsAllotted;
+        private int deathSecondsAlotted;
+        private Boolean cluckExist;
+        private int instructionStage;
+        private int instructionIntermissionTime;
+        private int instructionCount;
+
         private Model ground;
         private Model forest;
         private Model fence;
@@ -61,13 +67,16 @@ namespace Cluck
         private Model chicken;
         private Model penBase;
         private Model chickenPen;
-        private Model testFence;
+        private Model cluck;
         private Song testSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
         private static TimeSpan timer;
+        private static TimeSpan deathTimer;
+        private static TimeSpan tutTimer;
         private Boolean timeStart;
+        private Boolean tutorialOn;
         private string time;
         private Texture2D armsDiffuse;
         private Texture2D chickenDiffuse;
@@ -77,10 +86,7 @@ namespace Cluck
         private Texture2D healthBar;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
-        private GamePadState oldGPState;
-        private GamePadState curGPState;
         private static int winState;
-        private BoundingBox testBox;
         private float boundingArmScale;
         private float boundingPenScale;
         private float boundingChickenScale;
@@ -126,7 +132,7 @@ namespace Cluck
         Effect ToonEffect;
         Effect ToonEffectNoAnimation;
 
-        public const int TOTAL_NUM_OF_CHICKENS = 15;
+        public int total_num_of_chickens;
         public static int remainingChickens;
 
         // The current high score, if there is one, is stored in "highscore".
@@ -143,6 +149,16 @@ namespace Cluck
         float pauseAlpha;
 
         InputAction pauseAction;
+        InputAction instructionAction;
+
+        private float intensityBlue;
+
+        private const int MAX_BUTTON_SCALE = 6;
+        private Texture2D[] qteButtons;
+        private Texture2D[] qteKeys;
+        private int buttonSize = 75;
+        private int buttonScale = MAX_BUTTON_SCALE;
+        private Rectangle buttonPos;
 
         #endregion
 
@@ -156,6 +172,15 @@ namespace Cluck
         {
             camera = Cluck.camera;
             graphics = Cluck.graphics;
+            instructionStage = 0;
+
+            secondsAllotted = 0;
+            minutesAllotted = 10;
+            deathSecondsAlotted = 18;
+            instructionIntermissionTime = 30;
+            instructionCount = 6;
+
+            total_num_of_chickens = 3;
 
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -166,6 +191,11 @@ namespace Cluck
             pauseAction = new InputAction(
                 new Buttons[] { Buttons.Start, Buttons.Back },
                 new Keys[] { Keys.Escape },
+                true);
+
+            instructionAction = new InputAction(
+                new Buttons[] { Buttons.A },
+                new Keys[] { Keys.Enter },
                 true);
 
             //set boundingsphere scale
@@ -181,8 +211,12 @@ namespace Cluck
             windowWidth = graphics.GraphicsDevice.DisplayMode.Width / 2;
             windowHeight = graphics.GraphicsDevice.DisplayMode.Height / 2;
 
-            timer = new TimeSpan(0, 2, 0);
+            timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
+            deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
+            tutTimer = new TimeSpan(0, 0, 0);
             timeStart = false;
+            cluckExist = false;
+            tutorialOn = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
@@ -214,10 +248,15 @@ namespace Cluck
                 (float)windowWidth / (float)windowHeight,
                 CAMERA_ZNEAR, CAMERA_ZFAR);
 
-            remainingChickens = TOTAL_NUM_OF_CHICKENS;
+            remainingChickens = total_num_of_chickens;
 
             renderSystem = new RenderSystem(camera, graphics.GraphicsDevice);
             physicsSystem = new PhysicsSystem(camera);
+
+            qteButtons = new Texture2D[4];
+            qteKeys = new Texture2D[4];
+            buttonPos = new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - 37, (int)(graphics.GraphicsDevice.Viewport.Height * 0.2 - 37), buttonSize, buttonSize);
+
         }
 
 
@@ -235,6 +274,7 @@ namespace Cluck
                 spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
 
                 timerFont = content.Load<SpriteFont>("MessageFont");
+
                 // TODO: use this.Content to load your game content here
                 ToonEffect = content.Load<Effect>(@"Effects\Toon");
                 ToonEffectNoAnimation = content.Load<Effect>(@"Effects\ToonNoAnimation");
@@ -249,9 +289,10 @@ namespace Cluck
                 rightArm = content.Load<Model>(@"Models\arm_right");
 
                 fence = content.Load<Model>(@"Models\fence_side");
-                ground = content.Load<Model>(@"Models\ground");
+                ground = content.Load<Model>(@"Models\ground_v2");
 
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
+                cluck = content.Load<Model>(@"Models\cluck");
                 forest = content.Load<Model>(@"Models\tree_side");
 
                 penBase = content.Load<Model>(@"Models\pen_base_large");
@@ -278,12 +319,6 @@ namespace Cluck
                 playerEntitiy.AddComponent(new AudioListenerComponent());
                 world.Add(playerEntitiy);
 
-                //GameEntity testChicken = new GameEntity();
-                //testChicken.AddComponent(new PositionComponent(new Vector3(0, 0, 0), 0));
-                //testChicken.AddComponent(new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken, 1)));
-                //testChicken.AddComponent(new AudioEmitterComponent());
-                //world.Add(testChicken);
-
                 GameEntity groundEntity = new GameEntity();
 
                 GameEntity leftArmEntity = new GameEntity();
@@ -292,17 +327,19 @@ namespace Cluck
                 GameEntity penBaseEntity = new GameEntity();
                 GameEntity chickenPenEntity = new GameEntity();
 
+
+
                 BuildBounds(fence, woodDiffuse);
 
                 int i = 0;
 
-                for (i = 0; i < TOTAL_NUM_OF_CHICKENS; ++i)
+                for (i = 0; i < total_num_of_chickens; ++i)
                 {
                     // new chicken entity
                     GameEntity chickenEntity = new GameEntity();
 
                     // create chicken components
-                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 2f, (float)Math.PI / 4, 0.1f);
+                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
 
@@ -346,7 +383,6 @@ namespace Cluck
                 rightArmEntity.AddComponent(new ArmComponent(true));
 
                 groundEntity.AddComponent(new Renderable(ground, grassDiffuse, ground.Meshes[0].BoundingSphere, ToonEffectNoAnimation));
-                //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
                 penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale), ToonEffectNoAnimation));
                 penBaseEntity.AddComponent(new CaptureComponent());
@@ -354,16 +390,9 @@ namespace Cluck
                 penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
 
                 BuildPen(chickenPen, woodDiffuse);
-                BuildPenBase(penBase, null);
-
                 BuildForest(forest, treeDiffuse);
-                //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-                //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
-                //chickenPenEntity.AddComponent(new CollidableComponent());
-                //chickenPenEntity.AddComponent(new FenceComponent());
 
                 world.Add(groundEntity);
-
                 world.Add(leftArmEntity);
                 world.Add(rightArmEntity);
                 world.Add(penBaseEntity);
@@ -372,18 +401,19 @@ namespace Cluck
                 // now create the AI system.
                 aiSystem = new AISystem(world);
 
+                intensityBlue = 1.0f;
                 SkySphereEffect = content.Load<Effect>("SkySphere");
-                TextureCube SkyboxTexture =
-                    content.Load<TextureCube>(@"Textures\sky");
+                TextureCube SkyboxTexture = content.Load<TextureCube>(@"Textures\sky");
+                TextureCube SkyboxTextureRed = content.Load<TextureCube>(@"Textures\skyRed");
                 SkySphere = content.Load<Model>(@"Models\SphereHighPoly");
 
                 // Set the parameters of the effect
-                SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                    camera.ViewMatrix);
-                SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                    camera.ProjectionMatrix);
-                SkySphereEffect.Parameters["SkyboxTexture"].SetValue(
-                    SkyboxTexture);
+                SkySphereEffect.Parameters["ViewMatrix"].SetValue(camera.ViewMatrix);
+                SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(camera.ProjectionMatrix);
+                SkySphereEffect.Parameters["SkyboxTexture"].SetValue(SkyboxTexture);
+                SkySphereEffect.Parameters["SkyboxTextureRed"].SetValue(SkyboxTextureRed);
+                SkySphereEffect.Parameters["IntensityBlue"].SetValue(intensityBlue);
+
                 // Set the Skysphere Effect to each part of the Skysphere model
                 foreach (ModelMesh mesh in SkySphere.Meshes)
                 {
@@ -397,11 +427,23 @@ namespace Cluck
                 MediaPlayer.IsRepeating = true;
                 MediaPlayer.Volume = 0.45f;
 
+                qteButtons[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\x");
+                qteButtons[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\y");
+                qteButtons[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\b");
+                qteButtons[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\a");
+
+                qteKeys[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\q");
+                qteKeys[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\e");
+                qteKeys[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\r");
+                qteKeys[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\f");
+
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
                 ScreenManager.Game.ResetElapsedTime();
+                
             }
+
 
 #if WINDOWS_PHONE
             if (Microsoft.Phone.Shell.PhoneApplicationService.Current.State.ContainsKey("PlayerPosition"))
@@ -513,6 +555,16 @@ namespace Cluck
         {
             base.Update(gameTime, otherScreenHasFocus, false);
 
+            if (tutTimer <= TimeSpan.Zero)
+            {
+                tutorialOn = true;
+                tutTimer = new TimeSpan(0, 0, instructionIntermissionTime);
+            }
+            else
+            {
+                tutorialOn = false;
+                tutTimer -= gameTime.ElapsedGameTime;
+            }
             // Gradually fade in or out depending on whether we are covered by the pause screen.
             if (coveredByOtherScreen)
                 pauseAlpha = Math.Min(pauseAlpha + 1f / 32, 1);
@@ -530,44 +582,73 @@ namespace Cluck
                 //if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 //    this.Exit();
 
-                if (timer > TimeSpan.Zero && remainingChickens > 0)
+                //winState = 0;
+                curKeyState = Keyboard.GetState();
+
+                if (timer > TimeSpan.Zero && timeStart)
                 {
-                    winState = 0;
-                    curKeyState = Keyboard.GetState();
-
-                    if (timer > TimeSpan.Zero && timeStart)
-                    {
-                        timer -= gameTime.ElapsedGameTime;
-                    }
-
-                    time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-                    KeepCameraInBounds();
-
-                    if (camera.chickenCaught)
-                    {
-                        Random r = new Random();
-                        GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
-                    }
-                    else
-                    {
-                        GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
-                    }
-
-                    aiSystem.Update(world, gameTime, camera.Position);
-                    physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                    audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                    oldKeyState = curKeyState;
+                    timer -= gameTime.ElapsedGameTime;
                 }
-                else if (timer <= TimeSpan.Zero && remainingChickens > 0)
+
+                time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
+
+                KeepCameraInBounds();
+
+                if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
                 {
-                    winState = -1;
+                    Random r = new Random();
+                    GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
+                }
+                else if (GamePad.GetState(PlayerIndex.One).IsConnected)
+                {
+                    GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
+                }
+
+                if (camera.chickenCaught)
+                {
+                    buttonSize += buttonScale;
+                    int x = (int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - (buttonSize / 2);
+                    int y = (int)(graphics.GraphicsDevice.Viewport.Height * 0.2) - (buttonSize / 2);
+
+                    buttonPos = new Rectangle(x, y, buttonSize, buttonSize);
+
+                    if (buttonSize >= 120)
+                    {
+                        buttonScale = -MAX_BUTTON_SCALE;
+                    }
+                    else if (buttonSize <= 75)
+                    {
+                        buttonScale = MAX_BUTTON_SCALE;
+                    }
                 }
                 else
                 {
+                    buttonSize = 75;
+                    buttonScale = MAX_BUTTON_SCALE;
+                }
+
+                aiSystem.Update(world, gameTime, camera.Position);
+                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                oldKeyState = curKeyState;
+                if (timer <= TimeSpan.Zero)
+                {
+                    PlayDeathScene(gameTime);
+                }
+
+
+                if (timer > TimeSpan.Zero && remainingChickens <= 0)
+                {
                     winState = 1;
                 }
+                else if (deathTimer <= TimeSpan.Zero && remainingChickens > 0)
+                {
+                    winState = -1;
+                }
+
             }
+
+            //CheckWinState(winState);
         }
 
         /// <summary>
@@ -611,11 +692,27 @@ namespace Cluck
                                        input.GamePadWasConnected[playerIndex];
 
             PlayerIndex player;
-            if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
+
+            if (winState != 0)
+            {
+                ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
+            }
+
+            if (tutorialOn)
+            {
+                if (instructionStage < instructionCount)
+                {
+                    ScreenManager.AddScreen(new InstructionScreen(instructionStage), ControllingPlayer);
+                    instructionStage++;
+                }
+            }
+
+            if (pauseAction.Evaluate(input, ControllingPlayer, out player))
             {
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
+                //ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif
             }
@@ -654,10 +751,10 @@ namespace Cluck
             ScreenManager.GraphicsDevice.Clear(ClearOptions.Target,
                                                Color.CornflowerBlue, 0, 0);
 
-            SkySphereEffect.Parameters["ViewMatrix"].SetValue(
-                camera.ViewMatrix);
-            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(
-                camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["ViewMatrix"].SetValue(camera.ViewMatrix);
+            SkySphereEffect.Parameters["ProjectionMatrix"].SetValue(camera.ProjectionMatrix);
+            SkySphereEffect.Parameters["IntensityBlue"].SetValue(intensityBlue);
+
             // Draw the sphere model that the effect projects onto
             foreach (ModelMesh mesh in SkySphere.Meshes)
             {
@@ -669,39 +766,18 @@ namespace Cluck
 
             renderSystem.Update(world, gameTime);
             drawGUI();
-            drawWinState(winState);
+            //drawWinState(winState);
             //RenderBox(testBox);
 
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || pauseAlpha > 0)
             {
-                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, pauseAlpha / 2);
+                float alpha = MathHelper.Lerp(1f - TransitionAlpha, 1f, pauseAlpha);
 
                 ScreenManager.FadeBackBufferToBlack(alpha);
             }
 
             base.Draw(gameTime);
-        }
-
-
-        private void drawWinState(int state)
-        {
-            if (state == 1)
-            {
-                string winMsg = "You've prevented Cluck's wrath!";
-                if (showHighScoreMsg)
-                    winMsg += '\n' + highScoreMsg;
-
-                spriteBatch.Begin();
-                spriteBatch.DrawString(timerFont, winMsg, new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
-                spriteBatch.End();
-            }
-            else if (state == -1)
-            {
-                spriteBatch.Begin();
-                spriteBatch.DrawString(timerFont, "You failed to collect all the chickens before Cluck arrived!", new Vector2(windowWidth / 2, windowHeight / 2), Color.White);
-                spriteBatch.End();
-            }
         }
 
         private void drawGUI()
@@ -710,13 +786,31 @@ namespace Cluck
             spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
 
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Gray);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Yellow);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(0, 0, 44, healthBar.Height), Color.White);
 
-            //Draw the current health level based on the current Health
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), (int)(healthBar.Width * (camera.GetStaminaRatio())), 44), new Rectangle(0, 45, healthBar.Width, 44), Color.Blue);
+            if (camera.chickenCaught)
+            {
+                int button = camera.GetQTE().getCurrentButton();
+                bool controller = GamePad.GetState(PlayerIndex.One).IsConnected;
+                switch (button)
+                {
+                    case (int)Cluck.buttons.xq:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.ye:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.br:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                    case (int)Cluck.buttons.af:
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        break;
+                }
+            }
 
-            //Draw the box around the health bar
-            spriteBatch.Draw(healthBar, new Rectangle(graphics.GraphicsDevice.Viewport.Width / 2 - healthBar.Width / 2, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), healthBar.Width, 44), new Rectangle(0, 0, healthBar.Width, 44), Color.White);
             spriteBatch.End();
         }
 
@@ -743,6 +837,52 @@ namespace Cluck
                 newPos.Z = 1070.0f;
 
             camera.Position = newPos;
+        }
+
+        private void PlayDeathScene(GameTime gameTime)
+        {
+            if (!cluckExist)
+            {
+                GameEntity cluckEntity = new GameEntity();
+
+                Vector3 cluckPosition = new Vector3(0, 10000, 0);
+                PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
+                //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
+                Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
+
+                cluckEntity.AddComponent(cluckPos);
+                cluckEntity.AddComponent(cluckRenderable);
+                world.Add(cluckEntity);
+                cluckExist = true;
+            }
+
+            if (deathTimer > TimeSpan.Zero)
+            {
+                deathTimer -= gameTime.ElapsedGameTime;
+                intensityBlue -= 0.025f;
+                intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
+            }
+
+            Vector3 currentPosition = world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).GetPosition();
+            if (currentPosition.Y > 0)
+            {
+                world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPosition + new Vector3(0, -50, 0));
+            }
+            else
+            {
+                if (world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer() == null)
+                {
+                    SkinningData cluckSkinningData = cluck.Tag as SkinningData;
+
+                    if (cluckSkinningData == null)
+                        throw new InvalidOperationException
+                            ("This model does not contain a SkinningData tag.");
+                    AnimationClip cluckClip = cluckSkinningData.AnimationClips["Take 001"];
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetAnimationPlayer(new AnimationPlayer(cluckSkinningData));
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
+                }
+            }
         }
 
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)

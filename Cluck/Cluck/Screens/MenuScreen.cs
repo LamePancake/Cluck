@@ -162,6 +162,10 @@ namespace Cluck
 
         #region Update and Draw
 
+        protected virtual void ChangeTitle(String title)
+        {
+            this.menuTitle = title;
+        }
 
         /// <summary>
         /// Allows the screen the chance to position the menu entries. By default

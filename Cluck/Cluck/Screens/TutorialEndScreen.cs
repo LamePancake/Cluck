@@ -1,6 +1,6 @@
 ﻿#region File Description
 //-----------------------------------------------------------------------------
-// LossScreen.cs
+// TutorialEndScreen.cs
 //
 //-----------------------------------------------------------------------------
 #endregion
@@ -15,7 +15,7 @@ namespace Cluck
     /// The pause menu comes up over the top of the game,
     /// giving the player options to resume or quit.
     /// </summary>
-    class LossScreen : MenuScreen
+    class TutorialEndScreen : MenuScreen
     {
         #region Initialization
 
@@ -23,20 +23,16 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public LossScreen()
-            : base("You Lost!\n Cluck showed up and there weren't enough chickens to "
-             + "appease him!")
+        public TutorialEndScreen()
+            : base("You have completed the tutorial!")
         {
             // Create our menu entries.
-            MenuEntry playAgainGameMenuEntry = new MenuEntry("Play Again");
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
             // Hook up menu event handlers.
-            playAgainGameMenuEntry.Selected += PlayAgainGameMenuEntrySelected;
             mainMenuGameMenuEntry.Selected += MainMenuGameMenuEntrySelected;
 
             // Add entries to the menu.
-            MenuEntries.Add(playAgainGameMenuEntry);
             MenuEntries.Add(mainMenuGameMenuEntry);
         }
 
@@ -44,18 +40,6 @@ namespace Cluck
         #endregion
 
         #region Handle Input
-
-        /// <summary>
-        /// Event handler for when the player selects Play Again after losing.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void PlayAgainGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            Cluck.currentLevel = 1;
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(Cluck.currentLevel));
-        }
 
         /// <summary>
         /// Event handler for when the player selects Go Back To Main Menu after losing.

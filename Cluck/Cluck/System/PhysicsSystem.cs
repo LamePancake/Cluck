@@ -172,6 +172,7 @@ namespace Cluck
                                 physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                             }
 
+                            TutorialScreen.remainingChickens--;
                             GameplayScreen.AddTime(new TimeSpan(0, 0, 10));
                             GameplayScreen.remainingChickens--;
                         }
