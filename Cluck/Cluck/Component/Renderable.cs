@@ -123,6 +123,11 @@ namespace Cluck
             return animationPlayer;
         }
 
+        public void SetAnimationPlayer(AnimationPlayer amp)
+        {
+            animationPlayer = amp;
+        }
+
         public Effect GetEffect()
         {
             return customEffect;
@@ -166,6 +171,11 @@ namespace Cluck
         public void SetAmbientColor(Vector4 c)
         {
             ambientColor = c;
+        }
+
+        public void SetEffect(Effect fx)
+        {
+            customEffect = fx;
         }
     }
 }

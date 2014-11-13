@@ -55,6 +55,8 @@ namespace Cluck
         private int hoursAllotted;
         private int minutesAllotted;
         private int secondsAllotted;
+        private int deathSecondsAlotted;
+        private Boolean cluckExist;
 
         private Model ground;
         private Model forest;
@@ -70,6 +72,7 @@ namespace Cluck
         private int boundingSize;
         private SpriteFont timerFont;
         private static TimeSpan timer;
+        private static TimeSpan deathTimer;
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
@@ -179,8 +182,9 @@ namespace Cluck
             else
             {
                 secondsAllotted = 0;
-                minutesAllotted = 1 + (level / 5);
+                minutesAllotted = 0 + (level / 5);
             }
+            deathSecondsAlotted = 18;
 
             total_num_of_chickens = level;
 
@@ -209,7 +213,9 @@ namespace Cluck
             windowHeight = graphics.GraphicsDevice.DisplayMode.Height / 2;
 
             timer = new TimeSpan(hoursAllotted, minutesAllotted, secondsAllotted);
+            deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
             timeStart = false;
+            cluckExist = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
@@ -325,19 +331,7 @@ namespace Cluck
                 GameEntity penBaseEntity = new GameEntity();
                 GameEntity chickenPenEntity = new GameEntity();
 
-                GameEntity cluckEntity = new GameEntity();
-                //SkinningData cluckSkinningData = cluck.Tag as SkinningData;
 
-                //if (cluckSkinningData == null)
-                //    throw new InvalidOperationException
-                //        ("This model does not contain a SkinningData tag.");
-
-                //AnimationClip cluckClip = cluckSkinningData.AnimationClips["Take 001"];
-                //Vector3 cluckPosition = new Vector3(0, 1000000, 0);
-                //PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
-                //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
-                //cluckEntity.AddComponent(cluckPos);
-                //cluckEntity.AddComponent(cluckRenderable);
 
                 BuildBounds(fence, woodDiffuse);
 
@@ -415,7 +409,6 @@ namespace Cluck
                 world.Add(rightArmEntity);
                 world.Add(penBaseEntity);
                 world.Add(chickenPenEntity);
-                world.Add(cluckEntity);
 
                 // now create the AI system.
                 aiSystem = new AISystem(world);
@@ -589,78 +582,82 @@ namespace Cluck
                 //if (Keyboard.GetState().IsKeyDown(Keys.Escape))
                 //    this.Exit();
 
-                if (timer > TimeSpan.Zero && remainingChickens > 0)
+                //winState = 0;
+                curKeyState = Keyboard.GetState();
+
+                if (timer > TimeSpan.Zero && timeStart)
                 {
-                    winState = 0;
-                    curKeyState = Keyboard.GetState();
-                    
-                    if (timer > TimeSpan.Zero && timeStart)
+                    timer -= gameTime.ElapsedGameTime;
+                }
+
+                time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
+
+                KeepCameraInBounds();
+
+                //Temp Code to test the shader
+                if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                {
+                    intensityBlue -= 0.01f;
+                }
+                else if (Keyboard.GetState().IsKeyDown(Keys.Up))
+                {
+                    intensityBlue += 0.01f;
+                }
+
+                intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
+
+                if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
+                {
+                    Random r = new Random();
+                    GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
+                }
+                else if (GamePad.GetState(PlayerIndex.One).IsConnected)
+                {
+                    GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
+                }
+
+                if (camera.chickenCaught)
+                {
+                    buttonSize += buttonScale;
+                    int x = (int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - (buttonSize / 2);
+                    int y = (int)(graphics.GraphicsDevice.Viewport.Height * 0.2) - (buttonSize / 2);
+
+                    buttonPos = new Rectangle(x, y, buttonSize, buttonSize);
+
+                    if (buttonSize >= 120)
                     {
-                        timer -= gameTime.ElapsedGameTime;
+                        buttonScale = -MAX_BUTTON_SCALE;
                     }
-                    
-                    time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-                    KeepCameraInBounds();
-
-                    //Temp Code to test the shader
-                    if (Keyboard.GetState().IsKeyDown(Keys.Down))
+                    else if (buttonSize <= 75)
                     {
-                        intensityBlue -= 0.01f;
-                    }
-                    else if(Keyboard.GetState().IsKeyDown(Keys.Up))
-                    {
-                        intensityBlue += 0.01f;
-                    }
-
-                    intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
-
-                    if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
-                    {
-                        Random r = new Random();
-                        GamePad.SetVibration(PlayerIndex.One, (float)r.NextDouble() / 2, (float)r.NextDouble() / 2);
-                    }
-                    else if(GamePad.GetState(PlayerIndex.One).IsConnected)
-                    {
-                        GamePad.SetVibration(PlayerIndex.One, 0.0f, 0.0f);
-                    }
-
-                    if (camera.chickenCaught)
-                    {
-                        buttonSize += buttonScale;
-                        int x = (int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - (buttonSize / 2);
-                        int y = (int)(graphics.GraphicsDevice.Viewport.Height * 0.2) - (buttonSize / 2);
-
-                        buttonPos = new Rectangle(x, y, buttonSize, buttonSize);
-
-                        if (buttonSize >= 120)
-                        {
-                            buttonScale = -MAX_BUTTON_SCALE;
-                        }
-                        else if (buttonSize <= 75)
-                        {
-                            buttonScale = MAX_BUTTON_SCALE;
-                        }
-                    }
-                    else
-                    {
-                        buttonSize = 75;
                         buttonScale = MAX_BUTTON_SCALE;
                     }
-
-                    aiSystem.Update(world, gameTime, camera.Position);
-                    physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                    audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
-                    oldKeyState = curKeyState;
-                }
-                else if (timer <= TimeSpan.Zero && remainingChickens > 0)
-                {
-                    winState = -1;
                 }
                 else
                 {
+                    buttonSize = 75;
+                    buttonScale = MAX_BUTTON_SCALE;
+                }
+
+                aiSystem.Update(world, gameTime, camera.Position);
+                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                oldKeyState = curKeyState;
+                if (timer <= TimeSpan.Zero)
+                {
+                    PlayDeathScene(gameTime);
+                }
+
+
+                if (timer > TimeSpan.Zero && remainingChickens <= 0)
+                {
                     winState = 1;
                 }
+                else if (deathTimer <= TimeSpan.Zero && remainingChickens > 0)
+                {
+                    winState = -1;
+                }
+
             }
 
             //CheckWinState(winState);
@@ -866,6 +863,52 @@ namespace Cluck
                 newPos.Z = 1070.0f;
 
             camera.Position = newPos;
+        }
+
+        private void PlayDeathScene(GameTime gameTime)
+        {
+            if (!cluckExist)
+            {
+                GameEntity cluckEntity = new GameEntity();
+
+                Vector3 cluckPosition = new Vector3(0, 10000, 0);
+                PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
+                //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
+                Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
+
+                cluckEntity.AddComponent(cluckPos);
+                cluckEntity.AddComponent(cluckRenderable);
+                world.Add(cluckEntity);
+                cluckExist = true;
+            }
+
+            if (deathTimer > TimeSpan.Zero)
+            {
+                deathTimer -= gameTime.ElapsedGameTime;
+                intensityBlue -= 0.025f;
+                intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
+            }
+
+            Vector3 currentPosition = world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).GetPosition();
+            if (currentPosition.Y > 0)
+            {
+                world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPosition + new Vector3(0, -50, 0));
+            }
+            else
+            {
+                if (world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer() == null)
+                {
+                    SkinningData cluckSkinningData = cluck.Tag as SkinningData;
+
+                    if (cluckSkinningData == null)
+                        throw new InvalidOperationException
+                            ("This model does not contain a SkinningData tag.");
+                    AnimationClip cluckClip = cluckSkinningData.AnimationClips["Take 001"];
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetAnimationPlayer(new AnimationPlayer(cluckSkinningData));
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
+                }
+            }
         }
 
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
