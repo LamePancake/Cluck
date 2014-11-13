@@ -594,18 +594,6 @@ namespace Cluck
 
                 KeepCameraInBounds();
 
-                //Temp Code to test the shader
-                if (Keyboard.GetState().IsKeyDown(Keys.Down))
-                {
-                    intensityBlue -= 0.01f;
-                }
-                else if (Keyboard.GetState().IsKeyDown(Keys.Up))
-                {
-                    intensityBlue += 0.01f;
-                }
-
-                intensityBlue = MathHelper.Clamp(intensityBlue, 0.0f, 1.0f);
-
                 if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
                 {
                     Random r = new Random();
