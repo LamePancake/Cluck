@@ -52,7 +52,7 @@ namespace Cluck
                 4, 5, 5, 6, 6, 7, 7, 4, // Back edges
                 0, 4, 1, 5, 2, 6, 3, 7 // Side edges connecting front and back
             };
-        private int hoursAllotted;
+
         private int minutesAllotted;
         private int secondsAllotted;
         private int deathSecondsAlotted;
@@ -212,7 +212,7 @@ namespace Cluck
             windowWidth = graphics.GraphicsDevice.DisplayMode.Width / 2;
             windowHeight = graphics.GraphicsDevice.DisplayMode.Height / 2;
 
-            timer = new TimeSpan(hoursAllotted, minutesAllotted, secondsAllotted);
+            timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
             timeStart = false;
             cluckExist = false;
