@@ -68,6 +68,8 @@ namespace Cluck
         private Model chickenPen;
         private Model cluck;
         private Song testSong;
+        private Song fastSong;
+        private Song currentSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -297,6 +299,7 @@ namespace Cluck
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
 
                 testSong = content.Load<Song>(@"Audio\Yoshi_looped");
+                fastSong = content.Load<Song>(@"Audio\Yoshi_looped_fast");
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -305,7 +308,8 @@ namespace Cluck
                 CHICKEN_SOUNDS[5] = content.Load<SoundEffect>(@"Audio\Cluck6");
                 CHICKEN_SOUNDS[6] = content.Load<SoundEffect>(@"Audio\Cluck7");
                 CHICKEN_SOUNDS[7] = content.Load<SoundEffect>(@"Audio\Cluck8");
-                SoundEffect.DistanceScale = 100f;
+                SoundEffect.DistanceScale = 1000f;
+                SoundEffect.DopplerScale = 0.1f;
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -434,7 +438,9 @@ namespace Cluck
                         part.Effect = SkySphereEffect;
                     }
                 }
+
                 // Plays  Yoshi's island
+                currentSong = testSong;
                 MediaPlayer.Play(testSong);
                 MediaPlayer.IsRepeating = true;
                 MediaPlayer.Volume = 0.45f;
@@ -573,6 +579,33 @@ namespace Cluck
 
             if (IsActive)
             {
+                if (MediaPlayer.State == MediaState.Paused)
+                {
+                    MediaPlayer.Resume();
+                }
+
+                if (timer.Seconds <= 30 && timer.Minutes < 1 && timer.Hours < 1)
+                {
+                    if(!MediaPlayer.Equals(currentSong, fastSong))
+                    {
+                        MediaPlayer.Stop();
+                        MediaPlayer.Play(fastSong);
+                        currentSong = fastSong;
+                    }
+                    
+                }
+                else
+                {
+                    if (!MediaPlayer.Equals(currentSong, testSong))
+                    {
+                        MediaPlayer.Stop();
+                        MediaPlayer.Play(testSong);
+                        currentSong = testSong;
+                    }
+                }
+
+
+
                 timeStart = true;
 
                 // Allows the game to exit
@@ -695,10 +728,12 @@ namespace Cluck
 
             if (winState == -1)
             {
+                MediaPlayer.Stop();
                 ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
             }
             else if (winState == 1)
             {
+                MediaPlayer.Stop();
                 ScreenManager.AddScreen(new WinScreen(), ControllingPlayer);
             }
 
@@ -707,6 +742,7 @@ namespace Cluck
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
+                MediaPlayer.Pause();
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif
             }
