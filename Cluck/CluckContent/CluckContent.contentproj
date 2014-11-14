@@ -382,10 +382,17 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-  <Compile Include="Textures\skyDark.dds">
+    <Compile Include="Textures\skyDark.dds">
       <Name>skyDark</Name>
       <Importer>TextureImporter</Importer>
       <Processor>TextureProcessor</Processor>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Audio\Cluckzilla.wav">
+      <Name>Cluckzilla</Name>
+      <Importer>WavImporter</Importer>
+      <Processor>SoundEffectProcessor</Processor>
     </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\XNA Game Studio\$(XnaFrameworkVersion)\Microsoft.Xna.GameStudio.ContentPipeline.targets" />

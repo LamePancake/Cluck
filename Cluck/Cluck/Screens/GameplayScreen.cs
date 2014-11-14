@@ -175,6 +175,8 @@ namespace Cluck
         private int[] penIndices = new int[4];
         private Rectangle buttonPos;
 
+        private SoundEffectInstance cluckzilla;
+
         public struct SaveGameData
         {
             public int Score;
@@ -247,7 +249,7 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
-            penRaiseDelay = new TimeSpan(0, 0, 7);
+            penRaiseDelay = new TimeSpan(0, 0, 6);
             timeStart = false;
             cluckExist = false;
 
@@ -343,6 +345,8 @@ namespace Cluck
                 CHICKEN_SOUNDS[7] = content.Load<SoundEffect>(@"Audio\Cluck8");
                 SoundEffect.DistanceScale = 1000f;
                 SoundEffect.DopplerScale = 0.1f;
+
+                cluckzilla = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -1128,6 +1132,9 @@ namespace Cluck
                 Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 if (currentPenPos0.Y < maxPenElevation && penRaiseDelay <= TimeSpan.Zero)
                 {
+                    if(cluckzilla.State != SoundState.Playing)
+                        cluckzilla.Play();
+
                     world.ElementAt<GameEntity>(penIndices[0]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
                     world.ElementAt<GameEntity>(penIndices[1]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
                     world.ElementAt<GameEntity>(penIndices[2]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
