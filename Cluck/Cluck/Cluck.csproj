@@ -91,6 +91,8 @@
     <Compile Include="PerlinNoise.cs" />
     <Compile Include="QuickTimeEvent.cs" />
     <Compile Include="ScreenFactory.cs" />
+    <Compile Include="Screens\ArcadeScreen.cs" />
+    <Compile Include="Screens\ArcadeWinScreen.cs" />
     <Compile Include="Screens\BackgroundScreen.cs" />
     <Compile Include="Screens\Button.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />

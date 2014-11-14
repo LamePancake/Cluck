@@ -118,6 +118,14 @@ namespace Cluck
 
         private QuickTimeEvent qte;
 
+        public void Reset()
+        {
+            head = new HeadBob();
+            qte = new QuickTimeEvent();
+            Position = new Vector3(0, 0, 0);
+            chickenCaught = false;
+        }
+
         public FirstPersonCamera(Game game) : base(game)
         {
             UpdateOrder = 1;

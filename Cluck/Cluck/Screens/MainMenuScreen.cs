@@ -28,20 +28,23 @@ namespace Cluck
             : base("Main Menu")
         {
             // Create our menu entries.
-            MenuEntry playTutorialMenuEntry = new MenuEntry("Play Tutorial");
-            MenuEntry playGameMenuEntry = new MenuEntry("Play Game");
+            MenuEntry playTutorialMenuEntry = new MenuEntry("Tutorial");
+            MenuEntry playGameMenuEntry = new MenuEntry("Campaign");
+            MenuEntry playArcadeMenuEntry = new MenuEntry("Arcade");
             MenuEntry optionsMenuEntry = new MenuEntry("Options");
             MenuEntry exitMenuEntry = new MenuEntry("Exit");
 
             // Hook up menu event handlers.
             playTutorialMenuEntry.Selected += PlayTutorialMenuEntrySelected;
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
+            playArcadeMenuEntry.Selected += PlayArcadeMenuEntrySelected;
             optionsMenuEntry.Selected += OptionsMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
             MenuEntries.Add(playTutorialMenuEntry);
             MenuEntries.Add(playGameMenuEntry);
+            MenuEntries.Add(playArcadeMenuEntry);
             MenuEntries.Add(optionsMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
@@ -68,6 +71,12 @@ namespace Cluck
         {
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
                                new GameplayScreen(Cluck.currentLevel));
+        }
+
+        void PlayArcadeMenuEntrySelected(object sender, PlayerIndexEventArgs e)
+        {
+            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
+                               new ArcadeScreen());
         }
 
 
