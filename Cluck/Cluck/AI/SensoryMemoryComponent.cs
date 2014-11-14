@@ -28,7 +28,7 @@ namespace Cluck.AI
     class SensoryMemoryComponent : Component
     {
         private double FOV = Math.PI; // 180 degrees
-        private double memorySpan = 5000;
+        private double memorySpan = 5;
         private double rangeOfSight = 500;
         private PositionComponent myPosition;
         private KinematicComponent myKinematic;
@@ -73,7 +73,7 @@ namespace Cluck.AI
                        {
                            if (entityMem.time > 0)
                            {
-                               double remaining = entityMem.time - time.ElapsedGameTime.Milliseconds;
+                               double remaining = entityMem.time - time.ElapsedGameTime.TotalSeconds;
 
                                entityMem.time = remaining;
 

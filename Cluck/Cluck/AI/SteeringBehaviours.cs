@@ -233,7 +233,7 @@ namespace Cluck.AI
 
             Vector3 awayFromScary = agentPosition - scaryPos;
 
-            steering.linear = awayFromScary + (Vector3.Up * 3);
+            steering.linear = awayFromScary + (Vector3.Up * 5);
 
             if (awayFromScary.Length() > panicDistanceSq)
             {

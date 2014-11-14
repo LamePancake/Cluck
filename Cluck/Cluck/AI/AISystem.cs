@@ -94,19 +94,19 @@ namespace Cluck.AI
                     if (vel.LengthSquared() > 0.0001)
                     {
                         Vector3 temp = kinematics.velocity;
+                        //temp = Matrix.CreateRotationY(position.GetOrientation()).Forward;
                         temp.Normalize();
                         kinematics.heading = temp;
                         kinematics.side = Util.PerpInZPlane(kinematics.heading);
                     }
 
-                    Vector3 newPos = position.GetPosition() + kinematics.velocity;
-
-                    //Prevent falling through map
-                    //if (newPos.Y < 0)
+                    //if (steering.flying || position.GetPosition().Y > 0) // apply gravity sort of
                     //{
-                    //    newPos.Y = 0;
+                    //    kinematics.velocity.Y -= (float)(deltaTime.ElapsedGameTime.TotalSeconds)/4;
                     //}
 
+                    Vector3 newPos = position.GetPosition() + kinematics.velocity;
+                    
                     // Update position and orientation
                     position.SetPosition(newPos);
                     //position.SetOrientation(position.GetOrientation() + kinematics.rotation);

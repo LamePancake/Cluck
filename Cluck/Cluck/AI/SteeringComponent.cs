@@ -137,6 +137,7 @@ namespace Cluck.AI
         public void SetFly(bool state)
         {
             flyOn = state;
+            flying = state;
         }
 
         public void SetScaryPos(Vector3 scary)

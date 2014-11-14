@@ -61,17 +61,15 @@ namespace Cluck.AI
                         if (sensory.NewMemory(mem))
                         {
                             steering.SetScaryPos(mem.position);
-
-                            if ((mem.position - position.GetPosition()).Length() < 120)
-                            {
-                                //component.ChangeStates(FlyAway.Instance);
-                            }
-                            else
-                            {
-                                component.ChangeStates(RunAway.Instance);
-
-                                float stuff = (mem.position - position.GetPosition()).Length();
-                            }
+                            component.ChangeStates(RunAway.Instance);
+                            //if ((mem.position - position.GetPosition()).Length() < 300)
+                            //{
+                            //    component.ChangeStates(FlyAway.Instance);
+                            //}
+                            //else
+                            //{
+                            //    component.ChangeStates(RunAway.Instance);
+                            //}
                         }
                     }
                 }
@@ -148,10 +146,10 @@ namespace Cluck.AI
                         {
                             steering.SetScaryPos(mem.position);
 
-                            if ((mem.position - position.GetPosition()).Length() < 120)
-                            {
-                                //component.ChangeStates(FlyAway.Instance);
-                            }
+                            //if ((mem.position - position.GetPosition()).Length() < 300)
+                            //{
+                            //    component.ChangeStates(FlyAway.Instance);
+                            //}
                         }
                         else if (mem.time < 0)
                         {
@@ -208,28 +206,32 @@ namespace Cluck.AI
 
         public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
-            //if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
-            //{
-            //    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
+            if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
+            {
+                SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
-            //    SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+                SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
-            //    GameEntity scary = steering.GetScaryEntity();
+                GameEntity scary = steering.GetScaryEntity();
 
-            //    if (scary != null)
-            //    {
-            //        EntityMemory mem = sensory.GetMemory(scary);
+                if (scary != null)
+                {
+                    EntityMemory mem = sensory.GetMemory(scary);
 
-            //        if (mem != null)
-            //        {
-            //            if (sensory.NewMemory(mem))
-            //            {
-            //                steering.SetScaryPos(mem.position);
-            //                component.ChangeStates(RunAway.Instance);
-            //            }
-            //        }
-            //    }
-            //}
+                    if (mem != null)
+                    {
+                        //if (sensory.NewMemory(mem))
+                        //{
+                        //    steering.SetScaryPos(mem.position);
+                        //    component.ChangeStates(RunAway.Instance);
+                        //}
+                    }
+                    else
+                    {
+                        component.ChangeStates(Meander.Instance);
+                    }
+                }
+            }
         }
 
         public void Exit(AIThinking component, GameEntity entity)

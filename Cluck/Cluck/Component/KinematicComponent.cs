@@ -32,7 +32,7 @@ namespace Cluck
 
             maxWalkSpeed = maximumSpeed;
             maxRunSpeed = maximumSpeed * 2.5f;
-            maxFlySpeed = maximumSpeed * 3f;
+            maxFlySpeed = maxRunSpeed;
 
             velocity = Vector3.Zero;
             heading = new Vector3(1,0,0);
