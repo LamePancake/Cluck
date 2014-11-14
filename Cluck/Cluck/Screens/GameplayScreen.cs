@@ -57,6 +57,7 @@ namespace Cluck
         private int secondsAllotted;
         private int deathSecondsAlotted;
         private Boolean cluckExist;
+        private Boolean winStateSet;
 
         private Model ground;
         private Model forest;
@@ -73,7 +74,7 @@ namespace Cluck
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
-        private static TimeSpan timer;
+        private TimeSpan timer;
         private static TimeSpan deathTimer;
         private Boolean timeStart;
         private string time;
@@ -156,7 +157,10 @@ namespace Cluck
         private Texture2D[] qteKeys;
         private int buttonSize = 75;
         private int buttonScale = MAX_BUTTON_SCALE;
+        private int[] penIndices = new int[4];
         private Rectangle buttonPos;
+
+        public static bool addTime = false;
 
         #endregion
 
@@ -170,7 +174,7 @@ namespace Cluck
         {
             camera = Cluck.camera;
             graphics = Cluck.graphics;
-
+            winStateSet = false;
             if (level < 12)
             {
                 secondsAllotted = 5 * level;
@@ -333,9 +337,6 @@ namespace Cluck
                 GameEntity rightArmEntity = new GameEntity();
 
                 GameEntity penBaseEntity = new GameEntity();
-                GameEntity chickenPenEntity = new GameEntity();
-
-
 
                 BuildBounds(fence, woodDiffuse);
 
@@ -407,13 +408,20 @@ namespace Cluck
                 //chickenPenEntity.AddComponent(new CollidableComponent());
                 //chickenPenEntity.AddComponent(new FenceComponent());
 
-                world.Add(groundEntity);
-
+                world.Add(groundEntity);                
                 world.Add(leftArmEntity);
                 world.Add(rightArmEntity);
                 world.Add(penBaseEntity);
-                world.Add(chickenPenEntity);
-
+                //world.Add(chickenPenEntity);
+                int index = 0;
+                for (int p = 0; p < world.Count; p++)
+                {
+                    if (world.ElementAt<GameEntity>(p).HasComponent(0x10000))
+                    {
+                        penIndices[index] = p;
+                        index++;
+                    }
+                }
                 // now create the AI system.
                 aiSystem = new AISystem(world);
 
@@ -556,7 +564,7 @@ namespace Cluck
         //
         // Adds time on to TimeSpan timer
         //
-        public static void AddTime(TimeSpan addition)
+        public void AddTime(TimeSpan addition)
         {
             timer += addition;
         }
@@ -664,21 +672,35 @@ namespace Cluck
                 physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
+
+                if (addTime)
+                {
+                    if (winState != -1)
+                    {
+                        AddTime(new TimeSpan(0, 0, 10));
+                        addTime = false;
+                    }
+                }
+
                 if (timer <= TimeSpan.Zero)
                 {
                     PlayDeathScene(gameTime);
                 }
 
 
-                if (timer > TimeSpan.Zero && remainingChickens <= 0)
+                if (!winStateSet)
                 {
-                    winState = 1;
+                    if (timer > TimeSpan.Zero && remainingChickens <= 0)
+                    {
+                        winState = 1;
+                        winStateSet = true;
+                    }
+                    else if (timer <= TimeSpan.Zero && remainingChickens > 0)
+                    {
+                        winState = -1;
+                        winStateSet = true;
+                    }
                 }
-                else if (deathTimer <= TimeSpan.Zero && remainingChickens > 0)
-                {
-                    winState = -1;
-                }
-
             }
 
             //CheckWinState(winState);
@@ -726,7 +748,7 @@ namespace Cluck
 
             PlayerIndex player;
 
-            if (winState == -1)
+            if (winState == -1 && deathTimer <= TimeSpan.Zero)
             {
                 MediaPlayer.Stop();
                 ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
@@ -891,6 +913,7 @@ namespace Cluck
 
         private void PlayDeathScene(GameTime gameTime)
         {
+            int maxPenElevation = 200;
             if (!cluckExist)
             {
                 GameEntity cluckEntity = new GameEntity();
@@ -932,9 +955,25 @@ namespace Cluck
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
                 }
+
+
+                Vector3 currentPenPos0 = world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                Vector3 currentPenPos1 = world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                Vector3 currentPenPos2 = world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                if (currentPenPos0.Y < maxPenElevation)
+                {
+                    world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos0 + new Vector3(0, 5, 0));
+                    world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos1 + new Vector3(0, 5, 0));
+                    world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos2 + new Vector3(0, 5, 0));
+                    world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos3 + new Vector3(0, 5, 0));
+                    world.ElementAt<GameEntity>(penIndices[0]).RemoveComponent<FenceComponent>(component_flags.fence);
+                    world.ElementAt<GameEntity>(penIndices[1]).RemoveComponent<FenceComponent>(component_flags.fence);
+                    world.ElementAt<GameEntity>(penIndices[2]).RemoveComponent<FenceComponent>(component_flags.fence);
+                    world.ElementAt<GameEntity>(penIndices[3]).RemoveComponent<FenceComponent>(component_flags.fence);
+                }
             }
         }
-
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
         {
             List<Vector3> points = new List<Vector3>();
@@ -1164,6 +1203,7 @@ namespace Cluck
                 topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
                 penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityTop.AddComponent(new FenceComponent());
+                penEntityTop.AddComponent(new PenComponent());
 
                 penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
                     0,
@@ -1171,6 +1211,7 @@ namespace Cluck
                 bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
                 penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityBottom.AddComponent(new FenceComponent());
+                penEntityBottom.AddComponent(new PenComponent());
 
                 world.Add(penEntityTop);
                 world.Add(penEntityBottom);
@@ -1190,6 +1231,7 @@ namespace Cluck
                 leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
                 penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityLeft.AddComponent(new FenceComponent());
+                penEntityLeft.AddComponent(new PenComponent());
 
                 penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
                     0,
@@ -1197,6 +1239,7 @@ namespace Cluck
                 rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
                 penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityRight.AddComponent(new FenceComponent());
+                penEntityRight.AddComponent(new PenComponent());
 
                 world.Add(penEntityLeft);
                 world.Add(penEntityRight);

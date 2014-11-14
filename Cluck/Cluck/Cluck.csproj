@@ -84,6 +84,7 @@
     <Compile Include="Component\ComponentList.cs" />
     <Compile Include="Component\FenceComponent.cs" />
     <Compile Include="Component\FreeComponent.cs" />
+    <Compile Include="Component\PenComponent.cs" />
     <Compile Include="FirstPersonCamera.cs" />
     <Compile Include="GameEntity.cs" />
     <Compile Include="HeadBob.cs" />

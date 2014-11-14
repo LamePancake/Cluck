@@ -23,7 +23,6 @@ namespace Cluck
         audioEmitter = 0x02000,
         free = 0x04000,
         audioListener = 0x08000,
-        /*
-         = 0x10000,*/
+        pen = 0x10000,
     };
 }

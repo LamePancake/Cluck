@@ -173,7 +173,7 @@ namespace Cluck
                             }
 
                             TutorialScreen.remainingChickens--;
-                            GameplayScreen.AddTime(new TimeSpan(0, 0, 10));
+                            GameplayScreen.addTime = true;
                             GameplayScreen.remainingChickens--;
                         }
                         else
