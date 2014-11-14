@@ -312,7 +312,7 @@ namespace Cluck
                 isClapping = false;
             }
 
-            if ((i.IsSprinting() || i.IsSliding()) && sprintingTime > 0)
+            if ((i.IsSprinting() || i.IsSliding() || isSliding) && sprintingTime > 0)
             {
                 float elaspedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
                 sprintingTime -= elaspedSeconds;
