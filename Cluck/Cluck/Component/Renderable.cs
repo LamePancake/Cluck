@@ -103,6 +103,11 @@ namespace Cluck
             return entitySphere;
         }
 
+        public void SetBoundingBox(BoundingBox bb)
+        {
+            entityBox = bb;
+        }
+
         public void SetBoundingSphere(BoundingSphere boundsphere)
         {
             entitySphere = boundsphere;

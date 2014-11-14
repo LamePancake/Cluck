@@ -1127,6 +1127,10 @@ namespace Cluck
                 Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 if (currentPenPos0.Y < maxPenElevation && penRaiseDelay <= TimeSpan.Zero)
                 {
+                    world.ElementAt<GameEntity>(penIndices[0]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
+                    world.ElementAt<GameEntity>(penIndices[1]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
+                    world.ElementAt<GameEntity>(penIndices[2]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
+                    world.ElementAt<GameEntity>(penIndices[3]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
                     world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos0 + new Vector3(0, 5, 0));
                     world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos1 + new Vector3(0, 5, 0));
                     world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos2 + new Vector3(0, 5, 0));
@@ -1237,34 +1241,6 @@ namespace Cluck
             boundingSphereSize.M44 = 1;
 
         }
-
-        //protected BoundingSphere CalculateBoundingSphere(Model mod)
-        //{
-        //    BoundingSphere mergedSphere = new BoundingSphere();
-        //    BoundingSphere[] boundingSpheres;
-        //    int index = 0;
-        //    int meshCount = mod.Meshes.Count;
-
-        //    boundingSpheres = new BoundingSphere[meshCount];
-        //    foreach (ModelMesh mesh in mod.Meshes)
-        //    {
-        //        boundingSpheres[index++] = mesh.BoundingSphere;
-        //    }
-
-        //    mergedSphere = boundingSpheres[0];
-        //    if ((mod.Meshes.Count) > 1)
-        //    {
-        //        index = 1;
-        //        do
-        //        {
-        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
-        //                boundingSpheres[index]);
-        //            index++;
-        //        } while (index < mod.Meshes.Count);
-        //    }
-        //    mergedSphere.Center.Y = 0;
-        //    return mergedSphere;
-        //}
 
         private void RenderBox(BoundingBox box)
         {
