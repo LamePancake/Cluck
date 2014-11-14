@@ -508,27 +508,6 @@ namespace Cluck
         }
 
         /// <summary>
-        /// Gets the current high score.
-        /// </summary>
-        private void LoadHighScore()
-        {
-            highScoreFile = new FileStream("highscore", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            FileInfo info = new FileInfo("highscore");
-
-            if (info.Length == 0)
-            {
-                curHighScore = 0x01111111;
-            }
-            else
-            {
-
-                byte[] rawHighScore = new byte[8];
-                highScoreFile.Read(rawHighScore, 0, 8);
-                curHighScore = BitConverter.ToInt32(rawHighScore, 0);
-            }
-        }
-
-        /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
         /// all content.
         /// </summary>

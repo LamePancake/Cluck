@@ -19,8 +19,10 @@ namespace Cluck.AI
         public float wanderJitter = 3.5f;
         private bool wanderOn;
         private bool fleeOn;
+        private bool flyOn;
         public Ray[] feelers;
         public float feelerLength = 60;
+        public bool flying;
 
         /// <summary>
         /// Used to conform to the new() constraint in GetComponent<T>(). Don't instantiate them this way!
@@ -32,6 +34,8 @@ namespace Cluck.AI
         {
             wanderOn = true;
             fleeOn = false;
+            flyOn = false;
+            flying = false;
 
             target = targetPos;
 
@@ -64,6 +68,13 @@ namespace Cluck.AI
 
                 //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightWander))
                 //    return steeringTot;
+            }
+
+            if (flyOn)
+            {
+                steering = steeringBehaviours.FleeFly(position, kinematics, scaryPos);
+
+                steeringTot.linear += (steering.linear * weightFlee);
             }
 
             if (fleeOn)
@@ -121,6 +132,11 @@ namespace Cluck.AI
         public void SetFlee(bool state)
         {
             fleeOn = state;
+        }
+
+        public void SetFly(bool state)
+        {
+            flyOn = state;
         }
 
         public void SetScaryPos(Vector3 scary)

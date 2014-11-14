@@ -23,8 +23,8 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public WinScreen()
-            : base("You managed to prevent Cluck's wrath!")
+        public WinScreen(int score, int highscore)
+            : base("You managed to prevent Cluck's wrath! \n Your Score: " + score + "\n High-Score: " + highscore)
         {
             // Create our menu entries.
             MenuEntry continueGameMenuEntry = new MenuEntry("Next Level");

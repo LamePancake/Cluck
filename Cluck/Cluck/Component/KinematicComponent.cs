@@ -11,6 +11,7 @@ namespace Cluck
         public float maxAcceleration;
         public float maxRunSpeed;
         public float maxWalkSpeed;
+        public float maxFlySpeed;
         public float maxSpeed;
         public float maxAngularAcceleration;
         public float maxRotation;
@@ -31,6 +32,7 @@ namespace Cluck
 
             maxWalkSpeed = maximumSpeed;
             maxRunSpeed = maximumSpeed * 2.5f;
+            maxFlySpeed = maximumSpeed * 3f;
 
             velocity = Vector3.Zero;
             heading = new Vector3(1,0,0);

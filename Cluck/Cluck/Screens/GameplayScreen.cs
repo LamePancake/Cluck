@@ -7,6 +7,10 @@
 //-----------------------------------------------------------------------------
 #endregion
 
+#if WINDEMO
+#define WINDEMO
+#endif
+
 #region Using Statements
 using System;
 using System.Threading;
@@ -19,6 +23,10 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
+using Microsoft.Xna.Framework.Storage;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
 using Cluck.AI;
 using System.IO;
 using GameStateManagement;
@@ -61,6 +69,7 @@ namespace Cluck
 
         private Model ground;
         private Model forest;
+        private Model tree;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
@@ -134,11 +143,16 @@ namespace Cluck
 
         public int total_num_of_chickens;
         public static int remainingChickens;
+        private int currentLevel;
 
         // The current high score, if there is one, is stored in "highscore".
         // The FileStream will read this and set the current high score.
         private FileStream highScoreFile;
-        private Int64 curHighScore;
+        private int startTime;
+        private int curHighScore;
+        private int score;
+        private float targetTime;
+        private float baseScore;
 
         // Shown upon achieving a new high score (in case that wasn't obvious).
         private string highScoreMsg = "New high score!";
@@ -160,8 +174,13 @@ namespace Cluck
         private int[] penIndices = new int[4];
         private Rectangle buttonPos;
 
-        public static bool addTime = false;
+        public struct SaveGameData
+        {
+            public int Score;
+        }
 
+        IAsyncResult result;
+        public static bool addTime = false;        
         #endregion
 
         #region Initialization
@@ -175,6 +194,12 @@ namespace Cluck
             camera = Cluck.camera;
             graphics = Cluck.graphics;
             winStateSet = false;
+            currentLevel = level;
+            baseScore = 100;
+            int secondsPerChicken = 10;
+            targetTime = level * secondsPerChicken;
+            startTime = -1;
+
             if (level < 12)
             {
                 secondsAllotted = 5 * level;
@@ -298,6 +323,7 @@ namespace Cluck
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
                 cluck = content.Load<Model>(@"Models\cluck");
                 forest = content.Load<Model>(@"Models\tree_side");
+                tree = content.Load<Model>(@"Models\tree");
 
                 penBase = content.Load<Model>(@"Models\pen_base_large");
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
@@ -403,6 +429,7 @@ namespace Cluck
                 //BuildPenBase(penBase, null);
 
                 BuildForest(forest, treeDiffuse);
+
                 //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
                 //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
                 //chickenPenEntity.AddComponent(new CollidableComponent());
@@ -466,7 +493,12 @@ namespace Cluck
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
+
+                score = curHighScore = -1;
+
+                LoadHighScore();
                 ScreenManager.Game.ResetElapsedTime();
+                
             }
 
 #if WINDOWS_PHONE
@@ -536,20 +568,15 @@ namespace Cluck
         /// </summary>
         private void LoadHighScore()
         {
-            highScoreFile = new FileStream("highscore", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            FileInfo info = new FileInfo("highscore");
-
-            if (info.Length == 0)
+            //showHighScoreMsg = true;
+            result = StorageDevice.BeginShowSelector(
+                        PlayerIndex.One, null, null);
+            StorageDevice device = StorageDevice.EndShowSelector(result);
+            if (device != null && device.IsConnected)
             {
-                curHighScore = 0x01111111;
+                LoadGame(device);
             }
-            else
-            {
 
-                byte[] rawHighScore = new byte[8];
-                highScoreFile.Read(rawHighScore, 0, 8);
-                curHighScore = BitConverter.ToInt32(rawHighScore, 0);
-            }
         }
 
         /// <summary>
@@ -578,6 +605,11 @@ namespace Cluck
                                                        bool coveredByOtherScreen)
         {
             base.Update(gameTime, otherScreenHasFocus, false);
+
+            if (startTime < 0)
+            {
+                startTime = (int)gameTime.TotalGameTime.TotalMilliseconds;
+            }
 
             // Gradually fade in or out depending on whether we are covered by the pause screen.
             if (coveredByOtherScreen)
@@ -694,6 +726,7 @@ namespace Cluck
                     {
                         winState = 1;
                         winStateSet = true;
+                        UpdateHighScore(gameTime);
                     }
                     else if (timer <= TimeSpan.Zero && remainingChickens > 0)
                     {
@@ -713,16 +746,145 @@ namespace Cluck
         private void UpdateHighScore(GameTime gameTime)
         {
             // Write the new high score if we beat it
-            Int64 elapsedMillis = (Int64)gameTime.TotalGameTime.TotalMilliseconds;
-            if (elapsedMillis < curHighScore)
+            float seconds = ((float)gameTime.TotalGameTime.TotalMilliseconds - startTime)/1000;
+
+            score = (int)(targetTime / seconds * baseScore);
+
+            if (score > curHighScore)
             {
-                showHighScoreMsg = true;
-                byte[] bytes = BitConverter.GetBytes(elapsedMillis);
-                highScoreFile.Seek(0, SeekOrigin.Begin);
-                highScoreFile.Write(bytes, 0, 8);
+                curHighScore = score;
+                //showHighScoreMsg = true;
+                result = StorageDevice.BeginShowSelector(
+                            PlayerIndex.One, null, null);
+                StorageDevice device = StorageDevice.EndShowSelector(result);
+                if (device != null && device.IsConnected)
+                {
+                    SaveGame(device, score);
+                }
+                
+                //byte[] bytes = BitConverter.GetBytes(elapsedMillis);
+                //highScoreFile.Seek(0, SeekOrigin.Begin);
+                //highScoreFile.Write(bytes, 0, 8);
             }
         }
 
+        /// <summary>
+        /// This method loads a serialized data object
+        /// from the StorageContainer for this game.
+        /// </summary>
+        /// <param name="device"></param>
+        private void LoadGame(StorageDevice device)
+        {
+            // Open a storage container.
+            IAsyncResult result =
+                device.BeginOpenContainer("CluckSaves", null, null);
+
+            // Wait for the WaitHandle to become signaled.
+            result.AsyncWaitHandle.WaitOne();
+
+            StorageContainer container = device.EndOpenContainer(result);
+
+            // Close the wait handle.
+            result.AsyncWaitHandle.Close();
+
+            string filename = "highscore_level" + currentLevel + ".sav";
+
+            // Check to see whether the save exists.
+            if (!container.FileExists(filename))
+            {
+                // If not, dispose of the container and return.
+                container.Dispose();
+                curHighScore = -1;
+                return;
+            }
+
+            // Open the file.
+            Stream stream = container.OpenFile(filename, FileMode.Open);
+
+            #if WINDEMO
+            // Read the data from the file.
+            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
+            SaveGameData data = (SaveGameData)serializer.Deserialize(stream);
+            #else
+            using (StreamReader sr = new StreamReader(stream))
+            {
+                String input;
+
+                if ((input = sr.ReadLine()) != null)
+                {
+                    curHighScore = Convert.ToInt32(input);
+                }
+
+                sr.Close();
+            }
+            #endif
+
+            // Close the file.
+            stream.Close();
+
+            // Dispose the container.
+            container.Dispose();
+
+            #if WINDEMO
+            // Report the data to the console.
+            Debug.WriteLine("Name:     " + data.PlayerName);
+            Debug.WriteLine("Level:    " + data.Level.ToString());
+            Debug.WriteLine("Score:    " + data.Score.ToString());
+            Debug.WriteLine("Position: " + data.AvatarPosition.ToString());
+            #endif
+        }
+
+        /// <summary>
+        /// This method serializes a data object into
+        /// the StorageContainer for this game.
+        /// </summary>
+        /// <param name="device"></param>
+        private void SaveGame(StorageDevice device, int theScore)
+        {
+            // Create the data to save.
+            SaveGameData data = new SaveGameData();
+            data.Score = theScore;
+
+            // Open a storage container.
+            IAsyncResult result =
+                device.BeginOpenContainer("CluckSaves", null, null);
+
+            // Wait for the WaitHandle to become signaled.
+            result.AsyncWaitHandle.WaitOne();
+
+            StorageContainer container = device.EndOpenContainer(result);
+
+            // Close the wait handle.
+            result.AsyncWaitHandle.Close();
+
+            string filename = "highscore_level" + currentLevel + ".sav";
+
+            // Check to see whether the save exists.
+            if (container.FileExists(filename))
+                // Delete it so that we can create one fresh.
+                container.DeleteFile(filename);
+
+            // Create the file.
+            Stream stream = container.CreateFile(filename);
+
+            #if WINDEMO
+            // Convert the object to XML data and put it in the stream.
+            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
+            serializer.Serialize(stream, data);
+            #else
+            using (StreamWriter sw = new StreamWriter(stream))
+            {
+                sw.WriteLine("{0}", data.Score);
+                sw.Close();
+            }
+            #endif
+
+            // Close the file.
+            stream.Close();
+
+            // Dispose the container, to commit changes.
+            container.Dispose();
+        }
 
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
@@ -756,7 +918,7 @@ namespace Cluck
             else if (winState == 1)
             {
                 MediaPlayer.Stop();
-                ScreenManager.AddScreen(new WinScreen(), ControllingPlayer);
+                ScreenManager.AddScreen(new WinScreen(score, curHighScore), ControllingPlayer);
             }
 
             if (pauseAction.Evaluate(input, ControllingPlayer, out player))
@@ -1307,6 +1469,41 @@ namespace Cluck
 
         private void BuildForest(Model trees, Texture2D texture)
         {
+            /*int seed = random.Next(Int32.MaxValue);
+            PerlinNoise noise = new PerlinNoise(seed);
+
+            int maxWidth = 1000;
+            int maxLength = 1000;
+            int treeOffset = 60;
+
+            for (int u = -maxWidth; u < maxWidth; u += 300)
+            {
+                for (int v = -maxLength; v < maxLength; v += 300)
+                {
+                    float value = noise.FractalNoise2D(u, v, 3, 400f, 1f);
+
+                    if (value > 0.015f)
+                    {
+                        int randomXOffset = random.Next(-treeOffset, treeOffset);
+                        int randomYOffset = random.Next(-treeOffset, treeOffset);
+
+                        GameEntity treeEntity = new GameEntity();
+
+                        PositionComponent treePos = new PositionComponent(new Vector3(u + randomXOffset,
+                                0,
+                                v + randomYOffset), 0f);
+                        Renderable treeRenderable = new Renderable(tree, texture, calBoundingBox(trees, treePos.GetPosition(), treePos.GetOrientation()), ToonEffectNoAnimation);
+
+                        treeEntity.AddComponent(treePos);
+                        treeEntity.AddComponent(treeRenderable);
+
+                        world.Add(treeEntity);
+                    }
+
+                    //Console.WriteLine("Perlin Fractal Noise: " + value);
+                }
+            }*/
+
             for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
             {
                 GameEntity fenceEntityTop = new GameEntity();

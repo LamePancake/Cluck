@@ -223,6 +223,34 @@ namespace Cluck.AI
             return steering;
         }
 
+        public SteeringOutput FleeFly(PositionComponent agentPos, KinematicComponent agentKinematic, Vector3 scaryPos)
+        {
+            SteeringOutput steering = new SteeringOutput();
+            const double panicDistanceSq = 1000.0;
+            Vector3 agentPosition = agentPos.GetPosition();
+
+            scaryPos.Y = agentPosition.Y; // don't have chickens go through the ground.
+
+            Vector3 awayFromScary = agentPosition - scaryPos;
+
+            steering.linear = awayFromScary + (Vector3.Up * 3);
+
+            if (awayFromScary.Length() > panicDistanceSq)
+            {
+                steering.linear = new Vector3(0, 0, 0);
+
+                return steering;
+            }
+
+            steering.linear.Normalize();
+
+            steering.linear = steering.linear * agentKinematic.maxAcceleration;
+
+            steering.angular = 0;
+
+            return steering;
+        }
+
         public SteeringOutput Face(Vector3 target, PositionComponent agentPos)
         {
             float facingOffset = (float)Math.PI / 2;

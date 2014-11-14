@@ -98,9 +98,17 @@ namespace Cluck.AI
                         kinematics.heading = temp;
                         kinematics.side = Util.PerpInZPlane(kinematics.heading);
                     }
-                    
+
+                    Vector3 newPos = position.GetPosition() + kinematics.velocity;
+
+                    //Prevent falling through map
+                    //if (newPos.Y < 0)
+                    //{
+                    //    newPos.Y = 0;
+                    //}
+
                     // Update position and orientation
-                    position.SetPosition(position.GetPosition() + kinematics.velocity);
+                    position.SetPosition(newPos);
                     //position.SetOrientation(position.GetOrientation() + kinematics.rotation);
 
                     SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);

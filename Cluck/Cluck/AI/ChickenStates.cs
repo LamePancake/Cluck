@@ -40,11 +40,15 @@ namespace Cluck.AI
         public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
 
-            if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
+            if (entity.HasComponent((int)component_flags.sensory) 
+                && entity.HasComponent((int)component_flags.aiSteering)
+                && entity.HasComponent((int)component_flags.position))
             {
                 SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
                 SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+
+                PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
                 GameEntity scary = steering.GetScaryEntity();
 
@@ -57,23 +61,21 @@ namespace Cluck.AI
                         if (sensory.NewMemory(mem))
                         {
                             steering.SetScaryPos(mem.position);
-                            component.ChangeStates(RunAway.Instance);
+
+                            if ((mem.position - position.GetPosition()).Length() < 120)
+                            {
+                                //component.ChangeStates(FlyAway.Instance);
+                            }
+                            else
+                            {
+                                component.ChangeStates(RunAway.Instance);
+
+                                float stuff = (mem.position - position.GetPosition()).Length();
+                            }
                         }
                     }
                 }
             }
-
-            //testEntity.GetSleepy();
-            //testEntity.GetThirsty();
-
-            //if (testEntity.IsThirsty())
-            //{
-            //    component.ChangeStates(Drink.Instance);
-            //}
-            //else if (testEntity.IsSleepy())
-            //{
-            //    component.ChangeStates(Sleep.Instance);
-            //}
         }
 
         public void Exit(AIThinking component, GameEntity entity)
@@ -124,11 +126,15 @@ namespace Cluck.AI
         public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
         {
 
-            if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
+            if (entity.HasComponent((int)component_flags.sensory) 
+                && entity.HasComponent((int)component_flags.aiSteering)
+                && entity.HasComponent((int)component_flags.position))
             {
                 SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
 
                 SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+
+                PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
 
                 GameEntity scary = steering.GetScaryEntity();
 
@@ -141,6 +147,11 @@ namespace Cluck.AI
                         if (sensory.NewMemory(mem))
                         {
                             steering.SetScaryPos(mem.position);
+
+                            if ((mem.position - position.GetPosition()).Length() < 120)
+                            {
+                                //component.ChangeStates(FlyAway.Instance);
+                            }
                         }
                         else if (mem.time < 0)
                         {
@@ -160,6 +171,75 @@ namespace Cluck.AI
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
 
                 steer.SetFlee(false);
+            }
+        }
+    }
+
+    class FlyAway : State
+    {
+        private static FlyAway instance;
+
+        private FlyAway() { }
+
+        public static FlyAway Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new FlyAway();
+                }
+                return instance;
+            }
+        }
+
+        public void Enter(AIThinking component, GameEntity entity)
+        {
+            if (entity.HasComponent((int)component_flags.aiSteering)
+                && entity.HasComponent((int)component_flags.kinematic))
+            {
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
+                kinematic.maxSpeed = kinematic.maxFlySpeed;
+                steer.SetWander(false);
+                steer.SetFly(true);
+            }
+        }
+
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
+        {
+            //if (entity.HasComponent((int)component_flags.sensory) && entity.HasComponent((int)component_flags.aiSteering))
+            //{
+            //    SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
+
+            //    SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+
+            //    GameEntity scary = steering.GetScaryEntity();
+
+            //    if (scary != null)
+            //    {
+            //        EntityMemory mem = sensory.GetMemory(scary);
+
+            //        if (mem != null)
+            //        {
+            //            if (sensory.NewMemory(mem))
+            //            {
+            //                steering.SetScaryPos(mem.position);
+            //                component.ChangeStates(RunAway.Instance);
+            //            }
+            //        }
+            //    }
+            //}
+        }
+
+        public void Exit(AIThinking component, GameEntity entity)
+        {
+            if (entity.HasComponent((int)component_flags.aiSteering))
+            {
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+
+                steer.SetWander(true);
+                steer.SetFly(false);
             }
         }
     }
