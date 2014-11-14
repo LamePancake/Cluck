@@ -184,6 +184,7 @@ namespace Cluck
 
         IAsyncResult result;
         public static bool addTime = false;        
+
         #endregion
 
         #region Initialization
@@ -198,6 +199,7 @@ namespace Cluck
             camera.Reset();
             graphics = Cluck.graphics;
             winStateSet = false;
+
             currentLevel = level;
             baseScore = 100;
             int secondsPerChicken = 10;
@@ -583,7 +585,7 @@ namespace Cluck
             {
                 LoadGame(device);
             }
-
+            
         }
 
         /// <summary>
@@ -740,6 +742,7 @@ namespace Cluck
                         winState = -1;
                         winStateSet = true;
                     }
+                    UpdateHighScore(gameTime);
                 }
             }
 
