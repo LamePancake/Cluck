@@ -124,6 +124,7 @@ namespace Cluck
             qte = new QuickTimeEvent();
             Position = new Vector3(0, 0, 0);
             chickenCaught = false;
+            sprintingTime = MAX_SPRINTING_TIME;
         }
 
         public FirstPersonCamera(Game game) : base(game)
@@ -348,6 +349,8 @@ namespace Cluck
                 {
                     eye = head.Update(i.GetLeft() + i.GetRight(), i.GetForward() + i.GetBackward(), eye, (float)gameTime.ElapsedGameTime.Milliseconds, BOBBINGSPEED_WALKING, BOBBINGAMOUNT_WALKING);
                 }
+
+                eye.Y = MathHelper.Clamp(eye.Y, eyeHeightCrouching, eyeHeightStanding + BOBBINGAMOUNT_RUNNING);
             }
 
 
