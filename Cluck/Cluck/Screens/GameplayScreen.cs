@@ -85,6 +85,7 @@ namespace Cluck
         private SpriteFont timerFont;
         private TimeSpan timer;
         private static TimeSpan deathTimer;
+        private TimeSpan penRaiseDelay;
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
@@ -245,6 +246,7 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
+            penRaiseDelay = new TimeSpan(0, 0, 7);
             timeStart = false;
             cluckExist = false;
 
@@ -1080,8 +1082,8 @@ namespace Cluck
             {
                 GameEntity cluckEntity = new GameEntity();
 
-                Vector3 cluckPosition = new Vector3(0, 10000, 0);
-                PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
+                Vector3 cluckPosition = new Vector3(500, 10000, 125);
+                PositionComponent cluckPos = new PositionComponent(cluckPosition, 0);
                 //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
                 Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
 
@@ -1117,13 +1119,13 @@ namespace Cluck
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
                 }
-
+                penRaiseDelay -= gameTime.ElapsedGameTime;
 
                 Vector3 currentPenPos0 = world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 Vector3 currentPenPos1 = world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 Vector3 currentPenPos2 = world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
-                if (currentPenPos0.Y < maxPenElevation)
+                if (currentPenPos0.Y < maxPenElevation && penRaiseDelay <= TimeSpan.Zero)
                 {
                     world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos0 + new Vector3(0, 5, 0));
                     world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos1 + new Vector3(0, 5, 0));
