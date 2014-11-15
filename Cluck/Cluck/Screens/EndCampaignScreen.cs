@@ -1,6 +1,6 @@
 ﻿#region File Description
 //-----------------------------------------------------------------------------
-// WinScreen.cs
+// EndCampaignScreen.cs
 //
 //-----------------------------------------------------------------------------
 #endregion
@@ -15,7 +15,7 @@ namespace Cluck
     /// The pause menu comes up over the top of the game,
     /// giving the player options to resume or quit.
     /// </summary>
-    class WinScreen : MenuScreen
+    class EndCampaignScreen : MenuScreen
     {
         #region Initialization
 
@@ -23,19 +23,16 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public WinScreen(int score, int highscore)
-            : base("You managed to prevent Cluck's wrath for today! \n Your Score: " + score + "\n High-Score: " + highscore)
+        public EndCampaignScreen(int score, int highscore)
+            : base("Cluck has been satisfied! Your village is safe for the rest of the year!\n Your Score: " + score + "\n High-Score: " + highscore)
         {
             // Create our menu entries.
-            MenuEntry continueGameMenuEntry = new MenuEntry("Next Level");
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
             // Hook up menu event handlers.
-            continueGameMenuEntry.Selected += ContinueGameMenuEntrySelected;
             mainMenuGameMenuEntry.Selected += MainMenuGameMenuEntrySelected;
 
             // Add entries to the menu.
-            MenuEntries.Add(continueGameMenuEntry);
             MenuEntries.Add(mainMenuGameMenuEntry);
         }
 
@@ -43,19 +40,6 @@ namespace Cluck
         #endregion
 
         #region Handle Input
-
-        /// <summary>
-        /// Event handler for when the player selects Play Again after losing.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void ContinueGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            Cluck.currentLevel += 1;
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(Cluck.currentLevel));
-        }
-
         /// <summary>
         /// Event handler for when the player selects Go Back To Main Menu after losing.
         /// </summary>

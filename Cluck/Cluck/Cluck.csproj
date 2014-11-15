@@ -95,6 +95,7 @@
     <Compile Include="Screens\ArcadeWinScreen.cs" />
     <Compile Include="Screens\BackgroundScreen.cs" />
     <Compile Include="Screens\Button.cs" />
+    <Compile Include="Screens\EndCampaignScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
     <Compile Include="Screens\InstructionScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />

@@ -46,7 +46,7 @@ namespace Cluck
         #region Fields
 
         ContentManager content;
-        public static int MAX_LEVEL = 10;
+        public static int MAX_LEVEL = 2;
         public static int NUM_CHICKEN_SOUNDS = 8;
         public SoundEffect[] CHICKEN_SOUNDS = new SoundEffect[NUM_CHICKEN_SOUNDS];
 
@@ -67,7 +67,6 @@ namespace Cluck
         private int deathSecondsAlotted;
         private Boolean cluckExist;
         private Boolean winStateSet;
-        private Boolean chickensReleased;
 
         private Model ground;
         private Model forest;
@@ -177,8 +176,6 @@ namespace Cluck
         private int[] penIndices = new int[4];
         private Rectangle buttonPos;
 
-        private SoundEffectInstance cluckzilla;
-
         public struct SaveGameData
         {
             public int Score;
@@ -186,7 +183,6 @@ namespace Cluck
 
         IAsyncResult result;
         public static bool addTime = false;        
-
         #endregion
 
         #region Initialization
@@ -201,8 +197,6 @@ namespace Cluck
             camera.Reset();
             graphics = Cluck.graphics;
             winStateSet = false;
-            chickensReleased = false;
-
             currentLevel = level;
             baseScore = 100;
             int secondsPerChicken = 10;
@@ -254,7 +248,7 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
-            penRaiseDelay = new TimeSpan(0, 0, 6);
+            penRaiseDelay = new TimeSpan(0, 0, 7);
             timeStart = false;
             cluckExist = false;
 
@@ -350,8 +344,6 @@ namespace Cluck
                 CHICKEN_SOUNDS[7] = content.Load<SoundEffect>(@"Audio\Cluck8");
                 SoundEffect.DistanceScale = 1000f;
                 SoundEffect.DopplerScale = 0.1f;
-
-                cluckzilla = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -588,7 +580,7 @@ namespace Cluck
             {
                 LoadGame(device);
             }
-            
+
         }
 
         /// <summary>
@@ -729,7 +721,6 @@ namespace Cluck
                 if (timer <= TimeSpan.Zero)
                 {
                     PlayDeathScene(gameTime);
-
                 }
 
 
@@ -1125,9 +1116,6 @@ namespace Cluck
                 Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
                 if (currentPenPos0.Y < maxPenElevation && penRaiseDelay <= TimeSpan.Zero)
                 {
-                    if(cluckzilla.State != SoundState.Playing)
-                        cluckzilla.Play();
-
                     world.ElementAt<GameEntity>(penIndices[0]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
                     world.ElementAt<GameEntity>(penIndices[1]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
                     world.ElementAt<GameEntity>(penIndices[2]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
@@ -1141,29 +1129,8 @@ namespace Cluck
                     world.ElementAt<GameEntity>(penIndices[2]).RemoveComponent<FenceComponent>(component_flags.fence);
                     world.ElementAt<GameEntity>(penIndices[3]).RemoveComponent<FenceComponent>(component_flags.fence);
                 }
-                
-                if (currentPenPos0.Y >= maxPenElevation/5 && !chickensReleased)
-                {
-                   ReleaseChickens();
-                }
             }
         }
-
-        private void ReleaseChickens()
-        {
-            foreach (GameEntity entity in world)
-            {
-                if (entity.HasComponent((int)component_flags.aiThinking))
-                {
-                    AIThinking sensoryUnit = entity.GetComponent<AIThinking>(component_flags.aiThinking);
-
-                    sensoryUnit.ChangeStates(Attack.Instance);
-                }
-            }
-
-            chickensReleased = true;
-        }
-
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
         {
             List<Vector3> points = new List<Vector3>();

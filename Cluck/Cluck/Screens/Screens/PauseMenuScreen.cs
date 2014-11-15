@@ -1,7 +1,9 @@
-﻿#region File Description
+#region File Description
 //-----------------------------------------------------------------------------
-// WinScreen.cs
+// PauseMenuScreen.cs
 //
+// Microsoft XNA Community Game Platform
+// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -15,7 +17,7 @@ namespace Cluck
     /// The pause menu comes up over the top of the game,
     /// giving the player options to resume or quit.
     /// </summary>
-    class WinScreen : MenuScreen
+    class PauseMenuScreen : MenuScreen
     {
         #region Initialization
 
@@ -23,20 +25,20 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public WinScreen(int score, int highscore)
-            : base("You managed to prevent Cluck's wrath for today! \n Your Score: " + score + "\n High-Score: " + highscore)
+        public PauseMenuScreen()
+            : base("Paused")
         {
             // Create our menu entries.
-            MenuEntry continueGameMenuEntry = new MenuEntry("Next Level");
-            MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
-
+            MenuEntry resumeGameMenuEntry = new MenuEntry("Resume Game");
+            MenuEntry quitGameMenuEntry = new MenuEntry("Quit Game");
+            
             // Hook up menu event handlers.
-            continueGameMenuEntry.Selected += ContinueGameMenuEntrySelected;
-            mainMenuGameMenuEntry.Selected += MainMenuGameMenuEntrySelected;
+            resumeGameMenuEntry.Selected += OnCancel;
+            quitGameMenuEntry.Selected += QuitGameMenuEntrySelected;
 
             // Add entries to the menu.
-            MenuEntries.Add(continueGameMenuEntry);
-            MenuEntries.Add(mainMenuGameMenuEntry);
+            MenuEntries.Add(resumeGameMenuEntry);
+            MenuEntries.Add(quitGameMenuEntry);
         }
 
 
@@ -44,24 +46,13 @@ namespace Cluck
 
         #region Handle Input
 
-        /// <summary>
-        /// Event handler for when the player selects Play Again after losing.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void ContinueGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            Cluck.currentLevel += 1;
-            LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(Cluck.currentLevel));
-        }
 
         /// <summary>
-        /// Event handler for when the player selects Go Back To Main Menu after losing.
+        /// Event handler for when the Quit Game menu entry is selected.
         /// </summary>
-        void MainMenuGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
+        void QuitGameMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
-            const string message = "Are you sure you want go back to main menu?";
+            const string message = "Are you sure you want to quit this game?";
 
             MessageBoxScreen confirmQuitMessageBox = new MessageBoxScreen(message);
 

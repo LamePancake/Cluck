@@ -25,7 +25,7 @@ namespace Cluck
         /// Constructor fills in the menu contents.
         /// </summary>
         public MainMenuScreen()
-            : base("Cluck!")
+            : base("Main Menu")
         {
             // Create our menu entries.
             MenuEntry playTutorialMenuEntry = new MenuEntry("Tutorial");

@@ -1,15 +1,9 @@
-#region File Description
+﻿#region File Description
 //-----------------------------------------------------------------------------
-// GameplayScreen.cs
+// TutorialScreen.cs
 //
-// Microsoft XNA Community Game Platform
-// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
-
-#if WINDEMO
-#define WINDEMO
-#endif
 
 #region Using Statements
 using System;
@@ -23,10 +17,6 @@ using Microsoft.Xna.Framework.GamerServices;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework.Media;
-using Microsoft.Xna.Framework.Storage;
-using System.IO;
-using System.Xml;
-using System.Xml.Serialization;
 using Cluck.AI;
 using System.IO;
 using GameStateManagement;
@@ -41,12 +31,11 @@ namespace Cluck
     /// placeholder to get the idea across: you'll probably want to
     /// put some more interesting gameplay in here!
     /// </summary>
-    class GameplayScreen : GameScreen
+    class TutorialScreen : GameScreen
     {
         #region Fields
 
         ContentManager content;
-        public static int MAX_LEVEL = 10;
         public static int NUM_CHICKEN_SOUNDS = 8;
         public SoundEffect[] CHICKEN_SOUNDS = new SoundEffect[NUM_CHICKEN_SOUNDS];
 
@@ -66,12 +55,12 @@ namespace Cluck
         private int secondsAllotted;
         private int deathSecondsAlotted;
         private Boolean cluckExist;
-        private Boolean winStateSet;
-        private Boolean chickensReleased;
+        private int instructionStage;
+        private int instructionIntermissionTime;
+        private int instructionCount;
 
         private Model ground;
         private Model forest;
-        private Model tree;
         private Model fence;
         private Model leftArm;
         private Model rightArm;
@@ -80,15 +69,14 @@ namespace Cluck
         private Model chickenPen;
         private Model cluck;
         private Song testSong;
-        private Song fastSong;
-        private Song currentSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
-        private TimeSpan timer;
+        private static TimeSpan timer;
         private static TimeSpan deathTimer;
-        private TimeSpan penRaiseDelay;
+        private static TimeSpan tutTimer;
         private Boolean timeStart;
+        private Boolean tutorialOn;
         private string time;
         private Texture2D armsDiffuse;
         private Texture2D chickenDiffuse;
@@ -146,16 +134,11 @@ namespace Cluck
 
         public int total_num_of_chickens;
         public static int remainingChickens;
-        private int currentLevel;
 
         // The current high score, if there is one, is stored in "highscore".
         // The FileStream will read this and set the current high score.
         private FileStream highScoreFile;
-        private int startTime;
-        private int curHighScore;
-        private int score;
-        private float targetTime;
-        private float baseScore;
+        private Int64 curHighScore;
 
         // Shown upon achieving a new high score (in case that wasn't obvious).
         private string highScoreMsg = "New high score!";
@@ -166,6 +149,7 @@ namespace Cluck
         float pauseAlpha;
 
         InputAction pauseAction;
+        InputAction instructionAction;
 
         private float intensityBlue;
 
@@ -174,18 +158,7 @@ namespace Cluck
         private Texture2D[] qteKeys;
         private int buttonSize = 75;
         private int buttonScale = MAX_BUTTON_SCALE;
-        private int[] penIndices = new int[4];
         private Rectangle buttonPos;
-
-        private SoundEffectInstance cluckzilla;
-
-        public struct SaveGameData
-        {
-            public int Score;
-        }
-
-        IAsyncResult result;
-        public static bool addTime = false;        
 
         #endregion
 
@@ -195,38 +168,19 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public GameplayScreen(int level)
+        public TutorialScreen()
         {
             camera = Cluck.camera;
-            camera.Reset();
             graphics = Cluck.graphics;
-            winStateSet = false;
-            chickensReleased = false;
+            instructionStage = 0;
 
-            currentLevel = level;
-            baseScore = 100;
-            int secondsPerChicken = 10;
-            targetTime = level * secondsPerChicken;
-            startTime = -1;
-
-            if (level < 12)
-            {
-                secondsAllotted = 5 * level;
-                minutesAllotted = 1 + (level / 5);
-            }
-            else if (level > 12)
-            {
-                secondsAllotted = 0;
-                minutesAllotted = 2 + (level / 5);
-            }
-            else
-            {
-                secondsAllotted = 0;
-                minutesAllotted = 0 + (level / 5);
-            }
+            secondsAllotted = 0;
+            minutesAllotted = 10;
             deathSecondsAlotted = 18;
+            instructionIntermissionTime = 30;
+            instructionCount = 6;
 
-            total_num_of_chickens = level;
+            total_num_of_chickens = 3;
 
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -237,6 +191,11 @@ namespace Cluck
             pauseAction = new InputAction(
                 new Buttons[] { Buttons.Start, Buttons.Back },
                 new Keys[] { Keys.Escape },
+                true);
+
+            instructionAction = new InputAction(
+                new Buttons[] { Buttons.A },
+                new Keys[] { Keys.Enter },
                 true);
 
             //set boundingsphere scale
@@ -254,9 +213,10 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
-            penRaiseDelay = new TimeSpan(0, 0, 6);
+            tutTimer = new TimeSpan(0, 0, 0);
             timeStart = false;
             cluckExist = false;
+            tutorialOn = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
@@ -295,7 +255,8 @@ namespace Cluck
 
             qteButtons = new Texture2D[4];
             qteKeys = new Texture2D[4];
-            buttonPos = new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.5) -37, (int)(graphics.GraphicsDevice.Viewport.Height * 0.2 - 37), buttonSize, buttonSize);
+            buttonPos = new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - 37, (int)(graphics.GraphicsDevice.Viewport.Height * 0.2 - 37), buttonSize, buttonSize);
+
         }
 
 
@@ -333,13 +294,11 @@ namespace Cluck
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
                 cluck = content.Load<Model>(@"Models\cluck");
                 forest = content.Load<Model>(@"Models\tree_side");
-                tree = content.Load<Model>(@"Models\tree");
 
                 penBase = content.Load<Model>(@"Models\pen_base_large");
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
 
                 testSong = content.Load<Song>(@"Audio\Yoshi_looped");
-                fastSong = content.Load<Song>(@"Audio\Yoshi_looped_fast");
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -348,10 +307,7 @@ namespace Cluck
                 CHICKEN_SOUNDS[5] = content.Load<SoundEffect>(@"Audio\Cluck6");
                 CHICKEN_SOUNDS[6] = content.Load<SoundEffect>(@"Audio\Cluck7");
                 CHICKEN_SOUNDS[7] = content.Load<SoundEffect>(@"Audio\Cluck8");
-                SoundEffect.DistanceScale = 1000f;
-                SoundEffect.DopplerScale = 0.1f;
-
-                cluckzilla = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
+                SoundEffect.DistanceScale = 100f;
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -363,18 +319,15 @@ namespace Cluck
                 playerEntitiy.AddComponent(new AudioListenerComponent());
                 world.Add(playerEntitiy);
 
-                //GameEntity testChicken = new GameEntity();
-                //testChicken.AddComponent(new PositionComponent(new Vector3(0, 0, 0), 0));
-                //testChicken.AddComponent(new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken, 1)));
-                //testChicken.AddComponent(new AudioEmitterComponent());
-                //world.Add(testChicken);
-
                 GameEntity groundEntity = new GameEntity();
 
                 GameEntity leftArmEntity = new GameEntity();
                 GameEntity rightArmEntity = new GameEntity();
 
                 GameEntity penBaseEntity = new GameEntity();
+                GameEntity chickenPenEntity = new GameEntity();
+
+
 
                 BuildBounds(fence, woodDiffuse);
 
@@ -430,7 +383,6 @@ namespace Cluck
                 rightArmEntity.AddComponent(new ArmComponent(true));
 
                 groundEntity.AddComponent(new Renderable(ground, grassDiffuse, ground.Meshes[0].BoundingSphere, ToonEffectNoAnimation));
-                //groundEntity.AddComponent(new PositionComponent(new Vector3(0, 30, 0), 0.0f));
 
                 penBaseEntity.AddComponent(new Renderable(penBase, null, calBoundingSphere(penBase, boundingPenScale), ToonEffectNoAnimation));
                 penBaseEntity.AddComponent(new CaptureComponent());
@@ -438,29 +390,14 @@ namespace Cluck
                 penBaseEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
 
                 BuildPen(chickenPen, woodDiffuse);
-                //BuildPenBase(penBase, null);
-
                 BuildForest(forest, treeDiffuse);
 
-                //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
-                //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
-                //chickenPenEntity.AddComponent(new CollidableComponent());
-                //chickenPenEntity.AddComponent(new FenceComponent());
-
-                world.Add(groundEntity);                
+                world.Add(groundEntity);
                 world.Add(leftArmEntity);
                 world.Add(rightArmEntity);
                 world.Add(penBaseEntity);
-                //world.Add(chickenPenEntity);
-                int index = 0;
-                for (int p = 0; p < world.Count; p++)
-                {
-                    if (world.ElementAt<GameEntity>(p).HasComponent(0x10000))
-                    {
-                        penIndices[index] = p;
-                        index++;
-                    }
-                }
+                world.Add(chickenPenEntity);
+
                 // now create the AI system.
                 aiSystem = new AISystem(world);
 
@@ -485,9 +422,7 @@ namespace Cluck
                         part.Effect = SkySphereEffect;
                     }
                 }
-
                 // Plays  Yoshi's island
-                currentSong = testSong;
                 MediaPlayer.Play(testSong);
                 MediaPlayer.IsRepeating = true;
                 MediaPlayer.Volume = 0.45f;
@@ -505,13 +440,10 @@ namespace Cluck
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
-
-                score = curHighScore = -1;
-
-                LoadHighScore();
                 ScreenManager.Game.ResetElapsedTime();
                 
             }
+
 
 #if WINDOWS_PHONE
             if (Microsoft.Phone.Shell.PhoneApplicationService.Current.State.ContainsKey("PlayerPosition"))
@@ -576,22 +508,6 @@ namespace Cluck
         }
 
         /// <summary>
-        /// Gets the current high score.
-        /// </summary>
-        private void LoadHighScore()
-        {
-            //showHighScoreMsg = true;
-            result = StorageDevice.BeginShowSelector(
-                        PlayerIndex.One, null, null);
-            StorageDevice device = StorageDevice.EndShowSelector(result);
-            if (device != null && device.IsConnected)
-            {
-                LoadGame(device);
-            }
-            
-        }
-
-        /// <summary>
         /// UnloadContent will be called once per game and is the place to unload
         /// all content.
         /// </summary>
@@ -603,7 +519,7 @@ namespace Cluck
         //
         // Adds time on to TimeSpan timer
         //
-        public void AddTime(TimeSpan addition)
+        public static void AddTime(TimeSpan addition)
         {
             timer += addition;
         }
@@ -618,11 +534,16 @@ namespace Cluck
         {
             base.Update(gameTime, otherScreenHasFocus, false);
 
-            if (startTime < 0)
+            if (tutTimer <= TimeSpan.Zero)
             {
-                startTime = (int)gameTime.TotalGameTime.TotalMilliseconds;
+                tutorialOn = true;
+                tutTimer = new TimeSpan(0, 0, instructionIntermissionTime);
             }
-
+            else
+            {
+                tutorialOn = false;
+                tutTimer -= gameTime.ElapsedGameTime;
+            }
             // Gradually fade in or out depending on whether we are covered by the pause screen.
             if (coveredByOtherScreen)
                 pauseAlpha = Math.Min(pauseAlpha + 1f / 32, 1);
@@ -631,33 +552,6 @@ namespace Cluck
 
             if (IsActive)
             {
-                if (MediaPlayer.State == MediaState.Paused)
-                {
-                    MediaPlayer.Resume();
-                }
-
-                if (timer.Seconds <= 30 && timer.Minutes < 1 && timer.Hours < 1)
-                {
-                    if(!MediaPlayer.Equals(currentSong, fastSong))
-                    {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(fastSong);
-                        currentSong = fastSong;
-                    }
-                    
-                }
-                else
-                {
-                    if (!MediaPlayer.Equals(currentSong, testSong))
-                    {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(testSong);
-                        currentSong = testSong;
-                    }
-                }
-
-
-
                 timeStart = true;
 
                 // Allows the game to exit
@@ -716,37 +610,21 @@ namespace Cluck
                 physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
-
-                if (addTime)
-                {
-                    if (winState != -1)
-                    {
-                        AddTime(new TimeSpan(0, 0, 10));
-                        addTime = false;
-                    }
-                }
-
                 if (timer <= TimeSpan.Zero)
                 {
                     PlayDeathScene(gameTime);
-
                 }
 
 
-                if (!winStateSet)
+                if (timer > TimeSpan.Zero && remainingChickens <= 0)
                 {
-                    if (timer > TimeSpan.Zero && remainingChickens <= 0)
-                    {
-                        winState = 1;
-                        winStateSet = true;
-                        UpdateHighScore(gameTime);
-                    }
-                    else if (timer <= TimeSpan.Zero && remainingChickens > 0)
-                    {
-                        winState = -1;
-                        winStateSet = true;
-                    }
+                    winState = 1;
                 }
+                else if (deathTimer <= TimeSpan.Zero && remainingChickens > 0)
+                {
+                    winState = -1;
+                }
+
             }
 
             //CheckWinState(winState);
@@ -759,145 +637,16 @@ namespace Cluck
         private void UpdateHighScore(GameTime gameTime)
         {
             // Write the new high score if we beat it
-            float seconds = ((float)gameTime.TotalGameTime.TotalMilliseconds - startTime)/1000;
-
-            score = (int)(targetTime / seconds * baseScore);
-
-            if (score > curHighScore)
+            Int64 elapsedMillis = (Int64)gameTime.TotalGameTime.TotalMilliseconds;
+            if (elapsedMillis < curHighScore)
             {
-                curHighScore = score;
-                //showHighScoreMsg = true;
-                result = StorageDevice.BeginShowSelector(
-                            PlayerIndex.One, null, null);
-                StorageDevice device = StorageDevice.EndShowSelector(result);
-                if (device != null && device.IsConnected)
-                {
-                    SaveGame(device, score);
-                }
-                
-                //byte[] bytes = BitConverter.GetBytes(elapsedMillis);
-                //highScoreFile.Seek(0, SeekOrigin.Begin);
-                //highScoreFile.Write(bytes, 0, 8);
+                showHighScoreMsg = true;
+                byte[] bytes = BitConverter.GetBytes(elapsedMillis);
+                highScoreFile.Seek(0, SeekOrigin.Begin);
+                highScoreFile.Write(bytes, 0, 8);
             }
         }
 
-        /// <summary>
-        /// This method loads a serialized data object
-        /// from the StorageContainer for this game.
-        /// </summary>
-        /// <param name="device"></param>
-        private void LoadGame(StorageDevice device)
-        {
-            // Open a storage container.
-            IAsyncResult result =
-                device.BeginOpenContainer("CluckSaves", null, null);
-
-            // Wait for the WaitHandle to become signaled.
-            result.AsyncWaitHandle.WaitOne();
-
-            StorageContainer container = device.EndOpenContainer(result);
-
-            // Close the wait handle.
-            result.AsyncWaitHandle.Close();
-
-            string filename = "highscore_level" + currentLevel + ".sav";
-
-            // Check to see whether the save exists.
-            if (!container.FileExists(filename))
-            {
-                // If not, dispose of the container and return.
-                container.Dispose();
-                curHighScore = -1;
-                return;
-            }
-
-            // Open the file.
-            Stream stream = container.OpenFile(filename, FileMode.Open);
-
-            #if WINDEMO
-            // Read the data from the file.
-            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
-            SaveGameData data = (SaveGameData)serializer.Deserialize(stream);
-            #else
-            using (StreamReader sr = new StreamReader(stream))
-            {
-                String input;
-
-                if ((input = sr.ReadLine()) != null)
-                {
-                    curHighScore = Convert.ToInt32(input);
-                }
-
-                sr.Close();
-            }
-            #endif
-
-            // Close the file.
-            stream.Close();
-
-            // Dispose the container.
-            container.Dispose();
-
-            #if WINDEMO
-            // Report the data to the console.
-            Debug.WriteLine("Name:     " + data.PlayerName);
-            Debug.WriteLine("Level:    " + data.Level.ToString());
-            Debug.WriteLine("Score:    " + data.Score.ToString());
-            Debug.WriteLine("Position: " + data.AvatarPosition.ToString());
-            #endif
-        }
-
-        /// <summary>
-        /// This method serializes a data object into
-        /// the StorageContainer for this game.
-        /// </summary>
-        /// <param name="device"></param>
-        private void SaveGame(StorageDevice device, int theScore)
-        {
-            // Create the data to save.
-            SaveGameData data = new SaveGameData();
-            data.Score = theScore;
-
-            // Open a storage container.
-            IAsyncResult result =
-                device.BeginOpenContainer("CluckSaves", null, null);
-
-            // Wait for the WaitHandle to become signaled.
-            result.AsyncWaitHandle.WaitOne();
-
-            StorageContainer container = device.EndOpenContainer(result);
-
-            // Close the wait handle.
-            result.AsyncWaitHandle.Close();
-
-            string filename = "highscore_level" + currentLevel + ".sav";
-
-            // Check to see whether the save exists.
-            if (container.FileExists(filename))
-                // Delete it so that we can create one fresh.
-                container.DeleteFile(filename);
-
-            // Create the file.
-            Stream stream = container.CreateFile(filename);
-
-            #if WINDEMO
-            // Convert the object to XML data and put it in the stream.
-            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
-            serializer.Serialize(stream, data);
-            #else
-            using (StreamWriter sw = new StreamWriter(stream))
-            {
-                sw.WriteLine("{0}", data.Score);
-                sw.Close();
-            }
-            #endif
-
-            // Close the file.
-            stream.Close();
-
-            // Dispose the container, to commit changes.
-            container.Dispose();
-        }
 
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
@@ -923,21 +672,17 @@ namespace Cluck
 
             PlayerIndex player;
 
-            if (winState == -1 && deathTimer <= TimeSpan.Zero)
+            if (winState != 0)
             {
-                MediaPlayer.Stop();
-                ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
+                ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
             }
-            else if (winState == 1)
+
+            if (tutorialOn)
             {
-                MediaPlayer.Stop();
-                if (currentLevel == MAX_LEVEL)
+                if (instructionStage < instructionCount)
                 {
-                    ScreenManager.AddScreen(new EndCampaignScreen(score, curHighScore), ControllingPlayer);
-                }
-                else
-                {
-                    ScreenManager.AddScreen(new WinScreen(score, curHighScore), ControllingPlayer);
+                    ScreenManager.AddScreen(new InstructionScreen(instructionStage), ControllingPlayer);
+                    instructionStage++;
                 }
             }
 
@@ -946,7 +691,7 @@ namespace Cluck
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
-                MediaPlayer.Pause();
+                //ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif
             }
@@ -1002,7 +747,7 @@ namespace Cluck
             drawGUI();
             //drawWinState(winState);
             //RenderBox(testBox);
-            
+
             // If the game is transitioning on or off, fade it out to black.
             if (TransitionPosition > 0 || pauseAlpha > 0)
             {
@@ -1021,7 +766,7 @@ namespace Cluck
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
 
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
-            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0,healthBar.Width - 44, healthBar.Height),  Color.Yellow);
+            spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Yellow);
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(0, 0, 44, healthBar.Height), Color.White);
 
             if (camera.chickenCaught)
@@ -1031,7 +776,7 @@ namespace Cluck
                 switch (button)
                 {
                     case (int)Cluck.buttons.xq:
-                        spriteBatch.Draw(controller? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
+                        spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
                         break;
                     case (int)Cluck.buttons.ye:
                         spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
@@ -1075,13 +820,12 @@ namespace Cluck
 
         private void PlayDeathScene(GameTime gameTime)
         {
-            int maxPenElevation = 200;
             if (!cluckExist)
             {
                 GameEntity cluckEntity = new GameEntity();
 
-                Vector3 cluckPosition = new Vector3(500, 10000, 125);
-                PositionComponent cluckPos = new PositionComponent(cluckPosition, 0);
+                Vector3 cluckPosition = new Vector3(0, 10000, 0);
+                PositionComponent cluckPos = new PositionComponent(cluckPosition, (float)(Util.RandomClamped() * Math.PI));
                 //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
                 Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
 
@@ -1117,51 +861,7 @@ namespace Cluck
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
                     world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
                 }
-                penRaiseDelay -= gameTime.ElapsedGameTime;
-
-                Vector3 currentPenPos0 = world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
-                Vector3 currentPenPos1 = world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
-                Vector3 currentPenPos2 = world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
-                Vector3 currentPenPos3 = world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).GetPosition();
-                if (currentPenPos0.Y < maxPenElevation && penRaiseDelay <= TimeSpan.Zero)
-                {
-                    if(cluckzilla.State != SoundState.Playing)
-                        cluckzilla.Play();
-
-                    world.ElementAt<GameEntity>(penIndices[0]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
-                    world.ElementAt<GameEntity>(penIndices[1]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
-                    world.ElementAt<GameEntity>(penIndices[2]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
-                    world.ElementAt<GameEntity>(penIndices[3]).GetComponent<Renderable>(component_flags.renderable).SetBoundingBox(calBoundingBox(chickenPen, new Vector3(2000, 20000, 2000), 0));
-                    world.ElementAt<GameEntity>(penIndices[0]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos0 + new Vector3(0, 5, 0));
-                    world.ElementAt<GameEntity>(penIndices[1]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos1 + new Vector3(0, 5, 0));
-                    world.ElementAt<GameEntity>(penIndices[2]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos2 + new Vector3(0, 5, 0));
-                    world.ElementAt<GameEntity>(penIndices[3]).GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPenPos3 + new Vector3(0, 5, 0));
-                    world.ElementAt<GameEntity>(penIndices[0]).RemoveComponent<FenceComponent>(component_flags.fence);
-                    world.ElementAt<GameEntity>(penIndices[1]).RemoveComponent<FenceComponent>(component_flags.fence);
-                    world.ElementAt<GameEntity>(penIndices[2]).RemoveComponent<FenceComponent>(component_flags.fence);
-                    world.ElementAt<GameEntity>(penIndices[3]).RemoveComponent<FenceComponent>(component_flags.fence);
-                }
-                
-                if (currentPenPos0.Y >= maxPenElevation/5 && !chickensReleased)
-                {
-                   ReleaseChickens();
-                }
             }
-        }
-
-        private void ReleaseChickens()
-        {
-            foreach (GameEntity entity in world)
-            {
-                if (entity.HasComponent((int)component_flags.aiThinking))
-                {
-                    AIThinking sensoryUnit = entity.GetComponent<AIThinking>(component_flags.aiThinking);
-
-                    sensoryUnit.ChangeStates(Attack.Instance);
-                }
-            }
-
-            chickensReleased = true;
         }
 
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
@@ -1264,6 +964,34 @@ namespace Cluck
 
         }
 
+        //protected BoundingSphere CalculateBoundingSphere(Model mod)
+        //{
+        //    BoundingSphere mergedSphere = new BoundingSphere();
+        //    BoundingSphere[] boundingSpheres;
+        //    int index = 0;
+        //    int meshCount = mod.Meshes.Count;
+
+        //    boundingSpheres = new BoundingSphere[meshCount];
+        //    foreach (ModelMesh mesh in mod.Meshes)
+        //    {
+        //        boundingSpheres[index++] = mesh.BoundingSphere;
+        //    }
+
+        //    mergedSphere = boundingSpheres[0];
+        //    if ((mod.Meshes.Count) > 1)
+        //    {
+        //        index = 1;
+        //        do
+        //        {
+        //            mergedSphere = BoundingSphere.CreateMerged(mergedSphere,
+        //                boundingSpheres[index]);
+        //            index++;
+        //        } while (index < mod.Meshes.Count);
+        //    }
+        //    mergedSphere.Center.Y = 0;
+        //    return mergedSphere;
+        //}
+
         private void RenderBox(BoundingBox box)
         {
 
@@ -1365,7 +1093,6 @@ namespace Cluck
                 topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
                 penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityTop.AddComponent(new FenceComponent());
-                penEntityTop.AddComponent(new PenComponent());
 
                 penEntityBottom.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
                     0,
@@ -1373,7 +1100,6 @@ namespace Cluck
                 bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
                 penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityBottom.AddComponent(new FenceComponent());
-                penEntityBottom.AddComponent(new PenComponent());
 
                 world.Add(penEntityTop);
                 world.Add(penEntityBottom);
@@ -1393,7 +1119,6 @@ namespace Cluck
                 leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
                 penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityLeft.AddComponent(new FenceComponent());
-                penEntityLeft.AddComponent(new PenComponent());
 
                 penEntityRight.AddComponent(new PositionComponent(new Vector3((PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
                     0,
@@ -1401,7 +1126,6 @@ namespace Cluck
                 rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
                 penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation()), ToonEffectNoAnimation));
                 penEntityRight.AddComponent(new FenceComponent());
-                penEntityRight.AddComponent(new PenComponent());
 
                 world.Add(penEntityLeft);
                 world.Add(penEntityRight);
@@ -1469,41 +1193,6 @@ namespace Cluck
 
         private void BuildForest(Model trees, Texture2D texture)
         {
-            /*int seed = random.Next(Int32.MaxValue);
-            PerlinNoise noise = new PerlinNoise(seed);
-
-            int maxWidth = 1000;
-            int maxLength = 1000;
-            int treeOffset = 60;
-
-            for (int u = -maxWidth; u < maxWidth; u += 300)
-            {
-                for (int v = -maxLength; v < maxLength; v += 300)
-                {
-                    float value = noise.FractalNoise2D(u, v, 3, 400f, 1f);
-
-                    if (value > 0.015f)
-                    {
-                        int randomXOffset = random.Next(-treeOffset, treeOffset);
-                        int randomYOffset = random.Next(-treeOffset, treeOffset);
-
-                        GameEntity treeEntity = new GameEntity();
-
-                        PositionComponent treePos = new PositionComponent(new Vector3(u + randomXOffset,
-                                0,
-                                v + randomYOffset), 0f);
-                        Renderable treeRenderable = new Renderable(tree, texture, calBoundingBox(trees, treePos.GetPosition(), treePos.GetOrientation()), ToonEffectNoAnimation);
-
-                        treeEntity.AddComponent(treePos);
-                        treeEntity.AddComponent(treeRenderable);
-
-                        world.Add(treeEntity);
-                    }
-
-                    //Console.WriteLine("Perlin Fractal Noise: " + value);
-                }
-            }*/
-
             for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
             {
                 GameEntity fenceEntityTop = new GameEntity();

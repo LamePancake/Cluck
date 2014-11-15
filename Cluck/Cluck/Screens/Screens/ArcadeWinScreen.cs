@@ -1,7 +1,9 @@
 ﻿#region File Description
 //-----------------------------------------------------------------------------
-// WinScreen.cs
+// LossScreen.cs
 //
+// Microsoft XNA Community Game Platform
+// Copyright (C) Microsoft Corporation. All rights reserved.
 //-----------------------------------------------------------------------------
 #endregion
 
@@ -15,7 +17,7 @@ namespace Cluck
     /// The pause menu comes up over the top of the game,
     /// giving the player options to resume or quit.
     /// </summary>
-    class WinScreen : MenuScreen
+    class ArcadeWinScreen : MenuScreen
     {
         #region Initialization
 
@@ -23,11 +25,11 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public WinScreen(int score, int highscore)
-            : base("You managed to prevent Cluck's wrath for today! \n Your Score: " + score + "\n High-Score: " + highscore)
+        public ArcadeWinScreen(int caught)
+            : base("You caught " + caught + " chickens!")
         {
             // Create our menu entries.
-            MenuEntry continueGameMenuEntry = new MenuEntry("Next Level");
+            MenuEntry continueGameMenuEntry = new MenuEntry("Play Again");
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
             // Hook up menu event handlers.
@@ -53,7 +55,7 @@ namespace Cluck
         {
             Cluck.currentLevel += 1;
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
-                               new GameplayScreen(Cluck.currentLevel));
+                               new ArcadeScreen());
         }
 
         /// <summary>
