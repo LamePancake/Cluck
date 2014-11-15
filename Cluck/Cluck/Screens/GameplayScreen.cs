@@ -64,7 +64,8 @@ namespace Cluck
 
         private int minutesAllotted;
         private int secondsAllotted;
-        private int deathSecondsAlotted;
+        private int deathSecondsAlotted; 
+        private int winSecondsAlotted;
         private Boolean cluckExist;
         private Boolean winStateSet;
         private Boolean chickensReleased;
@@ -79,16 +80,20 @@ namespace Cluck
         private Model penBase;
         private Model chickenPen;
         private Model cluck;
+        private Model cluckWin;
         private Song testSong;
         private Song fastSong;
         private Song endSong;
+        private Song winSong;
         private Song currentSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
         private TimeSpan timer;
         private static TimeSpan deathTimer;
+        private static TimeSpan winTimer;
         private TimeSpan penRaiseDelay;
+        private TimeSpan chickenRaiseDelay;
         private Boolean timeStart;
         private string time;
         private Texture2D armsDiffuse;
@@ -179,6 +184,7 @@ namespace Cluck
         private Rectangle buttonPos;
 
         private SoundEffectInstance cluckzilla;
+        private SoundEffectInstance cluckwinna;
 
         public struct SaveGameData
         {
@@ -226,6 +232,7 @@ namespace Cluck
                 minutesAllotted = 0 + (level / 5);
             }
             deathSecondsAlotted = 18;
+            winSecondsAlotted = 18;
 
             total_num_of_chickens = level;
 
@@ -255,7 +262,9 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, secondsAllotted);
             deathTimer = new TimeSpan(0, 0, deathSecondsAlotted);
+            winTimer = new TimeSpan(0, 0, winSecondsAlotted);
             penRaiseDelay = new TimeSpan(0, 0, 6);
+            chickenRaiseDelay = new TimeSpan(0, 0, 6);
             timeStart = false;
             cluckExist = false;
 
@@ -333,6 +342,7 @@ namespace Cluck
 
                 chicken = content.Load<Model>(@"Models\chicken_animv2");
                 cluck = content.Load<Model>(@"Models\cluck");
+                cluckWin = content.Load<Model>(@"Models\cluck_win");
                 forest = content.Load<Model>(@"Models\tree_side");
                 tree = content.Load<Model>(@"Models\tree");
 
@@ -342,6 +352,7 @@ namespace Cluck
                 testSong = content.Load<Song>(@"Audio\Yoshi_looped");
                 fastSong = content.Load<Song>(@"Audio\Yoshi_looped_fast");
                 endSong = content.Load<Song>(@"Audio\ending");
+                winSong = content.Load<Song>(@"Audio\win");
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -354,6 +365,7 @@ namespace Cluck
                 SoundEffect.DopplerScale = 0.1f;
 
                 cluckzilla = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
+                cluckwinna = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -638,7 +650,16 @@ namespace Cluck
                     MediaPlayer.Resume();
                 }
 
-                if (timer <= TimeSpan.Zero)
+                if (winState == 1)
+                {
+                    if (!MediaPlayer.Equals(currentSong, winSong))
+                    {
+                        MediaPlayer.Stop();
+                        MediaPlayer.Play(winSong);
+                        currentSong = winSong;
+                    }
+                }
+                else if (timer <= TimeSpan.Zero)
                 {
                     if (!MediaPlayer.Equals(currentSong, endSong))
                     {
@@ -681,7 +702,7 @@ namespace Cluck
                 //winState = 0;
                 curKeyState = Keyboard.GetState();
 
-                if (timer > TimeSpan.Zero && timeStart)
+                if (timer > TimeSpan.Zero && timeStart && winState != 1)
                 {
                     timer -= gameTime.ElapsedGameTime;
                 }
@@ -737,12 +758,15 @@ namespace Cluck
                     }
                 }
 
-                if (timer <= TimeSpan.Zero)
+                if (timer <= TimeSpan.Zero && winState != 1)
                 {
                     PlayDeathScene(gameTime);
-
                 }
 
+                if (winState == 1 && winTimer > TimeSpan.Zero)
+                {
+                    PlayWinScene(gameTime);
+                }
 
                 if (!winStateSet)
                 {
@@ -942,7 +966,7 @@ namespace Cluck
                 MediaPlayer.Stop();
                 ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
             }
-            else if (winState == 1)
+            else if (winState == 1 && winTimer <= TimeSpan.Zero)
             {
                 MediaPlayer.Stop();
                 if (currentLevel == MAX_LEVEL)
@@ -1163,6 +1187,82 @@ namespace Cluck
                 if (currentPenPos0.Y >= maxPenElevation/5 && !chickensReleased)
                 {
                    ReleaseChickens();
+                }
+            }
+        }
+
+        private void PlayWinScene(GameTime gameTime)
+        {
+            if (!cluckExist)
+            {
+                GameEntity cluckEntity = new GameEntity();
+
+                Vector3 cluckPosition = new Vector3(500, 10000, 125);
+                PositionComponent cluckPos = new PositionComponent(cluckPosition, 0);
+                Renderable cluckRenderable = new Renderable(cluckWin, chickenDiffuse, calBoundingSphere(cluckWin, boundingChickenScale), ToonEffectNoAnimation);
+
+                cluckEntity.AddComponent(cluckPos);
+                cluckEntity.AddComponent(cluckRenderable);
+                world.Add(cluckEntity);
+                cluckExist = true;
+            }
+
+            if (winTimer > TimeSpan.Zero)
+            {
+                winTimer -= gameTime.ElapsedGameTime;
+            }
+
+            Vector3 currentPosition = world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).GetPosition();
+            if (currentPosition.Y > 0 && chickenRaiseDelay > TimeSpan.Zero)
+            {
+                world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPosition + new Vector3(0, -50, 0));
+            }
+            else
+            {
+                for (int i = 0; i < world.Count(); i++)
+                {
+                    if (world[i].HasComponent((int)component_flags.aiSteering))
+                    {
+                        world[i].RemoveComponent<SteeringComponent>(component_flags.aiSteering);
+                        world[i].AddComponent(new FreeComponent());
+                    }
+                }
+
+                if (world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer() == null)
+                {
+                    SkinningData cluckSkinningData = cluckWin.Tag as SkinningData;
+
+                    if (cluckSkinningData == null)
+                        throw new InvalidOperationException
+                            ("This model does not contain a SkinningData tag.");
+
+                    AnimationClip cluckClip = cluckSkinningData.AnimationClips["Take 001"];
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetAnimationPlayer(new AnimationPlayer(cluckSkinningData));
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffect);
+                    world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer().StartClip(cluckClip);
+                }
+                chickenRaiseDelay -= gameTime.ElapsedGameTime;
+
+                if (chickenRaiseDelay <= TimeSpan.Zero)
+                {
+                    if (currentPosition.Y < 10000)
+                    {
+                        if (cluckwinna.State != SoundState.Playing)
+                            cluckwinna.Play();
+
+                        world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetAnimationPlayer();
+                        world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).SetEffect(ToonEffectNoAnimation);
+                        world.Last<GameEntity>().GetComponent<PositionComponent>(component_flags.position).SetPosition(currentPosition + new Vector3(0, 15, 0));
+
+                        for (int i = 0; i < world.Count(); i++)
+                        {
+                            if (world[i].HasComponent((int)component_flags.free))
+                            {
+                                Vector3 cp = world[i].GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                                world[i].GetComponent<PositionComponent>(component_flags.position).SetPosition(cp + new Vector3(0, 15, 0));
+                            }
+                        }
+                    }
                 }
             }
         }

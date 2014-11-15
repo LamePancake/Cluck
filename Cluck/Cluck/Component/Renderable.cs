@@ -133,6 +133,11 @@ namespace Cluck
             animationPlayer = amp;
         }
 
+        public void SetAnimationPlayer()
+        {
+            animationPlayer = null;
+        }
+
         public Effect GetEffect()
         {
             return customEffect;
