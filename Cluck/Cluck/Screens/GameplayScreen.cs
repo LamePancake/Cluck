@@ -81,6 +81,7 @@ namespace Cluck
         private Model cluck;
         private Song testSong;
         private Song fastSong;
+        private Song endSong;
         private Song currentSong;
         private Matrix boundingSphereSize;
         private int boundingSize;
@@ -340,6 +341,7 @@ namespace Cluck
 
                 testSong = content.Load<Song>(@"Audio\Yoshi_looped");
                 fastSong = content.Load<Song>(@"Audio\Yoshi_looped_fast");
+                endSong = content.Load<Song>(@"Audio\ending");
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -636,7 +638,16 @@ namespace Cluck
                     MediaPlayer.Resume();
                 }
 
-                if (timer.Seconds <= 30 && timer.Minutes < 1 && timer.Hours < 1)
+                if (timer <= TimeSpan.Zero)
+                {
+                    if (!MediaPlayer.Equals(currentSong, endSong))
+                    {
+                        MediaPlayer.Stop();
+                        MediaPlayer.Play(endSong);
+                        currentSong = endSong;
+                    }
+                }
+                else if (timer.Seconds <= 30 && timer.Minutes < 1 && timer.Hours < 1)
                 {
                     if(!MediaPlayer.Equals(currentSong, fastSong))
                     {
@@ -918,8 +929,11 @@ namespace Cluck
             // they unplug the active gamepad. This requires us to keep track of
             // whether a gamepad was ever plugged in, because we don't want to pause
             // on PC if they are playing with a keyboard and have no gamepad at all!
-            bool gamePadDisconnected = !gamePadState.IsConnected &&
+            bool gamePadDisconnected = false;
+#if XBOX
+            gamePadDisconnected = !gamePadState.IsConnected &&
                                        input.GamePadWasConnected[playerIndex];
+#endif
 
             PlayerIndex player;
 
@@ -941,7 +955,7 @@ namespace Cluck
                 }
             }
 
-            if (pauseAction.Evaluate(input, ControllingPlayer, out player))
+            if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
@@ -1074,7 +1088,7 @@ namespace Cluck
         }
 
         private void PlayDeathScene(GameTime gameTime)
-        {
+        {    
             int maxPenElevation = 200;
             if (!cluckExist)
             {
@@ -1140,6 +1154,10 @@ namespace Cluck
                     world.ElementAt<GameEntity>(penIndices[1]).RemoveComponent<FenceComponent>(component_flags.fence);
                     world.ElementAt<GameEntity>(penIndices[2]).RemoveComponent<FenceComponent>(component_flags.fence);
                     world.ElementAt<GameEntity>(penIndices[3]).RemoveComponent<FenceComponent>(component_flags.fence);
+
+                    camera.Dead = true;
+                    camera.KillPlayer();
+                    camera.chickenCaught = false;
                 }
                 
                 if (currentPenPos0.Y >= maxPenElevation/5 && !chickensReleased)

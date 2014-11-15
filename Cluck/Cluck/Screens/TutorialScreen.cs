@@ -554,6 +554,11 @@ namespace Cluck
             {
                 timeStart = true;
 
+                if (MediaPlayer.State == MediaState.Paused)
+                {
+                    MediaPlayer.Resume();
+                }
+
                 // Allows the game to exit
                 //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
                 //    this.Exit();
@@ -667,13 +672,17 @@ namespace Cluck
             // they unplug the active gamepad. This requires us to keep track of
             // whether a gamepad was ever plugged in, because we don't want to pause
             // on PC if they are playing with a keyboard and have no gamepad at all!
-            bool gamePadDisconnected = !gamePadState.IsConnected &&
+            bool gamePadDisconnected = false;
+#if XBOX
+            gamePadDisconnected = !gamePadState.IsConnected &&
                                        input.GamePadWasConnected[playerIndex];
+#endif
 
             PlayerIndex player;
 
             if (winState != 0)
             {
+                MediaPlayer.Stop();
                 ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
             }
 
@@ -681,16 +690,18 @@ namespace Cluck
             {
                 if (instructionStage < instructionCount)
                 {
+                    MediaPlayer.Pause();
                     ScreenManager.AddScreen(new InstructionScreen(instructionStage), ControllingPlayer);
                     instructionStage++;
                 }
             }
 
-            if (pauseAction.Evaluate(input, ControllingPlayer, out player))
+            if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
             {
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
+                MediaPlayer.Pause();
                 //ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif

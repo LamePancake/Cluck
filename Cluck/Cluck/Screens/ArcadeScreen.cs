@@ -170,7 +170,7 @@ namespace Cluck
             camera.Reset();
             graphics = Cluck.graphics;
 
-            total_num_of_chickens = 15;
+            total_num_of_chickens = 10;
 
             TransitionOnTime = TimeSpan.FromSeconds(1.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -540,8 +540,6 @@ namespace Cluck
             // add chicken components to chicken
             chickenEntity.AddComponent(chickenRenderable);
             chickenEntity.AddComponent(chickenPos);
-            chickenEntity.AddComponent(new CollidableComponent());
-            chickenEntity.AddComponent(new AudioEmitterComponent(CHICKEN_SOUNDS[0].CreateInstance()));
 
             world.Add(chickenEntity);
         }
@@ -710,7 +708,7 @@ namespace Cluck
             // whether a gamepad was ever plugged in, because we don't want to pause
             // on PC if they are playing with a keyboard and have no gamepad at all!
             bool gamePadDisconnected = false;
-#if xbox
+#if XBOX
             gamePadDisconnected = !gamePadState.IsConnected &&
                                        input.GamePadWasConnected[playerIndex];
 #endif

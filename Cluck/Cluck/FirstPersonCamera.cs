@@ -118,6 +118,9 @@ namespace Cluck
 
         private QuickTimeEvent qte;
 
+        private bool dead;
+        private int tiltFix = 0;
+
         public void Reset()
         {
             head = new HeadBob();
@@ -125,6 +128,12 @@ namespace Cluck
             Position = new Vector3(0, 0, 0);
             chickenCaught = false;
             sprintingTime = MAX_SPRINTING_TIME;
+            dead = false;
+
+            Quaternion tilt = Quaternion.Identity;
+            Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(1 * tiltFix), out tilt);
+            Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+            tiltFix = 0;
         }
 
         public FirstPersonCamera(Game game) : base(game)
@@ -177,6 +186,8 @@ namespace Cluck
             isSliding = false;
 
             qte = new QuickTimeEvent();
+
+            dead = false;
         }
 
         public override void Initialize()
@@ -302,7 +313,7 @@ namespace Cluck
         {
             Input i = inputManager.Update(Game.Window.ClientBounds);
 
-            if (i.IsClapping() && !chickenCaught)
+            if (i.IsClapping() && !chickenCaught && !dead)
             {
                 isClapping = true;
             }
@@ -312,7 +323,7 @@ namespace Cluck
                 isClapping = false;
             }
 
-            if ((i.IsSprinting() || i.IsSliding() || isSliding) && sprintingTime > 0)
+            if ((i.IsSprinting() || i.IsSliding() || isSliding) && sprintingTime > 0 && !dead)
             {
                 float elaspedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
                 sprintingTime -= elaspedSeconds;
@@ -339,7 +350,7 @@ namespace Cluck
 
             UpdateCamera(gameTime, i);
 
-            if (posture != Posture.Jumping)
+            if (!dead)
             {
                 if (i.IsSprinting() && !i.IsCrouching() && sprintingTime > 0)
                 {
@@ -404,11 +415,11 @@ namespace Cluck
             leftArmPos += yAxis * ARM_Y_OFFSET;
             leftArmPos += xAxis * leftXOffset;
 
+  
             return /*Matrix.CreateScale(ARM_SCALE)
                 * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
                 * Matrix.CreateRotationY(MathHelper.ToRadians(HeadingDegrees))
                 * Matrix.CreateTranslation(leftArmPos);
-
         }
 
         public Vector3 GetChickenPosition()
@@ -534,7 +545,7 @@ namespace Cluck
             }
 			
 
-            if (i.IsCrouching())
+            if (i.IsCrouching() || dead)
             {
                 switch (posture)
                 {
@@ -620,16 +631,19 @@ namespace Cluck
                 velocity = velocitySliding;
             else if (i.IsSprinting() && !i.IsCrouching() && sprintingTime > 0)
                 velocity = velocityRunning;
-            else if (i.IsCrouching())
+            else if (i.IsCrouching() || dead)
                 velocity = velocityCrouching;
             else
                 velocity = velocityWalking;
 
-			 direction = GetMovementDirection(direction, i);
+            if(!dead)
+            {
+			    direction = GetMovementDirection(direction, i);
 
-            Rotate(i.GetViewX(), i.GetViewY()); 
-			UpdateVelocity(ref direction, elapsedTimeSec);
-            UpdatePosition(ref direction, elapsedTimeSec);
+                Rotate(i.GetViewX(), i.GetViewY()); 
+			    UpdateVelocity(ref direction, elapsedTimeSec);
+                UpdatePosition(ref direction, elapsedTimeSec);
+            }
         }
 
         /// <summary>
@@ -871,12 +885,21 @@ namespace Cluck
             return qte;
         }
 
+        public void KillPlayer()
+        {
+            Quaternion tilt = Quaternion.Identity;
+            Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-1), out tilt);
+            Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+            tiltFix++;
+        }
+
     #region Properties
 
-
-
-
-
+        public bool Dead
+        {
+            get { return dead; }
+            set { dead = value; }
+        }
 
         public Vector3 Acceleration
         {
