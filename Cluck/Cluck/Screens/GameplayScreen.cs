@@ -102,6 +102,7 @@ namespace Cluck
         private Texture2D woodDiffuse;
         private Texture2D treeDiffuse;
         private Texture2D healthBar;
+        private Texture2D cluckDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
         private static int winState;
@@ -333,6 +334,7 @@ namespace Cluck
                 woodDiffuse = content.Load<Texture2D>(@"Textures\wood_diffuse");
                 treeDiffuse = content.Load<Texture2D>(@"Textures\tree_diffuse");
                 healthBar = content.Load<Texture2D>(@"Textures\HealthBar");
+                cluckDiffuse = content.Load<Texture2D>(@"Textures\cluck_diffuse");
 
                 leftArm = content.Load<Model>(@"Models\arm_left");
                 rightArm = content.Load<Model>(@"Models\arm_right");
@@ -1121,7 +1123,7 @@ namespace Cluck
                 Vector3 cluckPosition = new Vector3(500, 10000, 125);
                 PositionComponent cluckPos = new PositionComponent(cluckPosition, 0);
                 //Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), new AnimationPlayer(cluckSkinningData), ToonEffect);
-                Renderable cluckRenderable = new Renderable(cluck, chickenDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
+                Renderable cluckRenderable = new Renderable(cluck, cluckDiffuse, calBoundingSphere(cluck, boundingChickenScale), ToonEffectNoAnimation);
 
                 cluckEntity.AddComponent(cluckPos);
                 cluckEntity.AddComponent(cluckRenderable);
@@ -1199,7 +1201,7 @@ namespace Cluck
 
                 Vector3 cluckPosition = new Vector3(500, 10000, 125);
                 PositionComponent cluckPos = new PositionComponent(cluckPosition, 0);
-                Renderable cluckRenderable = new Renderable(cluckWin, chickenDiffuse, calBoundingSphere(cluckWin, boundingChickenScale), ToonEffectNoAnimation);
+                Renderable cluckRenderable = new Renderable(cluckWin, cluckDiffuse, calBoundingSphere(cluckWin, boundingChickenScale), ToonEffectNoAnimation);
 
                 cluckEntity.AddComponent(cluckPos);
                 cluckEntity.AddComponent(cluckRenderable);
