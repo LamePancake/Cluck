@@ -23,6 +23,8 @@ namespace Cluck.AI
         {
             SteeringOutput steering = new SteeringOutput();
 
+            target.Y = agentPos.Y;
+
             Vector3 toTarget = target - agentPos;
 
             steering.linear = toTarget;
@@ -222,6 +224,7 @@ namespace Cluck.AI
 
             return steering;
         }
+
 
         public SteeringOutput FleeFly(PositionComponent agentPos, KinematicComponent agentKinematic, Vector3 scaryPos)
         {

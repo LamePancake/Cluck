@@ -66,6 +66,7 @@ namespace Cluck
         private int deathSecondsAlotted;
         private Boolean cluckExist;
         private Boolean winStateSet;
+        private Boolean chickensReleased;
 
         private Model ground;
         private Model forest;
@@ -199,6 +200,7 @@ namespace Cluck
             camera.Reset();
             graphics = Cluck.graphics;
             winStateSet = false;
+            chickensReleased = false;
 
             currentLevel = level;
             baseScore = 100;
@@ -726,6 +728,7 @@ namespace Cluck
                 if (timer <= TimeSpan.Zero)
                 {
                     PlayDeathScene(gameTime);
+
                 }
 
 
@@ -742,7 +745,6 @@ namespace Cluck
                         winState = -1;
                         winStateSet = true;
                     }
-                    UpdateHighScore(gameTime);
                 }
             }
 
@@ -1151,8 +1153,29 @@ namespace Cluck
                     world.ElementAt<GameEntity>(penIndices[2]).RemoveComponent<FenceComponent>(component_flags.fence);
                     world.ElementAt<GameEntity>(penIndices[3]).RemoveComponent<FenceComponent>(component_flags.fence);
                 }
+                
+                if (currentPenPos0.Y >= maxPenElevation/5 && !chickensReleased)
+                {
+                   ReleaseChickens();
+                }
             }
         }
+
+        private void ReleaseChickens()
+        {
+            foreach (GameEntity entity in world)
+            {
+                if (entity.HasComponent((int)component_flags.aiThinking))
+                {
+                    AIThinking sensoryUnit = entity.GetComponent<AIThinking>(component_flags.aiThinking);
+
+                    sensoryUnit.ChangeStates(Attack.Instance);
+                }
+            }
+
+            chickensReleased = true;
+        }
+
         private BoundingSphere calBoundingSphere(Model mod, float boundingScale)
         {
             List<Vector3> points = new List<Vector3>();

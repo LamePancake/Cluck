@@ -20,6 +20,7 @@ namespace Cluck.AI
         private bool wanderOn;
         private bool fleeOn;
         private bool flyOn;
+        private bool seekOn;
         public Ray[] feelers;
         public float feelerLength = 60;
         public bool flying;
@@ -36,6 +37,7 @@ namespace Cluck.AI
             fleeOn = false;
             flyOn = false;
             flying = false;
+            seekOn = false;
 
             target = targetPos;
 
@@ -68,6 +70,15 @@ namespace Cluck.AI
 
                 //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightWander))
                 //    return steeringTot;
+            }
+
+            if (seekOn)
+            {
+                PositionComponent scaryPosition = scaryEntity.GetComponent<PositionComponent>(component_flags.position);
+
+                steering = steeringBehaviours.Seek(scaryPosition.GetPosition(), position.GetPosition(), kinematics);
+
+                steeringTot.linear += (steering.linear * weightFlee);
             }
 
             if (flyOn)
@@ -138,6 +149,11 @@ namespace Cluck.AI
         {
             flyOn = state;
             flying = state;
+        }
+
+        public void SetSeek(bool state)
+        {
+            seekOn = state;
         }
 
         public void SetScaryPos(Vector3 scary)

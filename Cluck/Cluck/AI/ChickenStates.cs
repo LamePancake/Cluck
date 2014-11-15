@@ -245,4 +245,56 @@ namespace Cluck.AI
             }
         }
     }
+
+    class Attack : State
+    {
+        private static Attack instance;
+
+        private Attack() { }
+
+        public static Attack Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    instance = new Attack();
+                }
+                return instance;
+            }
+        }
+
+        public void Enter(AIThinking component, GameEntity entity)
+        {
+            //Console.WriteLine("State Entered: Meander");
+            if (entity.HasComponent((int)component_flags.aiSteering)
+                && entity.HasComponent((int)component_flags.kinematic))
+            {
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+                KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
+                kinematic.maxSpeed = kinematic.maxFlySpeed;
+                steer.SetWander(true);
+                steer.SetFlee(false);
+                steer.SetFly(false);
+                steer.SetSeek(true);
+            }
+        }
+
+        public void Execute(AIThinking component, GameEntity entity, GameTime deltaTime)
+        {
+
+            
+        }
+
+        public void Exit(AIThinking component, GameEntity entity)
+        {
+            //Console.WriteLine("State Exited: Meander");
+            if (entity.HasComponent((int)component_flags.aiSteering))
+            {
+                SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
+
+                //steer.SetWander(false);
+            }
+        }
+    }
 }

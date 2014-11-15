@@ -113,6 +113,7 @@
     <Compile Include="Screens\PhoneMenuScreen.cs" />
     <Compile Include="Screens\PhonePauseScreen.cs" />
     <Compile Include="Screens\PlayerIndexEventArgs.cs" />
+    <Compile Include="Screens\StoryScreen.cs" />
     <Compile Include="Screens\TutorialEndScreen.cs" />
     <Compile Include="Screens\TutorialScreen.cs" />
     <Compile Include="Screens\WinScreen.cs" />
