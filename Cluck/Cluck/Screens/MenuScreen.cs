@@ -29,6 +29,7 @@ namespace Cluck
         List<MenuEntry> menuEntries = new List<MenuEntry>();
         int selectedEntry = 0;
         string menuTitle;
+        Boolean normalEscape;
 
         InputAction menuUp;
         InputAction menuDown;
@@ -62,6 +63,7 @@ namespace Cluck
         {
             this.menuTitle = menuTitle;
 
+            normalEscape = true;
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
 
@@ -126,10 +128,16 @@ namespace Cluck
             }
             else if (menuCancel.Evaluate(input, ControllingPlayer, out playerIndex))
             {
-                OnCancel(playerIndex);
+                if (normalEscape)
+                {
+                    OnCancel(playerIndex);
+                }
+                else
+                {
+                    ScreenManager.Game.Exit();
+                }
             }
         }
-
 
         /// <summary>
         /// Handler for when the user has chosen a menu entry.
@@ -161,6 +169,11 @@ namespace Cluck
         #endregion
 
         #region Update and Draw
+
+        protected virtual void SetEscCommand(Boolean ec)
+        {
+            this.normalEscape = ec;
+        }
 
         protected virtual void ChangeTitle(String title)
         {
