@@ -42,6 +42,8 @@ namespace Cluck
         {
             Content.RootDirectory = "Content";
 
+            Components.Add(new GamerServicesComponent(this));
+
             graphics = new GraphicsDeviceManager(this);
             TargetElapsedTime = TimeSpan.FromTicks(333333);
 
