@@ -25,8 +25,8 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public ArcadeWinScreen(int caught)
-            : base("You caught " + caught + " chickens!")
+        public ArcadeWinScreen(int score, int highscore)
+            : base( "\n Your Score: " + score + "\n High-Score: " + highscore)
         {
             // Create our menu entries.
             MenuEntry continueGameMenuEntry = new MenuEntry("Play Again");

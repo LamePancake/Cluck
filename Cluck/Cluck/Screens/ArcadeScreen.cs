@@ -23,6 +23,7 @@ using Cluck.AI;
 using System.IO;
 using GameStateManagement;
 using SkinnedModel;
+using Microsoft.Xna.Framework.Storage;
 #endregion
 
 namespace Cluck
@@ -134,7 +135,11 @@ namespace Cluck
         // The current high score, if there is one, is stored in "highscore".
         // The FileStream will read this and set the current high score.
         private FileStream highScoreFile;
-        private Int64 curHighScore;
+        private int startTime;
+        private int curHighScore;
+        private int score;
+        private float targetTime;
+        private float baseScore;
 
         // Shown upon achieving a new high score (in case that wasn't obvious).
         private string highScoreMsg = "New high score!";
@@ -154,6 +159,13 @@ namespace Cluck
         private int buttonSize = 75;
         private int buttonScale = MAX_BUTTON_SCALE;
         private Rectangle buttonPos;
+
+        public struct SaveGameData
+        {
+            public int Score;
+        }
+
+        IAsyncResult result;
 
         #endregion
 
@@ -420,6 +432,9 @@ namespace Cluck
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
+                score = curHighScore = -1;
+
+                LoadHighScore();
                 ScreenManager.Game.ResetElapsedTime();
             }
 
@@ -490,19 +505,13 @@ namespace Cluck
         /// </summary>
         private void LoadHighScore()
         {
-            highScoreFile = new FileStream("highscore", FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            FileInfo info = new FileInfo("highscore");
-
-            if (info.Length == 0)
+            //showHighScoreMsg = true;
+            result = StorageDevice.BeginShowSelector(
+                        PlayerIndex.One, null, null);
+            StorageDevice device = StorageDevice.EndShowSelector(result);
+            if (device != null && device.IsConnected)
             {
-                curHighScore = 0x01111111;
-            }
-            else
-            {
-
-                byte[] rawHighScore = new byte[8];
-                highScoreFile.Read(rawHighScore, 0, 8);
-                curHighScore = BitConverter.ToInt32(rawHighScore, 0);
+                LoadGame(device);
             }
         }
 
@@ -663,6 +672,7 @@ namespace Cluck
                 if (timer <= TimeSpan.Zero)
                 {
                     winState = 1;
+                    UpdateHighScore(gameTime);
                 }
 
             }
@@ -676,17 +686,138 @@ namespace Cluck
         /// <param name="gameTime">The total time until the chickens were all caught.</param>
         private void UpdateHighScore(GameTime gameTime)
         {
-            // Write the new high score if we beat it
-            Int64 elapsedMillis = (Int64)gameTime.TotalGameTime.TotalMilliseconds;
-            if (elapsedMillis < curHighScore)
+            score = caughtChickens * 100;
+
+            if (score > curHighScore)
             {
-                showHighScoreMsg = true;
-                byte[] bytes = BitConverter.GetBytes(elapsedMillis);
-                highScoreFile.Seek(0, SeekOrigin.Begin);
-                highScoreFile.Write(bytes, 0, 8);
+                curHighScore = score;
+                result = StorageDevice.BeginShowSelector(
+                            PlayerIndex.One, null, null);
+                StorageDevice device = StorageDevice.EndShowSelector(result);
+                if (device != null && device.IsConnected)
+                {
+                    SaveGame(device, score);
+                }
             }
         }
 
+        /// <summary>
+        /// This method loads a serialized data object
+        /// from the StorageContainer for this game.
+        /// </summary>
+        /// <param name="device"></param>
+        private void LoadGame(StorageDevice device)
+        {
+            // Open a storage container.
+            IAsyncResult result =
+                device.BeginOpenContainer("CluckSaves", null, null);
+
+            // Wait for the WaitHandle to become signaled.
+            result.AsyncWaitHandle.WaitOne();
+
+            StorageContainer container = device.EndOpenContainer(result);
+
+            // Close the wait handle.
+            result.AsyncWaitHandle.Close();
+
+            string filename = "highscore_arcade" + ".sav";
+
+            // Check to see whether the save exists.
+            if (!container.FileExists(filename))
+            {
+                // If not, dispose of the container and return.
+                container.Dispose();
+                curHighScore = -1;
+                return;
+            }
+
+            // Open the file.
+            Stream stream = container.OpenFile(filename, FileMode.Open);
+
+#if WINDEMO
+            // Read the data from the file.
+            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
+            SaveGameData data = (SaveGameData)serializer.Deserialize(stream);
+#else
+            using (StreamReader sr = new StreamReader(stream))
+            {
+                String input;
+
+                if ((input = sr.ReadLine()) != null)
+                {
+                    curHighScore = Convert.ToInt32(input);
+                }
+
+                sr.Close();
+            }
+#endif
+
+            // Close the file.
+            stream.Close();
+
+            // Dispose the container.
+            container.Dispose();
+
+#if WINDEMO
+            // Report the data to the console.
+            Debug.WriteLine("Name:     " + data.PlayerName);
+            Debug.WriteLine("Level:    " + data.Level.ToString());
+            Debug.WriteLine("Score:    " + data.Score.ToString());
+            Debug.WriteLine("Position: " + data.AvatarPosition.ToString());
+#endif
+        }
+
+        /// <summary>
+        /// This method serializes a data object into
+        /// the StorageContainer for this game.
+        /// </summary>
+        /// <param name="device"></param>
+        private void SaveGame(StorageDevice device, int theScore)
+        {
+            // Create the data to save.
+            SaveGameData data = new SaveGameData();
+            data.Score = theScore;
+
+            // Open a storage container.
+            IAsyncResult result =
+                device.BeginOpenContainer("CluckSaves", null, null);
+
+            // Wait for the WaitHandle to become signaled.
+            result.AsyncWaitHandle.WaitOne();
+
+            StorageContainer container = device.EndOpenContainer(result);
+
+            // Close the wait handle.
+            result.AsyncWaitHandle.Close();
+
+            string filename = "highscore_arcade" + ".sav";
+
+            // Check to see whether the save exists.
+            if (container.FileExists(filename))
+                // Delete it so that we can create one fresh.
+                container.DeleteFile(filename);
+
+            // Create the file.
+            Stream stream = container.CreateFile(filename);
+
+#if WINDEMO
+            // Convert the object to XML data and put it in the stream.
+            XmlSerializer serializer = new XmlSerializer(typeof(SaveGameData));
+            serializer.Serialize(stream, data);
+#else
+            using (StreamWriter sw = new StreamWriter(stream))
+            {
+                sw.WriteLine("{0}", data.Score);
+                sw.Close();
+            }
+#endif
+
+            // Close the file.
+            stream.Close();
+
+            // Dispose the container, to commit changes.
+            container.Dispose();
+        }
 
         /// <summary>
         /// Lets the game respond to player input. Unlike the Update method,
@@ -718,7 +849,7 @@ namespace Cluck
             if (winState == 1)
             {
                 MediaPlayer.Stop();
-                ScreenManager.AddScreen(new ArcadeWinScreen(caughtChickens), ControllingPlayer);
+                ScreenManager.AddScreen(new ArcadeWinScreen(score, curHighScore), ControllingPlayer);
             }
 
             if (pauseAction.Evaluate(input, ControllingPlayer, out player) || gamePadDisconnected)
@@ -797,6 +928,7 @@ namespace Cluck
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, "Chickens:" + caughtChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + caughtChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.DrawString(timerFont, "Score: " + caughtChickens * 100, new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - (int)timerFont.MeasureString("Score: " + caughtChickens * 100).X, 0), Color.White);
 
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Yellow);
