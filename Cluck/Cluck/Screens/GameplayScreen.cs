@@ -1059,6 +1059,7 @@ namespace Cluck
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.DrawString(timerFont, "Day " + Cluck.currentLevel, new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - (int)timerFont.MeasureString("Day " + Cluck.currentLevel).X, 0), Color.White);
 
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0,healthBar.Width - 44, healthBar.Height),  Color.Yellow);

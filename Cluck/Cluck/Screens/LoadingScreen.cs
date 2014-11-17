@@ -140,7 +140,7 @@ namespace Cluck
                 SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
                 SpriteFont font = ScreenManager.Font;
 
-                const string message = "Loading...\nThere are 10 days of Cluckmas...";
+                const string message = "Loading...\n";
 
                 // Center the text in the viewport.
                 Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
