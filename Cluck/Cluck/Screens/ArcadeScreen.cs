@@ -693,10 +693,13 @@ namespace Cluck
                 curHighScore = score;
                 result = StorageDevice.BeginShowSelector(
                             PlayerIndex.One, null, null);
-                StorageDevice device = StorageDevice.EndShowSelector(result);
-                if (device != null && device.IsConnected)
+                if (result.IsCompleted)
                 {
-                    SaveGame(device, score);
+                    StorageDevice device = StorageDevice.EndShowSelector(result);
+                    if (device != null && device.IsConnected)
+                    {
+                        SaveGame(device, score);
+                    }
                 }
             }
         }
