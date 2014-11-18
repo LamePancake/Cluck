@@ -11,16 +11,18 @@ namespace Cluck.AI
 
         SteeringBehaviours steeringBehaviours;
         List<GameEntity> walls;
+        List<Obstacle> obstacles;
         public AISystem() : base((int)component_flags.aiThinking) { }
-        public AISystem(List<GameEntity> world) : base((int)component_flags.aiThinking)
+        public AISystem(List<GameEntity> world, List<Obstacle> obs) : base((int)component_flags.aiThinking)
         {
             steeringBehaviours = new SteeringBehaviours();
 
             walls = new List<GameEntity>();
+            obstacles = obs;
 
             foreach (GameEntity entity in world)
             {
-                if (entity.HasComponent((int)component_flags.renderable) && entity.HasComponent((int)component_flags.position))
+                if (entity.HasComponent((int)component_flags.fence) && entity.HasComponent((int)component_flags.renderable) && entity.HasComponent((int)component_flags.position))
                 {
                     walls.Add(entity);
                 }
@@ -60,7 +62,7 @@ namespace Cluck.AI
                     //    sensory.PlayerSpotted(false);
                     //}
 
-                    SteeringOutput output = steering.Calculate(walls, position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
+                    SteeringOutput output = steering.Calculate(obstacles, walls, position, kinematics, deltaTime.ElapsedGameTime.Milliseconds);
                     //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation

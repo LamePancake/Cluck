@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Cluck.AI;
 
 namespace Cluck
 {
@@ -60,6 +61,62 @@ namespace Cluck
             //Console.WriteLine(TransPoint);
 
             return TransPoint;
+        }
+
+        public static bool lineIntersectsCircle(Vector3 ahead, Vector3 ahead2, Obstacle obstacle) 
+        {
+            // the property "center" of the obstacle is a Vector3D.
+            return Vector3.Distance(obstacle.position, ahead) <= obstacle.radius || Vector3.Distance(obstacle.position, ahead2) <= obstacle.radius;
+        }
+
+        public static Vector3 PointToLocalSpace(Vector3 point, Vector3 heading, Vector3 side, Vector3 pos)
+        {
+            //make a copy of the point
+            Vector3 TransPoint = point;
+
+            //create a transformation matrix
+            Matrix matTransform = Matrix.Identity;
+
+            float Tx = -Vector3.Dot(pos, heading);
+            float Tz = -Vector3.Dot(pos, side);
+
+            //rotate
+
+            matTransform.M11 = heading.X;
+            matTransform.M13 = heading.Z;
+            matTransform.M31 = side.X;
+            matTransform.M33 = side.Z;
+            matTransform.M41 = Tx;
+            matTransform.M43 = Tz;
+
+            //Console.WriteLine("Pos: " + Matrix.CreateTranslation(pos));
+            //and translate
+            //matTransform *= Matrix.CreateTranslation(pos);
+
+            //Console.WriteLine("Trans " + matTransform);
+
+            //now transform the vertex
+            TransPoint = Vector3.Transform(TransPoint, matTransform);
+
+            //Console.WriteLine(TransPoint);
+
+            return TransPoint;
+        }
+
+        public static Vector3 VectorToWorldSpace(Vector3 vector, Vector3 heading, Vector3 side)
+        {
+            Vector3 transVec = vector;
+
+            Matrix matTransform = Matrix.Identity;
+
+            matTransform.M11 = heading.X;
+            matTransform.M13 = heading.Z;
+            matTransform.M31 = side.X;
+            matTransform.M33 = side.Z;
+
+            transVec = Vector3.Transform(transVec, matTransform);
+
+            return transVec;
         }
 
         public static Vector3 PerpInZPlane(Vector3 vec)

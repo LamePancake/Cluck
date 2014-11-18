@@ -54,7 +54,7 @@ namespace Cluck.AI
             feelers = new Ray[2];
         }
 
-        public SteeringOutput Calculate(List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)
+        public SteeringOutput Calculate(List<Obstacle> obstacles, List<GameEntity> entities, PositionComponent position, KinematicComponent kinematics, float deltaTime)
         {
             float weightWander = 1f;
             float weightFlee = 0.4f;
@@ -71,6 +71,7 @@ namespace Cluck.AI
                 //if (!AccumulateForce(steeringTot.linear, steering.linear, kinematics, weightWander))
                 //    return steeringTot;
             }
+
 
             if (seekOn)
             {
@@ -98,9 +99,15 @@ namespace Cluck.AI
                 //    return steeringTot;
             }
 
+            steering = steeringBehaviours.ObstacleAvoidance(obstacles, position, kinematics);
+
+            steeringTot.linear += (steering.linear * weightWallAvoid);
+
             steering = steeringBehaviours.WallAvoidance(entities, position, kinematics, this);
 
             steeringTot.linear += (steering.linear * weightWallAvoid);
+
+            
 
             return steeringTot;
         }
