@@ -29,6 +29,7 @@ using Microsoft.Xna.Framework.Storage;
 namespace Cluck
 {
 
+
     /// <summary>
     /// This screen implements the actual game logic. It is just a
     /// placeholder to get the idea across: you'll probably want to
@@ -167,6 +168,9 @@ namespace Cluck
 
         IAsyncResult result;
 
+        float scoreMultiplier = 1;
+        bool chickenWasCaught;
+
         #endregion
 
         #region Initialization
@@ -245,6 +249,8 @@ namespace Cluck
             qteButtons = new Texture2D[4];
             qteKeys = new Texture2D[4];
             buttonPos = new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.5) - 37, (int)(graphics.GraphicsDevice.Viewport.Height * 0.2 - 37), buttonSize, buttonSize);
+
+            chickenWasCaught = camera.chickenCaught;
         }
 
 
@@ -434,7 +440,8 @@ namespace Cluck
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
-                score = curHighScore = -1;
+                score = 0;
+                curHighScore = -1;
 
                 LoadHighScore();
                 ScreenManager.Game.ResetElapsedTime();
@@ -663,12 +670,20 @@ namespace Cluck
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
 
+
+                if (chickenWasCaught && !camera.chickenCaught && !chickenCaught)
+                {
+                    scoreMultiplier = 1;
+                }
+
                 if (chickenCaught)
                 {
                     RespawnChicken();
                     SpawnNewChicken();
                     caughtChickens++;
                     chickenCaught = false;
+                    score += (int)(100 * scoreMultiplier);
+                    scoreMultiplier += 0.5f;
                 }
                 
                 if (timer <= TimeSpan.Zero)
@@ -676,6 +691,8 @@ namespace Cluck
                     winState = 1;
                     UpdateHighScore(gameTime);
                 }
+
+                chickenWasCaught = camera.chickenCaught;
 
             }
 
@@ -688,7 +705,7 @@ namespace Cluck
         /// <param name="gameTime">The total time until the chickens were all caught.</param>
         private void UpdateHighScore(GameTime gameTime)
         {
-            score = caughtChickens * 100;
+            //score = caughtChickens * 100;
 
             if (score > curHighScore)
             {
@@ -930,10 +947,11 @@ namespace Cluck
 
         private void drawGUI()
         {
+            String scoreString = "Score: " + score + "  Multiplier: " + scoreMultiplier.ToString("F1", System.Globalization.CultureInfo.InvariantCulture) + "x";
             spriteBatch.Begin();
             spriteBatch.DrawString(timerFont, "Chickens:" + caughtChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + caughtChickens).X, 0), Color.White);
             spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
-            spriteBatch.DrawString(timerFont, "Score: " + caughtChickens * 100, new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - (int)timerFont.MeasureString("Score: " + caughtChickens * 100).X, 0), Color.White);
+            spriteBatch.DrawString(timerFont, scoreString, new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - ((int)timerFont.MeasureString(scoreString).X / 2), 0), Color.White);
 
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Yellow);

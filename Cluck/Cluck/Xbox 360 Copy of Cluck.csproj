@@ -103,7 +103,6 @@
     <Compile Include="Screens\EndCampaignScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
     <Compile Include="Screens\InstructionScreen.cs" />
-    <Compile Include="Screens\IntroductionScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\LossScreen.cs" />
     <Compile Include="Screens\MainMenuScreen.cs" />
