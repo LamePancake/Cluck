@@ -1593,41 +1593,41 @@ namespace Cluck
         private List<Obstacle> BuildForest(Model trees, Texture2D texture)
         {
             List<Obstacle> treesInPen = new List<Obstacle>();
-            int seed = random.Next(Int32.MaxValue);
-            PerlinNoise noise = new PerlinNoise(seed);
+            //int seed = random.Next(Int32.MaxValue);
+            //PerlinNoise noise = new PerlinNoise(seed);
 
-            int maxWidth = 1000;
-            int maxLength = 1000;
-            int treeOffset = 60;
+            //int maxWidth = 1000;
+            //int maxLength = 1000;
+            //int treeOffset = 60;
 
-            for (int u = -maxWidth; u < maxWidth; u += 300)
-            {
-                for (int v = -maxLength; v < maxLength; v += 300)
-                {
-                    float value = noise.FractalNoise2D(u, v, 3, 400f, 1f);
+            //for (int u = -maxWidth; u < maxWidth; u += 300)
+            //{
+            //    for (int v = -maxLength; v < maxLength; v += 300)
+            //    {
+            //        float value = noise.FractalNoise2D(u, v, 3, 400f, 1f);
 
-                    if (value > 0.015f)
-                    {
-                        int randomXOffset = random.Next(-treeOffset, treeOffset);
-                        int randomYOffset = random.Next(-treeOffset, treeOffset);
+            //        if (value > 0.015f)
+            //        {
+            //            int randomXOffset = random.Next(-treeOffset, treeOffset);
+            //            int randomYOffset = random.Next(-treeOffset, treeOffset);
 
-                        GameEntity treeEntity = new GameEntity();
+            //            GameEntity treeEntity = new GameEntity();
 
-                        PositionComponent treePos = new PositionComponent(new Vector3(u + randomXOffset,
-                                0,
-                                v + randomYOffset), 0f);
-                        Renderable treeRenderable = new Renderable(tree, texture, calBoundingBox(trees, treePos.GetPosition(), treePos.GetOrientation()), ToonEffectNoAnimation);
+            //            PositionComponent treePos = new PositionComponent(new Vector3(u + randomXOffset,
+            //                    0,
+            //                    v + randomYOffset), 0f);
+            //            Renderable treeRenderable = new Renderable(tree, texture, calBoundingBox(trees, treePos.GetPosition(), treePos.GetOrientation()), ToonEffectNoAnimation);
 
-                        treeEntity.AddComponent(treePos);
-                        treeEntity.AddComponent(treeRenderable);
+            //            treeEntity.AddComponent(treePos);
+            //            treeEntity.AddComponent(treeRenderable);
 
-                        world.Add(treeEntity);
-                        treesInPen.Add(new Obstacle(treePos.GetPosition(), 40));
-                    }
+            //            world.Add(treeEntity);
+            //            treesInPen.Add(new Obstacle(treePos.GetPosition(), 40));
+            //        }
 
-                    //Console.WriteLine("Perlin Fractal Noise: " + value);
-                }
-            }
+            //        //Console.WriteLine("Perlin Fractal Noise: " + value);
+            //    }
+            //}
 
             for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
             {
