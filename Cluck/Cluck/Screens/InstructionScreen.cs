@@ -66,7 +66,7 @@ namespace Cluck
                 }
                 else
                 {
-                    ChangeTitle("\n\n\n\n\n\n\n\nObjective\n\nObserve the time on the top left corner. \nYou must catch all the chickens before time runs out, \notherwise Cluck will smite your village of mud eaters.\n"
+                    ChangeTitle("\n\n\n\n\n\n\n\nObjective\n\nObserve the time on the top left corner. \nYou must catch all the chickens before time runs out, \notherwise Cluck will smite your village of chicken herders.\n"
                         + "\nCrouch or slide to catch the chickens, they're short little devils. \nWhen you are in range of the chicken, they will light up yellow.\n"
                         + "\nPress Left Mouse Button while in range to catch the chicken.\nPlace them in the chicken pen for each chicken to count.\n");
                 }
@@ -83,7 +83,7 @@ namespace Cluck
             }
             else if (stage == 5)
             {
-                ChangeTitle("\n\n\n\n\nYup, that's all the tips this sage glue sniffer can tell you. \nCatch the remaining chickens to finish the tutorial!\nGo out and save your village of mud eaters from an angry Cluck!\n");
+                ChangeTitle("\n\n\n\n\nYup, that's all the tips this sage glue sniffer can tell you. \nCatch the remaining chickens to finish the tutorial!\nGo out and save your village of chicken herders from an angry Cluck!\n");
             }
             // Create our menu entries.
 
