@@ -68,6 +68,7 @@
     <Compile Include="AI\AIThinking.cs" />
     <Compile Include="AI\ChickenEntity.cs" />
     <Compile Include="AI\ChickenStates.cs" />
+    <Compile Include="AI\Obstacle.cs" />
     <Compile Include="AI\SensoryMemoryComponent.cs" />
     <Compile Include="AI\State.cs" />
     <Compile Include="AI\SteeringBehaviours.cs" />

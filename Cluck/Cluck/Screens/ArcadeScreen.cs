@@ -388,8 +388,10 @@ namespace Cluck
                 world.Add(penBaseEntity);
                 world.Add(chickenPenEntity);
 
+                List<Obstacle> trees = new List<Obstacle>();
+
                 // now create the AI system.
-                aiSystem = new AISystem(world);
+                aiSystem = new AISystem(world, trees);
 
                 intensityBlue = 1.0f;
                 SkySphereEffect = content.Load<Effect>("SkySphere");

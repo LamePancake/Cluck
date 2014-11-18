@@ -137,6 +137,122 @@ namespace Cluck.AI
             return steering;
         }
 
+        public void TagObstaclesWithinRange(ref List<Obstacle> obstacles, Vector3 pos, float length)
+        {
+            foreach (Obstacle ob in obstacles)
+            {
+                Vector3 toObstacle = ob.position - pos;
+                if (toObstacle.Length() < (length + ob.radius))
+                {
+                    ob.tagged = true;
+                }
+            }
+        }
+
+
+        private Obstacle FindMostThreateningObstacle(List<Obstacle> obstacles, Vector3 ahead, Vector3 ahead2, Vector3 pos)
+        {
+            Obstacle mostThreatening = null;
+
+            foreach (Obstacle ob in obstacles)
+            {
+                bool collided = Util.lineIntersectsCircle(ahead, ahead2, ob);
+
+                if (collided && (mostThreatening == null || Vector3.Distance(pos, ob.position) < Vector3.Distance(pos, mostThreatening.position)))
+                {
+                    mostThreatening = ob;
+                }
+            }
+
+            return mostThreatening;
+        }
+
+        public SteeringOutput ObstacleAvoidance(List<Obstacle> obstacles, PositionComponent agentPos, KinematicComponent agentKinematic)
+        {
+            SteeringOutput steering = new SteeringOutput();
+
+            Vector3 pos = agentPos.GetPosition();
+            Vector3 heading = agentKinematic.heading;
+            Vector3 side = agentKinematic.side;
+
+            float see_ahead = 50;
+
+            Vector3 ahead = pos + heading * see_ahead;
+            Vector3 ahead2 = pos + heading * see_ahead * 0.5f;
+
+            Obstacle mostThreatening = FindMostThreateningObstacle(obstacles, ahead, ahead2, pos);
+
+            if (mostThreatening != null)
+            {
+                steering.linear.X = ahead.X - mostThreatening.position.X;
+                steering.linear.Y = ahead.Y - mostThreatening.position.Y;
+            }
+
+            //Vector3 pos = agentPos.GetPosition();
+            //Vector3 heading = agentKinematic.heading;
+            //Vector3 side = agentKinematic.side;
+
+            //int minDetectionBoxLength = 25;
+            //float dDBoxLength = minDetectionBoxLength + (agentKinematic.maxSpeed / agentKinematic.maxSpeed) * minDetectionBoxLength; // should be speed / maxSpeed, need a reference to speed
+
+            //TagObstaclesWithinRange(ref obstacles, pos, dDBoxLength);
+
+            //Obstacle closestObstacle = null;
+            //float distToClosest = float.MaxValue;
+
+            //Vector3 localPosForClosestOb = Vector3.Zero;
+
+            //foreach (Obstacle ob in obstacles)
+            //{
+            //    if (ob.tagged)
+            //    {
+            //        Vector3 localPos = Util.PointToLocalSpace(ob.position, heading, side, pos);
+
+            //        if (localPos.Z >= 0) // obstacle is infront of agent
+            //        {
+            //            float expandedRadius = ob.radius + dDBoxLength;
+
+            //            if (Math.Abs(localPos.X) < expandedRadius)
+            //            {
+            //                float cX = localPos.X; 
+            //                float cZ = localPos.Z;
+
+            //                float sqrtPart = (float)Math.Sqrt(expandedRadius * expandedRadius - cX * cX);
+
+            //                float ip = cX - sqrtPart;
+
+            //                if (ip <= 0) 
+            //                {
+            //                    ip = cX + sqrtPart; 
+            //                }
+
+            //                if (ip < distToClosest) 
+            //                {
+            //                    distToClosest = ip;
+            //                    closestObstacle = ob;
+            //                    localPosForClosestOb = localPos;
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+
+            //if (closestObstacle != null)
+            //{
+            //    float multiplier = 1.0f + (dDBoxLength - localPosForClosestOb.Z) / dDBoxLength;
+
+            //    steering.linear.X = (closestObstacle.radius - localPosForClosestOb.X) * multiplier;
+
+            //    float brakingWeight = 0.2f;
+
+            //    steering.linear.Z = (closestObstacle.radius - localPosForClosestOb.Z) * brakingWeight;
+            //}
+
+            //steering.linear = Util.VectorToWorldSpace(steering.linear, heading, side);
+
+            return steering;
+        }
+
         public SteeringOutput Align(float targetOrientation, PositionComponent agentPos, KinematicComponent agentKinematic)
         {
             float targetRadius = 0.15f;

@@ -405,7 +405,7 @@ namespace Cluck
                     KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
-
+                    
                     SkinningData skinningData = chicken.Tag as SkinningData;
 
                     if (skinningData == null)
@@ -456,7 +456,9 @@ namespace Cluck
                 BuildPen(chickenPen, woodDiffuse);
                 //BuildPenBase(penBase, null);
 
-                BuildForest(forest, treeDiffuse);
+                List<Obstacle> treesInPen;
+
+                treesInPen = BuildForest(forest, treeDiffuse);
 
                 //chickenPenEntity.AddComponent(new PositionComponent(new Vector3(500, 0, 500), 0.0f));
                 //chickenPenEntity.AddComponent(new Renderable(chickenPen, null, calBoundingBox(chickenPen, chickenPenEntity.GetComponent<PositionComponent>().GetPosition(), 0)));
@@ -478,7 +480,7 @@ namespace Cluck
                     }
                 }
                 // now create the AI system.
-                aiSystem = new AISystem(world);
+                aiSystem = new AISystem(world, treesInPen);
 
                 intensityBlue = 1.0f;
                 SkySphereEffect = content.Load<Effect>("SkySphere");
@@ -580,8 +582,8 @@ namespace Cluck
 
                 if ((randomPos.X > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_XCOORD)
                     || (randomPos.X < PEN_XCOORD - PEN_SPAWNBUFFER)) &&
-                    (randomPos.Y > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_YCOORD)
-                    || (randomPos.Y < PEN_YCOORD - PEN_SPAWNBUFFER)))
+                    (randomPos.Z > (PEN_BASE_WIDTH + PEN_SPAWNBUFFER + PEN_YCOORD)
+                    || (randomPos.Z < PEN_YCOORD - PEN_SPAWNBUFFER)))
                 {
                     inPen = false;
                 }
@@ -1588,9 +1590,10 @@ namespace Cluck
             }
         }
 
-        private void BuildForest(Model trees, Texture2D texture)
+        private List<Obstacle> BuildForest(Model trees, Texture2D texture)
         {
-            /*int seed = random.Next(Int32.MaxValue);
+            List<Obstacle> treesInPen = new List<Obstacle>();
+            int seed = random.Next(Int32.MaxValue);
             PerlinNoise noise = new PerlinNoise(seed);
 
             int maxWidth = 1000;
@@ -1619,11 +1622,12 @@ namespace Cluck
                         treeEntity.AddComponent(treeRenderable);
 
                         world.Add(treeEntity);
+                        treesInPen.Add(new Obstacle(treePos.GetPosition(), 40));
                     }
 
                     //Console.WriteLine("Perlin Fractal Noise: " + value);
                 }
-            }*/
+            }
 
             for (int x = 0; x < FENCE_LINKS_WIDTH; x++)
             {
@@ -1672,6 +1676,8 @@ namespace Cluck
                 world.Add(fenceEntityLeft);
                 world.Add(fenceEntityRight);
             }
+
+            return treesInPen;
         }
 
         #endregion
