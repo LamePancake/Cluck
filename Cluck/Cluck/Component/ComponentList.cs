@@ -73,6 +73,36 @@ namespace Cluck
         }
 
         /// <summary>
+        /// Gets the Dictionary mapping entity ID's to Components for a given component type.
+        /// 
+        /// OR'ing flags together will return the component type with the highest number and is
+        /// a bad idea. Passing component_flags.none will return null.
+        /// </summary>
+        /// <param name="flag">The flag corresponding to the component list to retrieve.</param>
+        /// <returns>A dicitionary mapping entity ID's to components, or null if flag is
+        /// component_flags.none.</returns>
+        public static Dictionary<ulong, Component> GetList(component_flags flag)
+        {
+            int whichList;
+            if (flag == component_flags.none)
+                return null;
+
+            whichList = GetListIndex((int)flag);
+            return lists[whichList];
+        }
+
+        /// <summary>
+        /// Clears all component lists.
+        /// </summary>
+        public static void ClearLists()
+        {
+            foreach (Dictionary<ulong, Component> d in lists)
+            {
+                d.Clear();
+            }
+        }
+
+        /// <summary>
         /// Get the index to the entity-component map for a given component type.
         /// </summary>
         /// <param name="componentFlag">The flag indicating which component list to get.</param>

@@ -270,6 +270,9 @@ namespace Cluck
                 if (content == null)
                     content = new ContentManager(ScreenManager.Game.Services, "Content");
 
+                camera.Reset();
+                ComponentLists.ClearLists();
+
                 // Create a new SpriteBatch, which can be used to draw textures.
                 spriteBatch = new SpriteBatch(graphics.GraphicsDevice);
 
