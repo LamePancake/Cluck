@@ -186,6 +186,8 @@ namespace Cluck
 
         private SoundEffectInstance cluckzilla;
         private SoundEffectInstance cluckwinna;
+        private SoundEffectInstance cluckCrash;
+        private bool crashPlayed = false;
 
         public struct SaveGameData
         {
@@ -371,6 +373,7 @@ namespace Cluck
 
                 cluckzilla = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
                 cluckwinna = content.Load<SoundEffect>(@"Audio\Cluckzilla").CreateInstance();
+                cluckCrash = content.Load<SoundEffect>(@"Audio\crash").CreateInstance();
 
                 audioSystem = new AudioSystem(CHICKEN_SOUNDS);
 
@@ -1151,6 +1154,13 @@ namespace Cluck
             }
             else
             {
+                if (!crashPlayed)
+                {
+                    if (cluckCrash.State != SoundState.Playing)
+                        cluckCrash.Play();
+                    crashPlayed = true;
+                }
+
                 if (world.Last<GameEntity>().GetComponent<Renderable>(component_flags.renderable).GetAnimationPlayer() == null)
                 {
                     SkinningData cluckSkinningData = cluck.Tag as SkinningData;
@@ -1227,6 +1237,13 @@ namespace Cluck
             }
             else
             {
+                if (!crashPlayed)
+                {
+                    if (cluckCrash.State != SoundState.Playing)
+                        cluckCrash.Play();
+                    crashPlayed = true;
+                }
+
                 for (int i = 0; i < world.Count(); i++)
                 {
                     if (world[i].HasComponent((int)component_flags.aiSteering))

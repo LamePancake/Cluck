@@ -120,7 +120,8 @@ namespace Cluck
 
         private bool dead;
         private int tiltFix = 0;
-
+        private int slideFix = 0;
+        
         public void Reset()
         {
             head = new HeadBob();
@@ -134,6 +135,15 @@ namespace Cluck
             Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(1 * tiltFix), out tilt);
             Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
             tiltFix = 0;
+
+            if (slideFix > 0)
+            {
+                Quaternion slideTilt = Quaternion.Identity;
+                Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out slideTilt);
+                Quaternion.Concatenate(ref orientation, ref slideTilt, out orientation);
+                slideFix = 0;
+            }
+            isSliding = false;
         }
 
         public FirstPersonCamera(Game game) : base(game)
@@ -619,11 +629,20 @@ namespace Cluck
             float elapsedTimeSec = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 direction = new Vector3();
 
+            if (slideFix > 0 && !isSliding)
+            {
+                Quaternion tilt = Quaternion.Identity;
+                Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
+                Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                slideFix = 0;
+            }
+
             if (i.IsSliding() && !isSliding && posture != Posture.Rising && sprintingTime > 0)
             {
-                //Quaternion tilt = Quaternion.Identity;
-                //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(3), out tilt);
-                //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                Quaternion tilt = Quaternion.Identity;
+                Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(3), out tilt);
+                Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                slideFix = 3;
                 isSliding = true;
             }
 
@@ -718,11 +737,12 @@ namespace Cluck
                         if (slideElapsedSeconds >= 0.55f)
                         {
                             posture = Posture.Rising;
-                            isSliding = false;
-                            //Quaternion tilt = Quaternion.Identity;
-                            //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-3), out tilt);
-                            //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                            Quaternion tilt = Quaternion.Identity;
+                            Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
+                            Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
                             slideElapsedSeconds = 0;
+                            slideFix = 0;
+                            isSliding = false;
                         }
                     }
                     break;
