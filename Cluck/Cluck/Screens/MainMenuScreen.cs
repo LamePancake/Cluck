@@ -45,7 +45,7 @@ namespace Cluck
             MenuEntries.Add(playTutorialMenuEntry);
             MenuEntries.Add(playGameMenuEntry);
             MenuEntries.Add(playArcadeMenuEntry);
-            MenuEntries.Add(optionsMenuEntry);
+            //MenuEntries.Add(optionsMenuEntry);
             MenuEntries.Add(exitMenuEntry);
         }
 
