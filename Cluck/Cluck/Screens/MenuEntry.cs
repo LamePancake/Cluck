@@ -166,6 +166,7 @@ namespace Cluck
 
             spriteBatch.DrawString(font, text, position, color, 0,
                                    origin, scale, SpriteEffects.None, 0);
+
         }
 
 

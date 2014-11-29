@@ -22,8 +22,12 @@ namespace Cluck
 
         static public FirstPersonCamera camera;
         public static GraphicsDeviceManager graphics;
+
         ScreenManager screenManager;
         ScreenFactory screenFactory;
+
+        ContentManager content;
+
         float curTime;
         static public int currentLevel;
 
@@ -84,6 +88,7 @@ namespace Cluck
             // On Windows and Xbox we just add the initial screens
             AddInitialScreens();
 #endif
+            
         }
         
         private void AddInitialScreens()

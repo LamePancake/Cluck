@@ -7,6 +7,7 @@
 
 #region Using Statements
 using Microsoft.Xna.Framework;
+using GameStateManagement;
 #endregion
 
 namespace Cluck
@@ -26,6 +27,7 @@ namespace Cluck
         public TutorialEndScreen()
             : base("You have completed the tutorial!")
         {
+            Background = BackgroundTexture.cluckScene;
             // Create our menu entries.
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 

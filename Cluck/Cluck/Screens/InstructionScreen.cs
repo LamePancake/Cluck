@@ -8,6 +8,7 @@
 #region Using Statements
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using GameStateManagement;
 #endregion
 
 namespace Cluck
@@ -30,6 +31,7 @@ namespace Cluck
         public InstructionScreen(int stage)
             : base("")
         {
+            Background = BackgroundTexture.cluckScene;
             MenuEntry nextInstructionMenuEntry;
 
             if (stage == 0)

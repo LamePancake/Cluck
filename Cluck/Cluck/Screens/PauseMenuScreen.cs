@@ -9,6 +9,7 @@
 
 #region Using Statements
 using Microsoft.Xna.Framework;
+using GameStateManagement;
 #endregion
 
 namespace Cluck
@@ -29,6 +30,7 @@ namespace Cluck
             : base("Paused")
         {
             // Create our menu entries.
+            Background = BackgroundTexture.black;
             MenuEntry resumeGameMenuEntry = new MenuEntry("Resume Game");
             MenuEntry quitGameMenuEntry = new MenuEntry("Quit Game");
             

@@ -22,6 +22,13 @@ using System.Xml.Linq;
 
 namespace GameStateManagement
 {
+    public enum BackgroundTexture
+    {
+        cluckScene,
+        black,
+        white
+    }
+
     /// <summary>
     /// The screen manager is a component which manages one or more GameScreen
     /// instances. It maintains a stack of screens, calls their Update and Draw
@@ -42,6 +49,7 @@ namespace GameStateManagement
         SpriteBatch spriteBatch;
         SpriteFont font;
         Texture2D blankTexture;
+        Texture2D backgroundTexture;
 
         bool isInitialized;
 
@@ -71,6 +79,14 @@ namespace GameStateManagement
             get { return font; }
         }
 
+        /// <summary>
+        /// A default background shared by all the screens. This saves
+        /// each screen having to bother loading their own local copy.
+        /// </summary>
+        public Texture2D Background
+        {
+            get { return backgroundTexture; }
+        }
 
         /// <summary>
         /// If true, the manager prints out a list of all the screens
@@ -133,6 +149,7 @@ namespace GameStateManagement
             spriteBatch = new SpriteBatch(GraphicsDevice);
             font = content.Load<SpriteFont>("menufont");
             blankTexture = content.Load<Texture2D>("blank");
+            backgroundTexture = content.Load<Texture2D>("background");
 
             // Tell each of the screens to load their content.
             foreach (GameScreen screen in screens)

@@ -7,6 +7,7 @@
 
 #region Using Statements
 using Microsoft.Xna.Framework;
+using GameStateManagement;
 #endregion
 
 namespace Cluck
@@ -26,6 +27,7 @@ namespace Cluck
         public EndCampaignScreen(int score, int highscore)
             : base("Cluck has been satisfied! Your village is safe for the rest of the year!\n Your Score: " + score + "\n High-Score: " + highscore)
         {
+            Background = BackgroundTexture.cluckScene;
             // Create our menu entries.
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 

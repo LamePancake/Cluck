@@ -30,6 +30,7 @@ namespace Cluck
         int selectedEntry = 0;
         string menuTitle;
         Boolean normalEscape;
+        BackgroundTexture background;
 
         InputAction menuUp;
         InputAction menuDown;
@@ -50,6 +51,12 @@ namespace Cluck
             get { return menuEntries; }
         }
 
+        protected BackgroundTexture Background
+        {
+            get { return background; }
+            set { background = value; }
+        }
+
 
         #endregion
 
@@ -61,8 +68,8 @@ namespace Cluck
         /// </summary>
         public MenuScreen(string menuTitle)
         {
+            background = BackgroundTexture.black;
             this.menuTitle = menuTitle;
-
             normalEscape = true;
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
             TransitionOffTime = TimeSpan.FromSeconds(0.5);
@@ -245,8 +252,29 @@ namespace Cluck
             GraphicsDevice graphics = ScreenManager.GraphicsDevice;
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
             SpriteFont font = ScreenManager.Font;
+            Texture2D backgroundTex = null;
+
+            switch (background)
+            {
+                case BackgroundTexture.cluckScene:
+                    backgroundTex = ScreenManager.Background;
+                    break;
+                case BackgroundTexture.white:
+                    backgroundTex = ScreenManager.BlankTexture;
+                    break;
+                default: // black
+                    break;
+            }
+
+            Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
+            Rectangle fullscreen = new Rectangle(0, 0, viewport.Width, viewport.Height);
+
 
             spriteBatch.Begin();
+
+            if (backgroundTex != null)
+                spriteBatch.Draw(backgroundTex, fullscreen,
+                                new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
 
             // Draw each menu entry in turn.
             for (int i = 0; i < menuEntries.Count; i++)
