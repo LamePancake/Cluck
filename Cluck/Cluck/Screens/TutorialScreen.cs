@@ -102,8 +102,8 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Y = 300.0f;
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
-        private const float CAMERA_SLIDING_MULTIPLIER = 2.5f;
-        private const float CAMERA_CROUCHING_MULTIPLIER = 0.85f;
+        private const float CAMERA_SLIDING_MULTIPLIER = 3.0f;
+        private const float CAMERA_CROUCHING_MULTIPLIER = 0.95f;
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
         private const int FENCE_LINKS_WIDTH = 1;
         private const int FENCE_LINKS_HEIGHT = 1;
@@ -159,6 +159,17 @@ namespace Cluck
         private int buttonSize = 75;
         private int buttonScale = MAX_BUTTON_SCALE;
         private Rectangle buttonPos;
+
+        private Texture2D clock;
+        private Texture2D chickenPic;
+
+        public static bool scored = false;
+        private float scoreScale = 0.1f;
+        private float scoreScaleAmount = 0.08f;
+
+        private float amountOfTimeToAdd = 10;
+
+        private AnimatedTexture sprintTexture;
 
         #endregion
 
@@ -287,6 +298,9 @@ namespace Cluck
                 woodDiffuse = content.Load<Texture2D>(@"Textures\wood_diffuse");
                 treeDiffuse = content.Load<Texture2D>(@"Textures\tree_diffuse");
                 healthBar = content.Load<Texture2D>(@"Textures\HealthBar");
+
+                chickenPic = content.Load<Texture2D>(@"Textures\chicken");
+                clock = content.Load<Texture2D>(@"Textures\clock");
 
                 leftArm = content.Load<Model>(@"Models\arm_left");
                 rightArm = content.Load<Model>(@"Models\arm_right");
@@ -441,6 +455,10 @@ namespace Cluck
                 qteKeys[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\e");
                 qteKeys[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\r");
                 qteKeys[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\f");
+
+                sprintTexture = new AnimatedTexture(Vector2.Zero, 0, 1.0f, 0.5f);
+                sprintTexture.Load(content, @"Textures\sprint_motion", 2, 6);
+                sprintTexture.Pause();
 
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
@@ -616,6 +634,17 @@ namespace Cluck
                     buttonScale = MAX_BUTTON_SCALE;
                 }
 
+                if (camera.IsSprinting())
+                {
+                    sprintTexture.Play();
+                }
+                else
+                {
+                    sprintTexture.Pause();
+                }
+
+                sprintTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
+
                 aiSystem.Update(world, gameTime, camera.Position);
                 physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
@@ -624,7 +653,6 @@ namespace Cluck
                 {
                     PlayDeathScene(gameTime);
                 }
-
 
                 if (timer > TimeSpan.Zero && remainingChickens <= 0)
                 {
@@ -778,8 +806,29 @@ namespace Cluck
         private void drawGUI()
         {
             spriteBatch.Begin();
-            spriteBatch.DrawString(timerFont, "Chickens:" + remainingChickens, new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString("Chickens: " + remainingChickens).X, 0), Color.White);
-            spriteBatch.DrawString(timerFont, time, new Vector2(0, 0), Color.White);
+            spriteBatch.Draw(chickenPic, new Rectangle(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString(" x " + remainingChickens).X - (int)(graphics.GraphicsDevice.Viewport.Width * 0.01f + 50), (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), 50, 50), Color.White);
+
+            Vector2 tempVector = new Vector2(graphics.GraphicsDevice.Viewport.Width - (int)timerFont.MeasureString(" x " + remainingChickens).X - (int)(graphics.GraphicsDevice.Viewport.Width * 0.01f), (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f + 10));
+            for (int layer = 0; layer < 4; layer++)
+            {
+                tempVector.X += layer;
+                tempVector.Y += layer;
+                spriteBatch.DrawString(timerFont, " x " + remainingChickens, tempVector, Color.Black);
+            }
+
+            spriteBatch.DrawString(timerFont, " x " + remainingChickens, tempVector, Color.White);
+
+            spriteBatch.Draw(clock, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01f), (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f), 50, 50), Color.White);
+
+            tempVector =  new Vector2((int)(graphics.GraphicsDevice.Viewport.Width * 0.01f) + 50, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f + 10));
+            for (int layer = 0; layer < 4; layer++)
+            {
+                tempVector.X += layer;
+                tempVector.Y += layer;
+                spriteBatch.DrawString(timerFont, time, tempVector, Color.Black);
+            }
+
+            spriteBatch.DrawString(timerFont, time, tempVector, Color.White);
 
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2, 44, healthBar.Height), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Gray);
             spriteBatch.Draw(healthBar, new Rectangle((int)(graphics.GraphicsDevice.Viewport.Width * 0.01) + 44 / 2, (int)((graphics.GraphicsDevice.Viewport.Height / 2 - healthBar.Height / 2) + (healthBar.Height * (1 - camera.GetStaminaRatio()))), 44, (int)(healthBar.Height * camera.GetStaminaRatio())), new Rectangle(45, 0, healthBar.Width - 44, healthBar.Height), Color.Yellow);
@@ -804,6 +853,35 @@ namespace Cluck
                         spriteBatch.Draw(controller ? qteButtons[button] : qteKeys[button], buttonPos, Color.White);
                         break;
                 }
+            }
+
+            if (scored)
+            {
+                tempVector = new Vector2((int)(graphics.GraphicsDevice.Viewport.Width * 0.01f) + 100, (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f + 55));
+                for (int layer = 0; layer < 4; layer++)
+                {
+                    tempVector.X += layer;
+                    tempVector.Y += layer;
+                    spriteBatch.DrawString(timerFont, "+" + amountOfTimeToAdd, tempVector, Color.Black, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
+                }
+                spriteBatch.DrawString(timerFont, "+" + amountOfTimeToAdd, tempVector, Color.White, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
+
+                scoreScale += scoreScaleAmount;
+                if (scoreScale >= 2)
+                {
+                    scoreScaleAmount = -0.08f;
+                }
+                else if (scoreScale <= 0)
+                {
+                    scored = false;
+                    scoreScale = 0.1f;
+                    scoreScaleAmount = 0.08f;
+                }
+            }
+
+            if (!sprintTexture.IsPaused)
+            {
+                sprintTexture.DrawFrame(spriteBatch, new Rectangle(0, 0, graphics.GraphicsDevice.DisplayMode.Width, graphics.GraphicsDevice.DisplayMode.Height));
             }
 
             spriteBatch.End();

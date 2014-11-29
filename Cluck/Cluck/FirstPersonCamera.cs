@@ -43,8 +43,8 @@ namespace Cluck
         private const float DEFAULT_VELOCITY_Y = 1.0f;
         private const float DEFAULT_VELOCITY_Z = 1.0f;
         private const float DEFAULT_RUNNING_MULTIPLIER = 2.0f;
-        private const float DEFAULT_SLIDING_MULTIPLIER = 2.5f;
-        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.85f;
+        private const float DEFAULT_SLIDING_MULTIPLIER = 3.0f;
+        private const float DEFAULT_CROUCHING_MULTIPLIER = 0.95f;
         private const float DEFAULT_SPEED_ROTATION = 0.3f;
         private const float HEIGHT_MULTIPLIER_CROUCHING = 0.6f;
 		private const float HEIGHT_MULTIPLIER_SLIDING = 0.67f;
@@ -105,6 +105,7 @@ namespace Cluck
         float rightXOffset;
 
         private bool isClapping;
+        private bool isSprinting;
 
         public bool chickenCaught;
         HeadBob head;
@@ -144,6 +145,7 @@ namespace Cluck
                 slideFix = 0;
             }
             isSliding = false;
+            isSprinting = false;
         }
 
         public FirstPersonCamera(Game game) : base(game)
@@ -198,6 +200,7 @@ namespace Cluck
             qte = new QuickTimeEvent();
 
             dead = false;
+            isSprinting = false;
         }
 
         public override void Initialize()
@@ -344,6 +347,15 @@ namespace Cluck
             }
 
             sprintingTime = MathHelper.Clamp(sprintingTime, 0, MAX_SPRINTING_TIME);
+
+            if (sprintingTime > 0 && i.IsSprinting())
+            {
+                isSprinting = true;
+            }
+            else
+            {
+                isSprinting = false;
+            }
 
             if (chickenCaught)
             {
@@ -629,20 +641,20 @@ namespace Cluck
             float elapsedTimeSec = (float)gameTime.ElapsedGameTime.TotalSeconds;
             Vector3 direction = new Vector3();
 
-            if (slideFix > 0 && !isSliding)
-            {
-                Quaternion tilt = Quaternion.Identity;
-                Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
-                Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
-                slideFix = 0;
-            }
+            //if (slideFix > 0 && !isSliding)
+            //{
+            //    Quaternion tilt = Quaternion.Identity;
+            //    Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
+            //    Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+            //    slideFix = 0;
+            //}
 
             if (i.IsSliding() && !isSliding && posture != Posture.Rising && sprintingTime > 0)
             {
-                Quaternion tilt = Quaternion.Identity;
-                Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(3), out tilt);
-                Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
-                slideFix = 3;
+                //Quaternion tilt = Quaternion.Identity;
+                //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(3), out tilt);
+                //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                //slideFix = 3;
                 isSliding = true;
             }
 
@@ -737,9 +749,9 @@ namespace Cluck
                         if (slideElapsedSeconds >= 0.55f)
                         {
                             posture = Posture.Rising;
-                            Quaternion tilt = Quaternion.Identity;
-                            Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
-                            Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
+                            //Quaternion tilt = Quaternion.Identity;
+                            //Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-slideFix), out tilt);
+                            //Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
                             slideElapsedSeconds = 0;
                             slideFix = 0;
                             isSliding = false;
@@ -1062,6 +1074,7 @@ namespace Cluck
             return false;
         }
 
+        public bool IsSprinting() { return isSprinting; }
         public bool IsClapping() { return isClapping; }
 
     #endregion

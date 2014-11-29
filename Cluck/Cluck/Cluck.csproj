@@ -71,6 +71,7 @@
     <Compile Include="AI\SteeringComponent.cs" />
     <Compile Include="AI\TestEntity.cs" />
     <Compile Include="AI\TestEntityStates.cs" />
+    <Compile Include="AnimatedTexture.cs" />
     <Compile Include="BoundingSphereRenderer.cs" />
     <Compile Include="Component\ArmComponent.cs" />
     <Compile Include="Component\AudioComponent.cs" />

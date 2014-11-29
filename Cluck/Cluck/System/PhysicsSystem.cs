@@ -185,6 +185,7 @@ namespace Cluck
                             }
 
                             TutorialScreen.remainingChickens--;
+                            TutorialScreen.scored = true;
                             GameplayScreen.addTime = true;
                             GameplayScreen.remainingChickens--;
                             ArcadeScreen.chickenCaught = true;
