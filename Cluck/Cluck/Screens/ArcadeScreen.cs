@@ -1066,7 +1066,7 @@ namespace Cluck
 
             if (!sprintTexture.IsPaused)
             {
-                sprintTexture.DrawFrame(spriteBatch, new Rectangle(0, 0, graphics.GraphicsDevice.DisplayMode.Width, graphics.GraphicsDevice.DisplayMode.Height));
+                sprintTexture.DrawFrame(spriteBatch, new Rectangle(0, 0, graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height));
             }
 
             spriteBatch.End();
