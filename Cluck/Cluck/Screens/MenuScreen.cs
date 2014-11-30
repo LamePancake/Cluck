@@ -265,6 +265,9 @@ namespace Cluck
                 case BackgroundTexture.betweenLevel:
                     backgroundTex = ScreenManager.BetweenLevels;
                     break;
+                case BackgroundTexture.lostCampaign:
+                    backgroundTex = ScreenManager.LostCampaign;
+                    break;
                 default: // black
                     break;
             }

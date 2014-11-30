@@ -26,6 +26,7 @@ namespace GameStateManagement
     {
         cluckScene,
         betweenLevel,
+        lostCampaign,
         black,
         white
     }
@@ -52,6 +53,7 @@ namespace GameStateManagement
         Texture2D blankTexture;
         Texture2D backgroundTexture;
         Texture2D betweenLevelTexture;
+        Texture2D lostCampaignTexture;
 
         bool isInitialized;
 
@@ -96,6 +98,11 @@ namespace GameStateManagement
         public Texture2D BetweenLevels
         {
             get { return betweenLevelTexture; }
+        }
+
+        public Texture2D LostCampaign
+        {
+            get { return lostCampaignTexture; }
         }
 
         /// <summary>
@@ -161,6 +168,7 @@ namespace GameStateManagement
             blankTexture = content.Load<Texture2D>("blank");
             backgroundTexture = content.Load<Texture2D>("background");
             betweenLevelTexture = content.Load<Texture2D>("betweenlevels");
+            lostCampaignTexture = content.Load<Texture2D>("lostcampaign");
 
             // Tell each of the screens to load their content.
             foreach (GameScreen screen in screens)

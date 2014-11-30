@@ -29,7 +29,7 @@ namespace Cluck
              + "appease him!\nYour entire village was turned into goats!")
         {
             // Create our menu entries.
-            Background = BackgroundTexture.cluckScene;
+            Background = BackgroundTexture.lostCampaign;
             MenuEntry playAgainGameMenuEntry = new MenuEntry("Play Again");
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
