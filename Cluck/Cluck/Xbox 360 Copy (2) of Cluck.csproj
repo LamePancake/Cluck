@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ProjectGuid>{5a236b7d-0af5-4d81-a67c-c3453c868fb7}</ProjectGuid>
+    <ProjectGuid>{6294defd-a214-47b2-9d94-80be9b31927f}</ProjectGuid>
     <ProjectTypeGuids>{6D335F3A-9D43-41b4-9D22-F6F17C4BE596};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">Xbox 360</Platform>
@@ -62,7 +62,6 @@
     <Compile Include="AI\AIThinking.cs" />
     <Compile Include="AI\ChickenEntity.cs" />
     <Compile Include="AI\ChickenStates.cs" />
-    <Compile Include="AI\Obstacle.cs" />
     <Compile Include="AI\SensoryMemoryComponent.cs" />
     <Compile Include="AI\State.cs" />
     <Compile Include="AI\SteeringBehaviours.cs" />
@@ -97,7 +96,6 @@
     <Compile Include="Screens\EndCampaignScreen.cs" />
     <Compile Include="Screens\GameplayScreen.cs" />
     <Compile Include="Screens\InstructionScreen.cs" />
-    <Compile Include="Screens\IntroductionScreen.cs" />
     <Compile Include="Screens\LoadingScreen.cs" />
     <Compile Include="Screens\LossScreen.cs" />
     <Compile Include="Screens\MainMenuScreen.cs" />
@@ -134,11 +132,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\GameStateManagement\Xbox 360 Copy of GameStateManagement (Windows).csproj">
-      <Project>{c5c7422a-5d80-4a8d-94a3-c58e4b4fe906}</Project>
+      <Project>{73e57fa1-3cfb-48d4-9688-d3011963291a}</Project>
       <Name>Xbox 360 Copy of GameStateManagement (Windows)</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\SkinnedModel\Xbox 360 Copy of SkinnedModel.csproj">
-      <Project>{3bd2d75e-fa82-43d1-80d8-cb04c1bb9832}</Project>
+      <Project>{a3b7f480-a2a2-4dc0-8cc1-c759bff13a34}</Project>
       <Name>Xbox 360 Copy of SkinnedModel</Name>
     </ProjectReference>
     <ProjectReference Include="..\CluckContent\CluckContent.contentproj">

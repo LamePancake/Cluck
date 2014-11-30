@@ -10,6 +10,9 @@ Content\gradient.xnb
 Content\Textures\grassplaceholder.xnb
 Content\Textures\tree_diffuse.xnb
 Content\Textures\HealthBar.xnb
+Content\Textures\chicken.xnb
+Content\Textures\clock.xnb
+Content\Textures\sprint_motion.xnb
 Content\MessageFont.xnb
 Content\gamefont.xnb
 Content\menufont.xnb
@@ -45,6 +48,7 @@ Content\Audio\Cluck7.xnb
 Content\Audio\Cluck8.xnb
 Content\Audio\yoshi.xnb
 Content\Audio\Yoshi_looped.xnb
+Content\Audio\crash.xnb
 Content\chicken_diffuse_0.xnb
 Content\chicken_diffuse_1.xnb
 Content\chicken_diffuse_2.xnb
