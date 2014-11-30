@@ -262,6 +262,9 @@ namespace Cluck
                 case BackgroundTexture.white:
                     backgroundTex = ScreenManager.BlankTexture;
                     break;
+                case BackgroundTexture.betweenLevel:
+                    backgroundTex = ScreenManager.BetweenLevels;
+                    break;
                 default: // black
                     break;
             }

@@ -25,6 +25,7 @@ namespace GameStateManagement
     public enum BackgroundTexture
     {
         cluckScene,
+        betweenLevel,
         black,
         white
     }
@@ -50,6 +51,7 @@ namespace GameStateManagement
         SpriteFont font;
         Texture2D blankTexture;
         Texture2D backgroundTexture;
+        Texture2D betweenLevelTexture;
 
         bool isInitialized;
 
@@ -86,6 +88,14 @@ namespace GameStateManagement
         public Texture2D Background
         {
             get { return backgroundTexture; }
+        }
+
+        /// <summary>
+        /// Background image used for between levels of campaign mode.
+        /// </summary>
+        public Texture2D BetweenLevels
+        {
+            get { return betweenLevelTexture; }
         }
 
         /// <summary>
@@ -150,6 +160,7 @@ namespace GameStateManagement
             font = content.Load<SpriteFont>("menufont");
             blankTexture = content.Load<Texture2D>("blank");
             backgroundTexture = content.Load<Texture2D>("background");
+            betweenLevelTexture = content.Load<Texture2D>("betweenlevels");
 
             // Tell each of the screens to load their content.
             foreach (GameScreen screen in screens)
