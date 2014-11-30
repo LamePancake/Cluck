@@ -294,8 +294,8 @@ namespace Cluck
                 chickenPic = content.Load<Texture2D>(@"Textures\chicken");
                 clock = content.Load<Texture2D>(@"Textures\clock");
 
-                leftArm = content.Load<Model>(@"Models\arm_left");
-                rightArm = content.Load<Model>(@"Models\arm_right");
+                leftArm = content.Load<Model>(@"Models\arm_left_extended");
+                rightArm = content.Load<Model>(@"Models\arm_right_extended");
 
                 fence = content.Load<Model>(@"Models\fence_side");
                 ground = content.Load<Model>(@"Models\ground_v2");
