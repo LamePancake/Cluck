@@ -268,6 +268,9 @@ namespace Cluck
                 case BackgroundTexture.lostCampaign:
                     backgroundTex = ScreenManager.LostCampaign;
                     break;
+                case BackgroundTexture.wonCampaign:
+                    backgroundTex = ScreenManager.WonCampaign;
+                    break;
                 default: // black
                     break;
             }

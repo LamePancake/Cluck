@@ -29,7 +29,7 @@ namespace Cluck
         public ArcadeWinScreen(int score, int highscore)
             : base( "\n Your Score: " + score + "\n High-Score: " + highscore)
         {
-            Background = BackgroundTexture.cluckScene;
+            Background = BackgroundTexture.black;
             // Create our menu entries.
             MenuEntry continueGameMenuEntry = new MenuEntry("Play Again");
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");

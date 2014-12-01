@@ -31,7 +31,7 @@ namespace Cluck
         public InstructionScreen(int stage)
             : base("")
         {
-            Background = BackgroundTexture.cluckScene;
+            Background = BackgroundTexture.black;
             MenuEntry nextInstructionMenuEntry;
 
             if (stage == 0)

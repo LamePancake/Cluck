@@ -27,7 +27,7 @@ namespace Cluck
         public EndCampaignScreen(int score, int highscore)
             : base("Cluck has been satisfied! Your village is safe for the rest of the year!\n Your Score: " + score + "\n High-Score: " + highscore)
         {
-            Background = BackgroundTexture.cluckScene;
+            Background = BackgroundTexture.wonCampaign;
             // Create our menu entries.
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
