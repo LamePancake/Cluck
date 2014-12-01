@@ -171,6 +171,7 @@ namespace Cluck
         private float amountOfTimeToAdd = 10;
 
         private AnimatedTexture sprintTexture;
+        private AnimatedTexture slideTexture;
 
         #endregion
 
@@ -457,9 +458,13 @@ namespace Cluck
                 qteKeys[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\r");
                 qteKeys[(int)Cluck.buttons.af] = content.Load<Texture2D>(@"Textures\f");
 
-                sprintTexture = new AnimatedTexture(Vector2.Zero, 0, 1.0f, 0.5f);
+                sprintTexture = new AnimatedTexture(Vector2.Zero, 0, 1.0f, 0.5f, false);
                 sprintTexture.Load(content, @"Textures\sprint_motion", 2, 6);
                 sprintTexture.Pause();
+
+                slideTexture = new AnimatedTexture(Vector2.Zero, 0, 1.0f, 0.5f, true);
+                slideTexture.Load(content, @"Textures\mud_streaks", 8, 8);
+                slideTexture.Pause();
 
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
@@ -635,7 +640,7 @@ namespace Cluck
                     buttonScale = MAX_BUTTON_SCALE;
                 }
 
-                if (camera.IsSprinting())
+                if (camera.IsSprinting() && !camera.IsSliding())
                 {
                     sprintTexture.Play();
                 }
@@ -645,6 +650,18 @@ namespace Cluck
                 }
 
                 sprintTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
+
+                if (camera.IsSliding())
+                {
+                    slideTexture.Play();
+                }
+                else
+                {
+                    slideTexture.Reset();
+                    slideTexture.Pause();
+                }
+
+                slideTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                 aiSystem.Update(world, gameTime, camera.Position);
                 physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
@@ -883,6 +900,11 @@ namespace Cluck
             if (!sprintTexture.IsPaused)
             {
                 sprintTexture.DrawFrame(spriteBatch, new Rectangle(0, 0, graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height));
+            }
+
+            if (!slideTexture.IsPaused)
+            {
+                slideTexture.DrawFrame(spriteBatch, new Rectangle(0, 0, graphics.GraphicsDevice.Viewport.Width, graphics.GraphicsDevice.Viewport.Height));
             }
 
             spriteBatch.End();

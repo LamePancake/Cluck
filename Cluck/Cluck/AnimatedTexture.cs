@@ -15,16 +15,19 @@ namespace Cluck
         private int Frame;
         private float TotalElapsed;
         private bool Paused;
+        private bool OneCylcle;
+        private bool flag = false;
 
         public float Rotation, Scale, Depth;
         public Vector2 Origin;
         public AnimatedTexture(Vector2 origin, float rotation,
-            float scale, float depth)
+            float scale, float depth, bool oneCylcle)
         {
             this.Origin = origin;
             this.Rotation = rotation;
             this.Scale = scale;
             this.Depth = depth;
+            this.OneCylcle = oneCylcle;
         }
         public void Load(ContentManager content, string asset,
             int frameCount, int framesPerSec)
@@ -67,12 +70,21 @@ namespace Cluck
         }
         public void DrawFrame(SpriteBatch batch, Rectangle screenPos)
         {
+            if (flag)
+                return;
+
             int FrameWidth = myTexture.Width / framecount;
             Rectangle sourcerect = new Rectangle(FrameWidth * Frame, 0,
                 FrameWidth, myTexture.Height);
             //batch.Draw(myTexture, screenPos, Color.White);
             batch.Draw(myTexture, screenPos, sourcerect, Color.White,
                 Rotation, Origin, SpriteEffects.None, Depth);
+
+            if (Frame == framecount - 1 && OneCylcle)
+            {
+                flag = true;
+                return;
+            }
         }
 
         public bool IsPaused
@@ -83,6 +95,7 @@ namespace Cluck
         {
             Frame = 0;
             TotalElapsed = 0f;
+            flag = false;
         }
         public void Stop()
         {

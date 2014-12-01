@@ -746,7 +746,7 @@ namespace Cluck
                         eye.Y = eyeHeightSliding;
 
                         slideElapsedSeconds += elapsedTimeSec;
-                        if (slideElapsedSeconds >= 0.55f)
+                        if (slideElapsedSeconds >= 0.8f)//0.55
                         {
                             posture = Posture.Rising;
                             //Quaternion tilt = Quaternion.Identity;
@@ -1074,6 +1074,7 @@ namespace Cluck
             return false;
         }
 
+        public bool IsSliding() { return isSliding; }
         public bool IsSprinting() { return isSprinting; }
         public bool IsClapping() { return isClapping; }
 
