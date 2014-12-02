@@ -27,6 +27,18 @@ namespace Cluck
 			Sliding
         };
 
+        /// <summary>
+        /// Specifies the signature for a callback function to be invoked when the player moves.
+        /// The function receives the previous and desired positions and the direction of movement
+        /// and returns the new camera position. Allows for keeping the camera in bounds and arbitrary
+        /// restriction of movement.
+        /// </summary>
+        /// <param name="prevPos">The camera position in the last update.</param>
+        /// <param name="desiredPos">The desired position.</param>
+        /// <param name="direction">The direction of movement.</param>
+        /// <returns>The new position for the camera.</returns>
+        public delegate void PositionUpdateCallback(ref Vector3 prevPos, ref Vector3 desiredPos, ref Vector3 direction, out Vector3 finalPos);
+
         public const float MAX_SPRINTING_TIME = 5;
 
         public const float DEFAULT_FOVX = 90.0f;
@@ -63,6 +75,7 @@ namespace Cluck
         private float eyeHeightStanding;
         private float eyeHeightCrouching;
 		private float eyeHeightSliding;
+        private PositionUpdateCallback posUpdate;
         private Vector3 eye;
         private Vector3 target;
         private Vector3 targetYAxis;
@@ -229,14 +242,19 @@ namespace Cluck
             // straight up and down.
 
             Vector3 forwards = Vector3.Normalize(Vector3.Cross(WORLD_Y_AXIS, xAxis));
+            Vector3 prev = Position;
 
             eye += xAxis * dx;
             eye += WORLD_Y_AXIS * dy;
             eye += forwards * dz;
 
+            if (posUpdate != null)
+                posUpdate(ref prev, ref eye, ref forwards, out eye);
+
             Position = eye;
         }
 
+       
         public void Perspective(float fovx, float aspect, float znear, float zfar)
         {
             this.fovx = fovx;
@@ -989,7 +1007,13 @@ namespace Cluck
                 UpdateViewMatrix();
             }
         }
-                
+
+        public PositionUpdateCallback PositionUpdate
+        {
+            get { return posUpdate; }
+            set { posUpdate = value; }
+        }
+
         public Matrix ProjectionMatrix
         {
             get { return projMatrix; }

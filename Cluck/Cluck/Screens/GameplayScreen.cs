@@ -127,14 +127,19 @@ namespace Cluck
         private const int FENCE_LINKS_WIDTH = 1;
         private const int FENCE_LINKS_HEIGHT = 1;
         private const int FENCE_WIDTH = 211 * 11;
-        private const int PEN_WIDTH = 0;//118;
+        private const int PEN_WIDTH = 0;
         private const int PEN_LINKS_WIDTH = 1;
         private const int PEN_LINKS_HEIGHT = 1;
         private const int PEN_BASE_WIDTH = 110;
         private const int PEN_YCOORD = 500;
         private const int PEN_XCOORD = 500;
         private const int PEN_SPAWNBUFFER = 100;
-
+        private const float PEN_TRANS = 118.8f;
+        private const float PEN_BOUNDARY_BUFFER = 60.0f;
+        private const float PEN_LEFT_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD - PEN_TRANS;
+        private const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
+        private const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
+        private const float PEN_BOTTOM_BOUND = (PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_YCOORD + PEN_TRANS;
         private FirstPersonCamera camera;
 
         private int windowWidth;
@@ -284,6 +289,7 @@ namespace Cluck
             cluckExist = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
+            camera.PositionUpdate = null;
             camera.Acceleration = new Vector3(
                 CAMERA_ACCELERATION_X,
                 CAMERA_ACCELERATION_Y,
@@ -741,9 +747,6 @@ namespace Cluck
                 }
 
                 time = String.Format("{0,2:D2}", timer.Hours) + ":" + String.Format("{0,2:D2}", timer.Minutes) + ":" + String.Format("{0,2:D2}", timer.Seconds);
-
-                KeepCameraInBounds();
-
                 if (camera.chickenCaught && GamePad.GetState(PlayerIndex.One).IsConnected)
                 {
                     Random r = new Random();
@@ -1209,29 +1212,66 @@ namespace Cluck
             spriteBatch.End();
         }
 
-        private void KeepCameraInBounds()
+        /// <summary>
+        /// Keeps the camera out of the pen and within the bounds of the level.
+        /// </summary>
+        /// <param name="prevPos">The camera's previous position.</param>
+        /// <param name="desiredPos">The camera's desired position.</param>
+        /// <param name="forwards">The forward direction of the camera.</param>
+        /// <returns></returns>
+        private void KeepCameraInBounds(ref Vector3 prev, ref Vector3 desiredPos, ref Vector3 forwards, out Vector3 finalPos)
         {
-            Vector3 newPos = camera.Position;
+            Vector3 newPos = desiredPos;
+            const float penRight = PEN_RIGHT_BOUND + PEN_BOUNDARY_BUFFER;
+            const float penLeft = PEN_LEFT_BOUND - PEN_BOUNDARY_BUFFER;
+            const float penTop = PEN_TOP_BOUND - PEN_BOUNDARY_BUFFER;
+            const float penBottom = PEN_BOTTOM_BOUND + PEN_BOUNDARY_BUFFER;
 
-            if (camera.Position.X < -1070.0f)
+            #region Stay in Bounds
+            // East and West fences
+            if (desiredPos.X < -1070.0f)
                 newPos.X = -1070.0f;
-
-            if (camera.Position.X > 1070.0f)
+            else if (desiredPos.X > 1070.0f)
                 newPos.X = 1070.0f;
 
-            if (camera.Position.Y > 1070.0f)
-                newPos.Y = 1070.0f;
-
-            if (camera.Position.Y < -1.0f)
+            // Crouching height
+            if (desiredPos.Y < -1.0f)
                 newPos.Y = -1.0f;
 
-            if (camera.Position.Z < -1070.0f)
+            // North and South fences
+            if (desiredPos.Z < -1070.0f)
                 newPos.Z = -1070.0f;
-
-            if (camera.Position.Z > 1070.0f)
+            else if (desiredPos.Z > 1070.0f)
                 newPos.Z = 1070.0f;
 
-            camera.Position = newPos;
+            #endregion
+            #region Stay out of Pen
+            // Get them out of the pen if they're in there
+            if(desiredPos.X < penRight && desiredPos.X > penLeft
+               && desiredPos.Z < penBottom && desiredPos.Z > penTop)
+            {
+                bool wasInZ = prev.Z < penBottom && prev.Z > penTop;
+                bool wasInX = prev.X < penRight && prev.X > penLeft;
+
+                // If they're moving positively along Z, then they came from the top part of the pen
+                if (!wasInZ)
+                {
+                    if (forwards.Z > 0)
+                        newPos.Z = penTop;
+                    // Otherwise they're coming from the top part of the pen
+                    else
+                        newPos.Z = penBottom;
+                }
+                if (!wasInX)
+                {
+                    if (forwards.X > 0)
+                        newPos.X = penLeft;
+                    else
+                        newPos.X = penRight;
+                }
+            }
+            #endregion
+            finalPos = newPos;
         }
 
         private void PlayDeathScene(GameTime gameTime)
