@@ -118,7 +118,7 @@ namespace Cluck.AI
 
             double MagnitudeSoFar = RunningTot.Length();
 
-            double MagnitudeRemaining = kinematic.maxSpeed - MagnitudeSoFar;
+            double MagnitudeRemaining = kinematic.MaxSpeed - MagnitudeSoFar;
 
             if (MagnitudeRemaining <= 0.0) return false;
 

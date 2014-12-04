@@ -30,7 +30,7 @@ namespace Cluck.AI
             steering.linear = toTarget;
 
             steering.linear.Normalize();
-            steering.linear = steering.linear * agent.maxAcceleration;
+            steering.linear = steering.linear * agent.MaxAcceleration;
 
             steering.angular = 0;
 
@@ -51,7 +51,7 @@ namespace Cluck.AI
 
             Vector3 targetLocal = agentSteering.wanderTarget + new Vector3(agentSteering.wanderOffset, 0, 0);
 
-            Vector3 targetWorld = Util.PointToWorldSpace(targetLocal, agentkinematic.heading, agentkinematic.side, agentPos.GetPosition());
+            Vector3 targetWorld = Util.PointToWorldSpace(targetLocal, agentkinematic.Heading, agentkinematic.Side, agentPos.GetPosition());
 
             steering = Seek(targetWorld, agentPos.GetPosition(), agentkinematic);
 
@@ -66,7 +66,7 @@ namespace Cluck.AI
             //agentSteering.feelers[0].Direction = agentkinematic.heading;
 
             ////feeler to left
-            Vector3 temp = agentkinematic.heading;
+            Vector3 temp = agentkinematic.Heading;
             temp = Util.Vec3RotateAroundOrigin(temp, (float)((Math.PI / 3f)));
 
             agentSteering.feelers[0].Position = agentPos.GetPosition();
@@ -76,7 +76,7 @@ namespace Cluck.AI
             //temp = agentkinematic.heading;
             //temp = Util.Vec3RotateAroundOrigin(temp, (float)(Math.PI / 2) * 0.5f);
             //agentSteering.feelers.Add(agentPos.GetPosition() + (agentSteering.feelerLength / 2.0f * temp));
-            temp = agentkinematic.heading;
+            temp = agentkinematic.Heading;
             temp = Util.Vec3RotateAroundOrigin(temp, -(float)(Math.PI / 3f));
             
             agentSteering.feelers[1].Position = agentPos.GetPosition();
@@ -172,8 +172,8 @@ namespace Cluck.AI
             SteeringOutput steering = new SteeringOutput();
 
             Vector3 pos = agentPos.GetPosition();
-            Vector3 heading = agentKinematic.heading;
-            Vector3 side = agentKinematic.side;
+            Vector3 heading = agentKinematic.Heading;
+            Vector3 side = agentKinematic.Side;
 
             float see_ahead = 50;
 
@@ -287,25 +287,25 @@ namespace Cluck.AI
 
             if (rotationSize > slowRadius)
             {
-                targetRotation = agentKinematic.maxRotation;
+                targetRotation = agentKinematic.MaxRotation;
             }
             else
             {
-                targetRotation = (agentKinematic.maxRotation * rotationSize) / slowRadius;
+                targetRotation = (agentKinematic.MaxRotation * rotationSize) / slowRadius;
             }
 
             targetRotation *= (rotation / rotationSize);
 
-            steering.angular = targetRotation - agentKinematic.rotation;
+            steering.angular = targetRotation - agentKinematic.Rotation;
 
             steering.angular /= timeToTarget;
 
             float angularAcceleration = Math.Abs(steering.angular);
 
-            if (angularAcceleration > agentKinematic.maxAngularAcceleration)
+            if (angularAcceleration > agentKinematic.MaxAngularAcceleration)
             {
                 steering.angular /= angularAcceleration;
-                steering.angular *= agentKinematic.maxAngularAcceleration;
+                steering.angular *= agentKinematic.MaxAngularAcceleration;
             }
 
             steering.linear = new Vector3(0, 0, 0);
@@ -334,7 +334,7 @@ namespace Cluck.AI
 
             steering.linear.Normalize();
 
-            steering.linear = steering.linear * agentKinematic.maxAcceleration;
+            steering.linear = steering.linear * agentKinematic.MaxAcceleration;
 
             steering.angular = 0;
 
@@ -363,7 +363,7 @@ namespace Cluck.AI
 
             steering.linear.Normalize();
 
-            steering.linear = steering.linear * agentKinematic.maxAcceleration;
+            steering.linear = steering.linear * agentKinematic.MaxAcceleration;
 
             steering.angular = 0;
 

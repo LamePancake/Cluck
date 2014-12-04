@@ -237,7 +237,7 @@ namespace Cluck
             cluckExist = false;
             tutorialOn = false;
 
-            camera.PositionUpdate = null;
+            camera.PositionUpdate = KeepCameraInBounds;
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
                 CAMERA_ACCELERATION_X,
@@ -365,7 +365,7 @@ namespace Cluck
                     GameEntity chickenEntity = new GameEntity();
 
                     // create chicken components
-                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
+                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f, 2.6f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
 
@@ -668,7 +668,7 @@ namespace Cluck
                 slideTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                 aiSystem.Update(world, gameTime, camera.Position);
-                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                physicsSystem.Update(world, gameTime);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
                 if (timer <= TimeSpan.Zero)

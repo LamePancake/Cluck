@@ -9,10 +9,6 @@ namespace Cluck
 {
     class PhysicsSystem : GameSystem
     {
-        /// <summary>
-        /// The previous game time (used for calculating movement).
-        /// </summary>
-        private float prevTime = 0.0f;
         private List<GameEntity> physicalObjects;
         private bool catchable;
         
@@ -35,15 +31,13 @@ namespace Cluck
             catchable = false;
         }
 
-        public void Update(List<GameEntity> world, float gameTime)
+        public void Update(List<GameEntity> world, GameTime gameTime)
         {
             // Get the list of objects that will be processed by the physics system
             physicalObjects = BuildPhysicalList(world);
 
-            ApplyForces(gameTime - prevTime);
+            ApplyForces(gameTime);
             ApplyCollisions();
-
-            prevTime = gameTime;
         }
 
         /// <summary>
@@ -53,7 +47,7 @@ namespace Cluck
         /// <returns>A list of objects with physical attributes.</returns>
         private List<GameEntity> BuildPhysicalList(List<GameEntity> world)
         {
-            List<GameEntity> physicalWorld = new List<GameEntity>((Int32)64);
+            List<GameEntity> physicalWorld = new List<GameEntity>((Int32)32);
             foreach(GameEntity g in world)
             {
                 if (g.HasComponent((int)component_flags.camera) && g.HasComponent((int)component_flags.position))
@@ -63,13 +57,15 @@ namespace Cluck
                     cameraPos.SetOrientation(camera.Orientation.W);
                 }
 
+                // Set the currently caught chicken free and add the required components back to it
                 if (g.HasComponent((int)component_flags.kinematic) || g.HasComponent((int)component_flags.collidable))
                 {
                     if (g.HasComponent((int)component_flags.caught) && !camera.chickenCaught)
                     {
-                        g.RemoveComponent<CaughtComponent>(component_flags.caught);
                         PositionComponent p = g.GetComponent<PositionComponent>(component_flags.position);
-                        p.SetPosition(new Vector3(p.GetPosition().X, 0, p.GetPosition().Z));
+                        KinematicComponent k = g.GetComponent<KinematicComponent>(component_flags.kinematic);
+                        g.RemoveComponent<CaughtComponent>(component_flags.caught);
+                        //p.SetPosition(new Vector3(p.GetPosition().X, 0, p.GetPosition().Z));
 
                         SteeringComponent steering = new SteeringComponent(p);
 
@@ -82,6 +78,10 @@ namespace Cluck
                         }
 
                         g.AddComponent(steering);
+                        // Add a force to the chicken in the direction we're looking with the camera
+                        k.Forces.Add(new Force(camera.ViewDirection * 3000, 200));
+                        k.Forces.Add(KinematicComponent.Gravity);
+                        k.IsGrounded = false;
                     }
                     physicalWorld.Add(g);
                 }
@@ -108,7 +108,6 @@ namespace Cluck
                 return;
 
             // Loop through the remaining entities to check for collisions
-
             for (; i < physicalObjects.Count(); i++)
             {
                 if (!physicalObjects.ElementAt<GameEntity>(i)
@@ -118,32 +117,34 @@ namespace Cluck
                 // Check the collidable entity against every other collidable entity
                 for (int j = i + 1; j < physicalObjects.Count(); j++)
                 {
-
+                    GameEntity ent;
+                    Renderable rend;
                     if (Catchable)
                     {
-                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(1, 1, 0, 1));
-                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.4f);
-                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 0, 1));
-                        physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.4f);
+                        ent = physicalObjects.ElementAt<GameEntity>(chickenInRange);
+                        rend = ent.GetComponent<Renderable>(component_flags.renderable);
+                        rend.SetLineColor(new Vector4(1, 1, 0, 1));
+                        rend.SetBorderSize(0.4f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 0, 1));
+                        rend.SetAmbientIntensity(0.4f);
                     }
                     else
                     {
-                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(0, 0, 0, 1));
-                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.2f);
-                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 1, 1));
-                        physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.1f);
-                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetLineColor(new Vector4(0, 0, 0, 1));
-                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetBorderSize(0.2f);
-                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetAmbientColor(new Vector4(1, 1, 1, 1));
-                        physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetAmbientIntensity(0.1f);
+                        ent = physicalObjects.ElementAt<GameEntity>(j);
+                        rend = ent.GetComponent<Renderable>(component_flags.renderable);
+                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
+                        rend.SetBorderSize(0.2f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        rend.SetAmbientIntensity(0.1f);
+                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
+                        rend.SetBorderSize(0.2f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        rend.SetAmbientIntensity(0.1f);
                     }
                     
                     if(!physicalObjects.ElementAt<GameEntity>(j)
                         .HasComponent((int)component_flags.collidable))
                         continue;
-
-                    //physicalObjects.ElementAt<GameEntity>(i).GetComponent<Renderable>(component_flags.renderable).SetInRange(false);
-                    //physicalObjects.ElementAt<GameEntity>(j).GetComponent<Renderable>(component_flags.renderable).SetInRange(false);
 
                     if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
@@ -202,12 +203,75 @@ namespace Cluck
         /// <summary>
         /// Applies forces (gravity, wind, AI behaviours, etc) to all objects that can move.
         /// </summary>
-        /// <param name="kinematicObjects">A list of all GameEntities with a KinematicComponent.</param>
-        private void ApplyForces(float deltaTime)
+        private void ApplyForces(GameTime gameTime)
         {
-            // Look for force components in this object
-            // Apply them to the kinematics components
-            // Using the deltaTime, move objects appropriately
+            GameEntity cur;
+            KinematicComponent kinematicComponent;
+            PositionComponent positionComponent;
+
+            // Loop through all objects, applying any forces to those with kinematic components (so long
+            // as they're not caught)
+            for (int i = 0; i < physicalObjects.Count; i++)
+            {
+                cur = physicalObjects.ElementAt<GameEntity>(i);
+                if (cur.HasComponent((int)component_flags.kinematic) && !cur.HasComponent((int)component_flags.caught))
+                {
+                    kinematicComponent = cur.GetComponent<KinematicComponent>(component_flags.kinematic);
+                    positionComponent = cur.GetComponent<PositionComponent>(component_flags.position);
+                    
+                    // If the entity is on the ground, go to the next one. I don't have time to implement
+                    // physics properly, so this is my hacky workaround.
+                    if (kinematicComponent.IsGrounded)
+                        continue;
+
+                    int numForces = kinematicComponent.Forces.Count;
+                    Vector3 finalForce = Vector3.Zero;
+                    Vector3 acceleration;
+                    Vector3 velocity = kinematicComponent.Velocity;
+                    //velocity.X *= KinematicComponent.LinearDamping;
+                    //velocity.Z *= KinematicComponent.LinearDamping;
+                    Vector3 newPos = positionComponent.GetPosition();
+
+                    for (int j = 0; j < kinematicComponent.Forces.Count; j++)
+                    {
+                        finalForce += kinematicComponent.Forces[j].DirectionMagnitude;
+
+                        // If the force has a duration, then update it; if its duration is int.MaxValue, then the force is supposed to be applied
+                        // every frame so skip this step
+                        if (kinematicComponent.Forces[j].Duration != int.MaxValue)
+                        {
+                            kinematicComponent.Forces[j].Duration -= (int)gameTime.ElapsedGameTime.TotalMilliseconds;
+
+                            // If the force's duration has elapsed, remove it from the list
+                            if (kinematicComponent.Forces[j].Duration <= 0)
+                                kinematicComponent.Forces.RemoveAt(j);
+                        }
+                    }
+
+                    // Calculate the acceleration and velocity
+                    acceleration = finalForce / kinematicComponent.Mass;
+                    velocity += acceleration * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    kinematicComponent.Velocity = velocity;
+
+                    // Calculate the new position and keep it in bounds
+                    newPos += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    newPos.X = MathHelper.Clamp(newPos.X, -1070, 1070);
+                    newPos.Z = MathHelper.Clamp(newPos.Z, -1070, 1070);
+                    newPos.Y = MathHelper.Clamp(newPos.Y, 0, float.PositiveInfinity);
+                    Console.WriteLine(newPos);
+
+                    // Once they hit the ground again, clear all the forces and allow Dan's
+                    // AI physics stuff to take over
+                    if (newPos.Y == 0)
+                    {
+                        kinematicComponent.Forces.Clear();
+                        kinematicComponent.IsGrounded = true;
+                        kinematicComponent.Velocity = Vector3.Zero;
+                    }
+
+                    positionComponent.SetPosition(newPos);
+                }
+            }
         }
 
         /// <summary>

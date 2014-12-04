@@ -85,7 +85,12 @@ namespace Cluck
         private Song fastSong;
         private Song endSong;
         private Song winSong;
-        private Song currentSong;
+        private Cue currentSong;
+        private float currentSongPitch;
+        private AudioCategory musicCategory;
+        private AudioEngine engine;
+        private SoundBank soundBank;
+        private WaveBank waveBank;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -160,18 +165,11 @@ namespace Cluck
         public static int remainingChickens;
         private int currentLevel;
 
-        // The current high score, if there is one, is stored in "highscore".
-        // The FileStream will read this and set the current high score.
-        private FileStream highScoreFile;
         private int startTime;
         private int curHighScore;
         private int score;
         private float targetTime;
         private float baseScore;
-
-        // Shown upon achieving a new high score (in case that wasn't obvious).
-        private string highScoreMsg = "New high score!";
-        private bool showHighScoreMsg = false;
 
         Random random = new Random();
 
@@ -289,7 +287,7 @@ namespace Cluck
             cluckExist = false;
 
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
-            camera.PositionUpdate = null;
+            camera.PositionUpdate = KeepCameraInBounds;
             camera.Acceleration = new Vector3(
                 CAMERA_ACCELERATION_X,
                 CAMERA_ACCELERATION_Y,
@@ -377,8 +375,19 @@ namespace Cluck
                 penBase = content.Load<Model>(@"Models\pen_base_large");
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
 
-                testSong = content.Load<Song>(@"Audio\Yoshi_looped");
-                fastSong = content.Load<Song>(@"Audio\Yoshi_looped_fast");
+                // Initialize audio objects.
+                engine = new AudioEngine("Content\\Audio\\Yoshi_dynamic.xgs");
+                soundBank = new SoundBank(engine, "Content\\Audio\\CluckSound.xsb");
+                waveBank = new WaveBank(engine, "Content\\Audio\\CluckWave.xwb");
+
+                // Get the category.
+                musicCategory = engine.GetCategory("Music");
+
+                // Play the sound.
+                currentSong = soundBank.GetCue("Yoshi_looped_xact");
+                currentSong.SetVariable("Pitch", currentSongPitch);
+                //currentSong.Play();
+
                 endSong = content.Load<Song>(@"Audio\ending");
                 winSong = content.Load<Song>(@"Audio\win");
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
@@ -429,7 +438,7 @@ namespace Cluck
                     GameEntity chickenEntity = new GameEntity();
 
                     // create chicken components
-                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
+                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f, 2.6f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
                     
@@ -532,11 +541,11 @@ namespace Cluck
                 }
 
                 // Plays  Yoshi's island
-                currentSong = testSong;
-                MediaPlayer.Play(testSong);
-                MediaPlayer.IsRepeating = true;
-                MediaPlayer.Volume = 0.45f;
-
+                //currentSong = testSong;
+                ////MediaPlayer.Play(testSong);
+                //MediaPlayer.IsRepeating = true;
+                //MediaPlayer.Volume = 0.45f;
+                
                 qteButtons[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\x");
                 qteButtons[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\y");
                 qteButtons[(int)Cluck.buttons.br] = content.Load<Texture2D>(@"Textures\b");
@@ -670,7 +679,7 @@ namespace Cluck
                                                        bool coveredByOtherScreen)
         {
             base.Update(gameTime, otherScreenHasFocus, false);
-
+            engine.Update();
             if (startTime < 0)
             {
                 startTime = (int)gameTime.TotalGameTime.TotalMilliseconds;
@@ -686,44 +695,34 @@ namespace Cluck
             {
                 if (MediaPlayer.State == MediaState.Paused)
                 {
-                    MediaPlayer.Resume();
+                    //MediaPlayer.Resume();
                 }
 
                 if (winState == 1)
                 {
                     if (!MediaPlayer.Equals(currentSong, winSong))
                     {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(winSong);
-                        currentSong = winSong;
+                        //MediaPlayer.Stop();
+                        ////MediaPlayer.Play(winSong);
+                        //currentSong = winSong;
                     }
                 }
                 else if (timer <= TimeSpan.Zero)
                 {
                     if (!MediaPlayer.Equals(currentSong, endSong))
                     {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(endSong);
-                        currentSong = endSong;
+                        //MediaPlayer.Stop();
+                       // //MediaPlayer.Play(endSong);
+                        //currentSong = endSong;
                     }
-                }
-                else if (timer.Seconds <= 30 && timer.Minutes < 1 && timer.Hours < 1)
-                {
-                    if(!MediaPlayer.Equals(currentSong, fastSong))
-                    {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(fastSong);
-                        currentSong = fastSong;
-                    }
-                    
                 }
                 else
                 {
                     if (!MediaPlayer.Equals(currentSong, testSong))
                     {
-                        MediaPlayer.Stop();
-                        MediaPlayer.Play(testSong);
-                        currentSong = testSong;
+                        //MediaPlayer.Stop();
+                        //MediaPlayer.Play(testSong);
+                        //currentSong = testSong;
                     }
                 }
 
@@ -804,7 +803,7 @@ namespace Cluck
                 slideTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                 aiSystem.Update(world, gameTime, camera.Position);
-                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                physicsSystem.Update(world, gameTime);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
 
@@ -1023,12 +1022,12 @@ namespace Cluck
 
             if (winState == -1 && deathTimer <= TimeSpan.Zero)
             {
-                MediaPlayer.Stop();
+                //MediaPlayer.Stop();
                 ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
             }
             else if (winState == 1 && winTimer <= TimeSpan.Zero)
             {
-                MediaPlayer.Stop();
+                //MediaPlayer.Stop();
                 if (currentLevel == MAX_LEVEL)
                 {
                     ScreenManager.AddScreen(new EndCampaignScreen(score, curHighScore), ControllingPlayer);
@@ -1044,7 +1043,7 @@ namespace Cluck
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
-                MediaPlayer.Pause();
+                //MediaPlayer.Pause();
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif
             }

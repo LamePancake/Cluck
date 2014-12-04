@@ -45,12 +45,13 @@ namespace Cluck.AI
                     && entity.HasComponent((int)component_flags.sensory))
                 {
                     KinematicComponent kinematics = entity.GetComponent <KinematicComponent>(component_flags.kinematic);
-
                     SteeringComponent steering = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
-
                     PositionComponent position = entity.GetComponent<PositionComponent>(component_flags.position);
-
                     SensoryMemoryComponent sensory = entity.GetComponent<SensoryMemoryComponent>(component_flags.sensory);
+
+                    // If the chicken is in the air, we don't want to apply any AI behaviours
+                    if (!kinematics.IsGrounded)
+                        continue;
 
                     // this is a hack!! Here be dragons.
                     //if (sensory.WithinView(position.GetPosition(), kinematics.velocity, playerPos))
@@ -66,40 +67,40 @@ namespace Cluck.AI
                     //SteeringOutput output = steeringBehaviours.Seek(position, kinematics);
 
                     // update velocity and rotation
-                    kinematics.velocity += (output.linear * deltaTime.ElapsedGameTime.Milliseconds);
-                    kinematics.rotation += (output.angular * deltaTime.ElapsedGameTime.Milliseconds);
+                    kinematics.Velocity += (output.linear * deltaTime.ElapsedGameTime.Milliseconds);
+                    kinematics.Rotation += (output.angular * deltaTime.ElapsedGameTime.Milliseconds);
                     
                     // clamp rotation
-                    float rot = kinematics.rotation;
+                    float rot = kinematics.Rotation;
 
                     float targetRotation = Math.Abs(rot);
 
-                    if (targetRotation > kinematics.maxRotation)
+                    if (targetRotation > kinematics.MaxRotation)
                     {
                         rot /= targetRotation;
-                        rot *= kinematics.maxRotation;
+                        rot *= kinematics.MaxRotation;
 
-                        kinematics.rotation = rot;
+                        kinematics.Rotation = rot;
                     }
 
                     // clamp velocity
-                    Vector3 vel = kinematics.velocity;
+                    Vector3 vel = kinematics.Velocity;
                     
-                    if (vel.Length() > kinematics.maxSpeed)
+                    if (vel.Length() > kinematics.MaxSpeed)
                     {
                         vel.Normalize();
-                        vel *= kinematics.maxSpeed;
+                        vel *= kinematics.MaxSpeed;
 
-                        kinematics.velocity = vel;
+                        kinematics.Velocity = vel;
                     }
 
                     if (vel.LengthSquared() > 0.0001)
                     {
-                        Vector3 temp = kinematics.velocity;
+                        Vector3 temp = kinematics.Velocity;
                         //temp = Matrix.CreateRotationY(position.GetOrientation()).Forward;
                         temp.Normalize();
-                        kinematics.heading = temp;
-                        kinematics.side = Util.PerpInZPlane(kinematics.heading);
+                        kinematics.Heading = temp;
+                        kinematics.Side = Util.PerpInZPlane(kinematics.Heading);
                     }
 
                     //if (steering.flying || position.GetPosition().Y > 0) // apply gravity sort of
@@ -107,13 +108,13 @@ namespace Cluck.AI
                     //    kinematics.velocity.Y -= (float)(deltaTime.ElapsedGameTime.TotalSeconds)/4;
                     //}
 
-                    Vector3 newPos = position.GetPosition() + kinematics.velocity;
+                    Vector3 newPos = position.GetPosition() + kinematics.Velocity;
                     
                     // Update position and orientation
                     position.SetPosition(newPos);
                     //position.SetOrientation(position.GetOrientation() + kinematics.rotation);
 
-                    SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.velocity, position);
+                    SteeringOutput facingDirection = steeringBehaviours.Face(position.GetPosition() + kinematics.Velocity, position);
                     position.SetOrientation(facingDirection.angular);
 
                 }

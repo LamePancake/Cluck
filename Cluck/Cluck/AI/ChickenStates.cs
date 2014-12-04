@@ -32,7 +32,7 @@ namespace Cluck.AI
             {
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
                 KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
-                kinematic.maxSpeed = kinematic.maxWalkSpeed;
+                kinematic.MaxSpeed = kinematic.MaxWalkSpeed;
                 steer.SetWander(true);
             }
         }
@@ -115,7 +115,7 @@ namespace Cluck.AI
             {
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
                 KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
-                kinematic.maxSpeed = kinematic.maxRunSpeed;
+                kinematic.MaxSpeed = kinematic.MaxRunSpeed;
                 
                 steer.SetFlee(true);
             }
@@ -198,7 +198,7 @@ namespace Cluck.AI
             {
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
                 KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
-                kinematic.maxSpeed = kinematic.maxFlySpeed;
+                kinematic.MaxSpeed = kinematic.MaxFlySpeed;
                 steer.SetWander(false);
                 steer.SetFly(true);
             }
@@ -272,7 +272,7 @@ namespace Cluck.AI
             {
                 SteeringComponent steer = entity.GetComponent<SteeringComponent>(component_flags.aiSteering);
                 KinematicComponent kinematic = entity.GetComponent<KinematicComponent>(component_flags.kinematic);
-                kinematic.maxSpeed = kinematic.maxFlySpeed;
+                kinematic.MaxSpeed = kinematic.MaxFlySpeed;
                 steer.SetWander(true);
                 steer.SetFlee(false);
                 steer.SetFly(false);

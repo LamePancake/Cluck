@@ -64,7 +64,7 @@ namespace Cluck.AI
 
                        EntityMemory entityMem = memories[entity];
 
-                       if (WithinView(myPosition.GetPosition(), myKinematic.heading, entityPos.GetPosition()))
+                       if (WithinView(myPosition.GetPosition(), myKinematic.Heading, entityPos.GetPosition()))
                        {
                            entityMem.position = entityPos.GetPosition();
                            entityMem.time = memorySpan;

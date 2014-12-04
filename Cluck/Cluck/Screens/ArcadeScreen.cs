@@ -141,16 +141,10 @@ namespace Cluck
 
         // The current high score, if there is one, is stored in "highscore".
         // The FileStream will read this and set the current high score.
-        private FileStream highScoreFile;
-        private int startTime;
         private int curHighScore;
         private int score;
         private float targetTime;
         private float baseScore;
-
-        // Shown upon achieving a new high score (in case that wasn't obvious).
-        private string highScoreMsg = "New high score!";
-        private bool showHighScoreMsg = false;
 
         Random random = new Random();
 
@@ -227,7 +221,7 @@ namespace Cluck
 
             timer = new TimeSpan(0, minutesAllotted, 0);
 
-            camera.PositionUpdate = null;
+            camera.PositionUpdate = KeepCameraInBounds;
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
             camera.Acceleration = new Vector3(
                 CAMERA_ACCELERATION_X,
@@ -356,7 +350,7 @@ namespace Cluck
                     GameEntity chickenEntity = new GameEntity();
 
                     // create chicken components
-                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f);
+                    KinematicComponent chickinematics = new KinematicComponent(0.08f, 3f, (float)Math.PI / 4, 0.1f, 2.6f);
 
                     Vector3 chickenPosition = GetRandomChickenSpawn();
 
@@ -717,7 +711,7 @@ namespace Cluck
                 slideTexture.UpdateFrame((float)gameTime.ElapsedGameTime.TotalSeconds);
 
                 aiSystem.Update(world, gameTime, camera.Position);
-                physicsSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
+                physicsSystem.Update(world, gameTime);
                 audioSystem.Update(world, gameTime.ElapsedGameTime.Milliseconds);
                 oldKeyState = curKeyState;
 
