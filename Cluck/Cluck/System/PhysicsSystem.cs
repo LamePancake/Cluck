@@ -79,7 +79,7 @@ namespace Cluck
 
                         g.AddComponent(steering);
                         // Add a force to the chicken in the direction we're looking with the camera
-                        k.Forces.Add(new Force(camera.ViewDirection * 3000, 200));
+                        k.Forces.Add(new Force(camera.ViewDirection * 20000, 100));
                         k.Forces.Add(KinematicComponent.Gravity);
                         k.IsGrounded = false;
                     }
@@ -258,7 +258,6 @@ namespace Cluck
                     newPos.X = MathHelper.Clamp(newPos.X, -1070, 1070);
                     newPos.Z = MathHelper.Clamp(newPos.Z, -1070, 1070);
                     newPos.Y = MathHelper.Clamp(newPos.Y, 0, float.PositiveInfinity);
-                    Console.WriteLine(newPos);
 
                     // Once they hit the ground again, clear all the forces and allow Dan's
                     // AI physics stuff to take over
