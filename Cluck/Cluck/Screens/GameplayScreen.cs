@@ -140,7 +140,7 @@ namespace Cluck
         private const int PEN_XCOORD = 500;
         private const int PEN_SPAWNBUFFER = 100;
         private const float PEN_TRANS = 118.8f;
-        private const float PEN_BOUNDARY_BUFFER = 60.0f;
+        private const float PEN_BOUNDARY_BUFFER = 55.0f;
         private const float PEN_LEFT_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD - PEN_TRANS;
         private const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
         private const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
@@ -1264,7 +1264,7 @@ namespace Cluck
                     else
                         newPos.Z = penBottom;
                 }
-                if (!wasInX)
+                else if (!wasInX)
                 {
                     if (forwards.X > 0)
                         newPos.X = penLeft;
