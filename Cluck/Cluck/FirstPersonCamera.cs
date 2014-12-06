@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 
 namespace Cluck
 {
@@ -119,6 +120,7 @@ namespace Cluck
 
         private bool isClapping;
         private bool isSprinting;
+        private bool handsGoingBack = false;
 
         public bool chickenCaught;
         HeadBob head;
@@ -135,6 +137,9 @@ namespace Cluck
         private bool dead;
         private int tiltFix = 0;
         private int slideFix = 0;
+
+        private SoundEffectInstance walk;
+        private SoundEffectInstance slide;
         
         public void Reset()
         {
@@ -149,6 +154,7 @@ namespace Cluck
             Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(1 * tiltFix), out tilt);
             Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
             tiltFix = 0;
+            handsGoingBack = false;
 
             if (slideFix > 0)
             {
@@ -159,6 +165,8 @@ namespace Cluck
             }
             isSliding = false;
             isSprinting = false;
+            walk = null;
+            slide = null;
         }
 
         public FirstPersonCamera(Game game) : base(game)
@@ -354,12 +362,12 @@ namespace Cluck
                 isClapping = false;
             }
 
-            if ((i.IsSprinting() || i.IsSliding() || isSliding) && sprintingTime > 0 && !dead)
+            if ((i.IsSprinting() || i.IsSliding() || isSliding) && sprintingTime > 0 && !dead && !isCrouching())
             {
                 float elaspedSeconds = (float)gameTime.ElapsedGameTime.TotalSeconds;
                 sprintingTime -= elaspedSeconds;
             }
-            else if (!i.IsSprinting() && !i.IsSliding() && sprintingTime < MAX_SPRINTING_TIME)
+            else if (!i.IsSprinting() && !i.IsSliding() && sprintingTime < MAX_SPRINTING_TIME || isCrouching())
             {
                 sprintingTime += ((float)gameTime.ElapsedGameTime.TotalSeconds) / 2;
             }
@@ -430,7 +438,7 @@ namespace Cluck
 
             if (isClapping)
             {
-                if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET)
+                if (leftXOffset <= MIN_LEFT_ARM_X_OFFSET && !handsGoingBack)
                 {
                     leftXOffset += ARM_MOVEMENT * gameTime;
                 }
@@ -442,19 +450,22 @@ namespace Cluck
             else
             {
                 if (leftXOffset > LEFT_ARM_X_OFFSET)
-
                 {
+                    handsGoingBack = true;
                     leftXOffset -= ARM_MOVEMENT * gameTime;
 
+                }
+                else
+                {
+                    handsGoingBack = false;
                 }
                 chickenCaught = false;
 
             }
-
+           
             leftArmPos += viewDir * ARM_Z_OFFSET;
             leftArmPos += yAxis * ARM_Y_OFFSET;
             leftArmPos += xAxis * leftXOffset;
-
   
             return /*Matrix.CreateScale(ARM_SCALE)
                 * */Matrix.CreateRotationX(MathHelper.ToRadians(PitchDegrees))
@@ -493,7 +504,7 @@ namespace Cluck
 
             if (isClapping)
             {
-                if (rightXOffset >= MIN_RIGHT_ARM_X_OFFSET)
+                if (rightXOffset >= MIN_RIGHT_ARM_X_OFFSET && !handsGoingBack)
                 {
                     rightXOffset -= ARM_MOVEMENT * gameTime;
                 }
@@ -505,10 +516,14 @@ namespace Cluck
             else 
             {
                 if (rightXOffset < RIGHT_ARM_X_OFFSET)
-
                 {
+                    handsGoingBack = true;
                     rightXOffset += ARM_MOVEMENT * gameTime;
 
+                }
+                else
+                {
+                    handsGoingBack = false;
                 }
                 chickenCaught = false;
 
@@ -539,10 +554,38 @@ namespace Cluck
             direction.Z += i.GetForward() + i.GetBackward();
             direction.X += i.GetRight() + i.GetLeft();
 
+            if ((direction.X != 0 || direction.Z != 0))
+            {
+                if (walk != null && !walk.IsDisposed && walk.State == SoundState.Paused)
+                    walk.Resume();
+                else if (walk != null && !walk.IsDisposed && walk.State != SoundState.Playing)
+                    walk.Play();
+                else
+                    walk.Pause();
+
+                if (isSprinting)
+                    walk.Pitch = 0.55f;
+                else if (i.IsCrouching())
+                    walk.Pitch = -0.05f;
+                else
+                    walk.Pitch = 0.05f;
+            }
+            else
+            {
+                if (walk != null && !walk.IsDisposed && walk.State == SoundState.Playing )
+                    walk.Pause();
+            }
+
             if (isSliding)
             {
                 if ((direction.X != 0 || direction.Z != 0))
                 {
+                    if (slide != null && !slide.IsDisposed && slide.State != SoundState.Playing)
+                    {
+                        walk.Pause();
+                        slide.Play();
+                    }
+
                     switch (posture)
                     {
                         case Posture.Standing:
@@ -566,6 +609,9 @@ namespace Cluck
             }
             else
             {
+                if (slide != null && !slide.IsDisposed && slide.State == SoundState.Playing)
+                    slide.Stop();
+
                 isSliding = false;
                 switch (posture)
                 {
@@ -602,6 +648,7 @@ namespace Cluck
                 case Posture.Rising:
                     // Finish rising before allowing another crouch.
                     direction.Y += 1.0f;
+                    currentVelocity.Y = 0.0f;
                     break;
 
                 default:
@@ -620,6 +667,7 @@ namespace Cluck
 
                 case Posture.Rising:
                     direction.Y += 1.0f;
+                    currentVelocity.Y = 0.0f;
                     break;
 
                 default:
@@ -1096,6 +1144,18 @@ namespace Cluck
             }
 
             return false;
+        }
+
+        public SoundEffectInstance Walk
+        {
+            get { return walk; }
+            set { walk = value; }
+        }
+
+        public SoundEffectInstance Slide
+        {
+            get { return slide; }
+            set { slide = value; }
         }
 
         public bool IsSliding() { return isSliding; }

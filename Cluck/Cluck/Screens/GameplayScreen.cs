@@ -127,7 +127,7 @@ namespace Cluck
         private const float CAMERA_VELOCITY_Z = 300.0f;
         private const float CAMERA_RUNNING_MULTIPLIER = 2.0f;
         private const float CAMERA_SLIDING_MULTIPLIER = 3.0f;
-        private const float CAMERA_CROUCHING_MULTIPLIER = 0.95f;
+        private const float CAMERA_CROUCHING_MULTIPLIER = 1.0f;
         private const float CAMERA_RUNNING_JUMP_MULTIPLIER = 1.5f;
         private const int FENCE_LINKS_WIDTH = 1;
         private const int FENCE_LINKS_HEIGHT = 1;
@@ -564,6 +564,9 @@ namespace Cluck
                 slideTexture.Load(content, @"Textures\mud_streaks", 8, 8);
                 slideTexture.Pause();
 
+                camera.Walk = content.Load<SoundEffect>(@"Audio\walk").CreateInstance();
+                camera.Slide = content.Load<SoundEffect>(@"Audio\slide").CreateInstance();
+
                 // once the load has finished, we use ResetElapsedTime to tell the game's
                 // timing mechanism that we have just finished a very long frame, and that
                 // it should not try to catch up.
@@ -779,7 +782,7 @@ namespace Cluck
                     buttonScale = MAX_BUTTON_SCALE;
                 }
 
-                if (camera.IsSprinting() && !camera.IsSliding())
+                if (camera.IsSprinting() && !camera.IsSliding() && !camera.isCrouching())
                 {
                     sprintTexture.Play();
                 }
@@ -1183,10 +1186,10 @@ namespace Cluck
                     tempVector.Y += layer;
                     spriteBatch.DrawString(timerFont, "+" + amountOfTimeToAdd, tempVector, Color.Black, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
                 }
-                spriteBatch.DrawString(timerFont, "+" + amountOfTimeToAdd, tempVector, Color.White, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
+                spriteBatch.DrawString(timerFont, "+" + amountOfTimeToAdd, tempVector, Color.GreenYellow, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
 
                 scoreScale += scoreScaleAmount;
-                if (scoreScale >= 2)
+                if (scoreScale >= 2.2)
                 {
                     scoreScaleAmount = -0.08f;
                 }
