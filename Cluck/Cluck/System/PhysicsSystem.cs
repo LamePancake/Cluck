@@ -146,7 +146,20 @@ namespace Cluck
                         .HasComponent((int)component_flags.collidable))
                         continue;
 
-                    if (Colliding(physicalObjects.ElementAt<GameEntity>(i),
+                    // Offset arms forward
+                    GameEntity arm = physicalObjects.ElementAt<GameEntity>(i);
+                    Vector3 prevPos = Vector3.Zero;
+
+                    if (arm.HasComponent((int)component_flags.position))
+                    {
+                        Vector3 amount = new Vector3(0, 0, 20);
+                        amount = Vector3.Transform(amount, Matrix.CreateRotationY(camera.HeadingDegrees));
+                        Vector3 offsetPos = arm.GetComponent<PositionComponent>(component_flags.position).GetPosition() + amount;
+                        prevPos = arm.GetComponent<PositionComponent>(component_flags.position).GetPosition();
+                        arm.GetComponent<PositionComponent>(component_flags.position).SetPosition(offsetPos);
+                    }
+
+                    if (SimpleColliding(physicalObjects.ElementAt<GameEntity>(i),
                                   physicalObjects.ElementAt<GameEntity>(j)))
                     {
                         if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.arm) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free))
@@ -195,6 +208,11 @@ namespace Cluck
                         {
                             Catchable = false;
                         }
+                    }
+
+                    if (arm.HasComponent((int)component_flags.position))
+                    {
+                        arm.GetComponent<PositionComponent>(component_flags.position).SetPosition(prevPos);
                     }
                 }
             }
@@ -271,6 +289,44 @@ namespace Cluck
                     positionComponent.SetPosition(newPos);
                 }
             }
+        }
+
+        private bool SimpleColliding(GameEntity ent1, GameEntity ent2)
+        {
+            Renderable c1 = ent1.GetComponent<Renderable>(component_flags.renderable);
+            Renderable c2 = ent2.GetComponent<Renderable>(component_flags.renderable);
+
+            Vector3 pos1;
+            Vector3 pos2;
+
+            if (ent1.HasComponent((int)component_flags.position))
+            {
+                pos1 = ent1.GetComponent<PositionComponent>(component_flags.position).GetPosition();
+            }
+            else
+            {
+                pos1 = new Vector3(c1.GetMatrix().M41, c1.GetMatrix().M42, c1.GetMatrix().M43);
+            }
+
+            if (ent2.HasComponent((int)component_flags.position))
+            {
+                pos2 = ent2.GetComponent<PositionComponent>(component_flags.position).GetPosition();
+            }
+            else
+            {
+                pos2 = new Vector3(c2.GetMatrix().M41, c2.GetMatrix().M42, c2.GetMatrix().M43);
+            }
+            
+            float dist = (pos1 - pos2).Length();
+            float intersectDist = 65;
+
+            if (Math.Abs(dist) < intersectDist)
+            {
+                return true;
+            }
+            
+
+            return false;
         }
 
         /// <summary>

@@ -24,11 +24,6 @@ Content\Textures\cluck_diffuse.xnb
 Content\Textures\chicken.xnb
 Content\Textures\clock.xnb
 Content\Textures\sprint_motion.xnb
-Content\Textures\mud_streaks.xnb
-Content\betweenlevels.xnb
-Content\lostcampaign.xnb
-Content\woncampaign.xnb
-Content\mainmenuoverlay.xnb
 Content\MessageFont.xnb
 Content\gamefont.xnb
 Content\menufont.xnb
@@ -52,8 +47,6 @@ Content\Models\cluck.xnb
 Content\Models\ground_v2.xnb
 Content\Models\tree.xnb
 Content\Models\cluck_win.xnb
-Content\Models\arm_left_extended.xnb
-Content\Models\arm_right_extended.xnb
 Content\SkySphere.xnb
 Content\Effects\Toon.xnb
 Content\Effects\ToonNoAnimation.xnb
@@ -78,9 +71,6 @@ Content\chicken_diffuse_1.xnb
 Content\chicken_diffuse_2.xnb
 Content\chicken_diffuse_3.xnb
 Content\chicken_diffuse_4.xnb
-Content\Audio\Yoshi_looped_xact.xnb
-Content\Audio\slide.xnb
-Content\Audio\walk.xnb
 Content\Audio\Lacrimosa Dominae.wma
 Content\Audio\yoshi.wma
 Content\Audio\Yoshi_looped.wma
