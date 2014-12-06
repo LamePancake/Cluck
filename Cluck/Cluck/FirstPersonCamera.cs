@@ -989,6 +989,7 @@ namespace Cluck
             Quaternion.CreateFromAxisAngle(ref WORLD_Z_AXIS, MathHelper.ToRadians(-1), out tilt);
             Quaternion.Concatenate(ref orientation, ref tilt, out orientation);
             tiltFix++;
+            UpdateViewMatrix();
         }
 
     #region Properties
