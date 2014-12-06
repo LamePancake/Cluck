@@ -139,13 +139,14 @@ namespace Cluck
         private const int PEN_YCOORD = 500;
         private const int PEN_XCOORD = 500;
         private const int PEN_SPAWNBUFFER = 100;
-        private const float PEN_TRANS = 118.8f;
-        private const float PEN_BOUNDARY_BUFFER = 55.0f;
-        private const float PEN_LEFT_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD - PEN_TRANS;
-        private const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
-        private const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
-        private const float PEN_BOTTOM_BOUND = (PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_YCOORD + PEN_TRANS;
-        private FirstPersonCamera camera;
+        public const float PEN_TRANS = 118.8f;
+        public const float PEN_BOUNDARY_BUFFER = 55.0f;
+        public const float PEN_LEFT_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD - PEN_TRANS;
+        public const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
+        public const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
+        public const float PEN_BOTTOM_BOUND = (PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_YCOORD + PEN_TRANS;
+        public const float PEN_HEIGHT = 39.38924f;
+        public FirstPersonCamera camera;
 
         private int windowWidth;
         private int windowHeight;
@@ -430,7 +431,7 @@ namespace Cluck
 
                 BuildBounds(fence, woodDiffuse);
 
-                int i = 0;
+                int i;
 
                 for (i = 0; i < total_num_of_chickens; ++i)
                 {

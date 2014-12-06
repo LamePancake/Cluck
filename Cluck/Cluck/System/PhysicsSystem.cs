@@ -116,32 +116,7 @@ namespace Cluck
 
                 // Check the collidable entity against every other collidable entity
                 for (int j = i + 1; j < physicalObjects.Count(); j++)
-                {
-                    GameEntity ent;
-                    Renderable rend;
-                    if (Catchable)
-                    {
-                        ent = physicalObjects.ElementAt<GameEntity>(chickenInRange);
-                        rend = ent.GetComponent<Renderable>(component_flags.renderable);
-                        rend.SetLineColor(new Vector4(1, 1, 0, 1));
-                        rend.SetBorderSize(0.4f);
-                        rend.SetAmbientColor(new Vector4(1, 1, 0, 1));
-                        rend.SetAmbientIntensity(0.4f);
-                    }
-                    else
-                    {
-                        ent = physicalObjects.ElementAt<GameEntity>(j);
-                        rend = ent.GetComponent<Renderable>(component_flags.renderable);
-                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
-                        rend.SetBorderSize(0.2f);
-                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
-                        rend.SetAmbientIntensity(0.1f);
-                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
-                        rend.SetBorderSize(0.2f);
-                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
-                        rend.SetAmbientIntensity(0.1f);
-                    }
-                    
+                {     
                     if(!physicalObjects.ElementAt<GameEntity>(j)
                         .HasComponent((int)component_flags.collidable))
                         continue;
@@ -184,16 +159,25 @@ namespace Cluck
                                 CatchChicken();
                             }
                         }
-                        else if ((physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free) && (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.aiSteering)) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.capture))
-                            || (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.capture) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free) && (physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.aiSteering))))
+                        else if ((physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free) && physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.aiSteering) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.capture))
+                              || (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.capture) && physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.free) && (physicalObjects.ElementAt<GameEntity>(j).HasComponent((int)component_flags.aiSteering))))
                         {
+                            PositionComponent pos;
                             if (physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.free))
                             {
+                                pos = physicalObjects.ElementAt<GameEntity>(i).GetComponent<PositionComponent>(component_flags.position);
+                                // Check if the chicken is actually in the pen
+                                if (pos.GetPosition().Y > GameplayScreen.PEN_HEIGHT)
+                                    continue;
                                 physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<FreeComponent>(component_flags.free);
                                 chickenCaughtIndex = i;
                             }
                             else
                             {
+                                pos = physicalObjects.ElementAt<GameEntity>(j).GetComponent<PositionComponent>(component_flags.position);
+                                // Check if the chicken is actually in the pen
+                                if (pos.GetPosition().Y > GameplayScreen.PEN_HEIGHT)
+                                    continue;
                                 physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                                 chickenCaughtIndex = j;
                             }
@@ -213,6 +197,30 @@ namespace Cluck
                     if (arm.HasComponent((int)component_flags.position))
                     {
                         arm.GetComponent<PositionComponent>(component_flags.position).SetPosition(prevPos);
+                    }
+
+                    Renderable rend;
+                    if (Catchable)
+                    {
+                        rend = physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<Renderable>(component_flags.renderable);
+                        rend.SetLineColor(new Vector4(1, 1, 0, 1));
+                        rend.SetBorderSize(0.4f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 0, 1));
+                        rend.SetAmbientIntensity(0.4f);
+                    }
+                    else
+                    {
+                        // Determine the index of the chicken, and if they're not catchable, set the colour back to normal
+                        int idx = physicalObjects.ElementAt<GameEntity>(i).HasComponent((int)component_flags.arm) ? j : i;
+                        rend = physicalObjects.ElementAt<GameEntity>(idx).GetComponent<Renderable>(component_flags.renderable);
+                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
+                        rend.SetBorderSize(0.2f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        rend.SetAmbientIntensity(0.1f);
+                        rend.SetLineColor(new Vector4(0, 0, 0, 1));
+                        rend.SetBorderSize(0.2f);
+                        rend.SetAmbientColor(new Vector4(1, 1, 1, 1));
+                        rend.SetAmbientIntensity(0.1f);
                     }
                 }
             }
@@ -272,10 +280,21 @@ namespace Cluck
                     kinematicComponent.Velocity = velocity;
 
                     // Calculate the new position and keep it in bounds
+                    Vector3 oldPos = newPos;
+                    Vector3 forward = camera.ViewDirection;
+                    float radius = 0.0f;
+                    if(cur.HasComponent((int)component_flags.renderable))
+                    {
+                        Renderable r = cur.GetComponent<Renderable>(component_flags.renderable);
+                        BoundingBox b = r.GetBoundingBox();
+                        BoundingSphere s = r.GetBoundingSphere();
+                        if(b != null || s != null)
+                            radius = (b != null) ? ((b.Max.Y + b.Min.Y) / 2) : s.Radius;
+                    }
                     newPos += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    newPos.X = MathHelper.Clamp(newPos.X, -1070, 1070);
-                    newPos.Z = MathHelper.Clamp(newPos.Z, -1070, 1070);
-                    newPos.Y = MathHelper.Clamp(newPos.Y, 0, float.PositiveInfinity);
+
+                    // Restrict the object's position so that it doesn't go through bounds
+                    ClampPos(ref oldPos, ref newPos, ref forward, radius, out newPos);
 
                     // Once they hit the ground again, clear all the forces and allow Dan's
                     // AI physics stuff to take over
@@ -397,6 +416,65 @@ namespace Cluck
                 physicalObjects.ElementAt<GameEntity>(chickenInRange).AddComponent(new CaughtComponent());
                 camera.chickenCaught = true;
             }
+        }
+
+        /// <summary>
+        /// Keeps the camera out of the pen and within the bounds of the level.
+        /// </summary>
+        /// <param name="prevPos">The camera's previous position.</param>
+        /// <param name="desiredPos">The camera's desired position.</param>
+        /// <param name="forwards">The forward direction of the camera.</param>
+        /// <returns></returns>
+        private void ClampPos(ref Vector3 prev, ref Vector3 desiredPos, ref Vector3 forwards, float radius, out Vector3 finalPos)
+        {
+            Vector3 newPos = desiredPos;
+            float penRight = GameplayScreen.PEN_RIGHT_BOUND + radius;
+            float penLeft = GameplayScreen.PEN_LEFT_BOUND + radius;
+            float penTop = GameplayScreen.PEN_TOP_BOUND + radius;
+            float penBottom = GameplayScreen.PEN_BOTTOM_BOUND + radius;
+            const float penHeight = GameplayScreen.PEN_HEIGHT;
+
+            #region Stay in Bounds
+            newPos.X = MathHelper.Clamp(newPos.X, -1070, 1070);
+            newPos.Z = MathHelper.Clamp(newPos.Z, -1070, 1070);
+            newPos.Y = MathHelper.Clamp(newPos.Y, 0, float.PositiveInfinity);
+            #endregion
+            #region Collide with Pen Walls
+            // If they're about to go into the pen and their path would have them collide with a wall
+            if (desiredPos.X < penRight && desiredPos.X > penLeft &&
+                desiredPos.Z < penBottom && desiredPos.Z > penTop &&
+                prev.Y + radius <= penHeight && desiredPos.Y + radius <= penHeight)
+            {
+                bool wasInZ = prev.Z < penBottom && prev.Z > penTop;
+                bool wasInX = prev.X < penRight && prev.X > penLeft;
+
+                if (!wasInZ)
+                {
+                    // If they're moving positively along Z, then they came from the top part of the pen
+                    if (forwards.Z > 0)
+                        newPos.Z = penTop;
+                    // Otherwise they're coming from the bottom part of the pen
+                    else
+                        newPos.Z = penBottom;
+                }
+                else if (!wasInX)
+                {
+                    if (forwards.X > 0)
+                        newPos.X = penLeft;
+                    else
+                        newPos.X = penRight;
+                }
+            }
+            // If the object was already in the pen but is about to go out, stop them
+            else if (prev.X <= penRight && prev.X >= penLeft &&
+                     prev.Z <= penBottom && prev.Z >= penTop &&
+                     prev.Y + radius <= penHeight && desiredPos.Y + radius <= penHeight)
+            {
+                newPos.X = MathHelper.Clamp(newPos.X, penLeft, penRight);
+                newPos.Z = MathHelper.Clamp(newPos.Z, penTop, penBottom);
+            }
+            #endregion
+            finalPos = newPos;
         }
     }
 }
