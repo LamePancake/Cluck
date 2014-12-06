@@ -28,9 +28,12 @@ namespace Cluck
 
         List<MenuEntry> menuEntries = new List<MenuEntry>();
         int selectedEntry = 0;
+        float titleSize = 1;
         string menuTitle;
         Boolean normalEscape;
+        Boolean enlarge;
         BackgroundTexture background;
+        MenuOverLay overlay;
 
         InputAction menuUp;
         InputAction menuDown;
@@ -57,6 +60,11 @@ namespace Cluck
             set { background = value; }
         }
 
+        protected MenuOverLay Overlay
+        {
+            get { return overlay; }
+            set { overlay = value; }
+        }
 
         #endregion
 
@@ -69,6 +77,7 @@ namespace Cluck
         public MenuScreen(string menuTitle)
         {
             background = BackgroundTexture.black;
+            overlay = MenuOverLay.nothing;
             this.menuTitle = menuTitle;
             normalEscape = true;
             TransitionOnTime = TimeSpan.FromSeconds(0.5);
@@ -90,6 +99,8 @@ namespace Cluck
                 new Buttons[] { Buttons.B, Buttons.Back },
                 new Keys[] { Keys.Escape },
                 true);
+
+            enlarge = true;
         }
 
 
@@ -253,6 +264,7 @@ namespace Cluck
             SpriteBatch spriteBatch = ScreenManager.SpriteBatch;
             SpriteFont font = ScreenManager.Font;
             Texture2D backgroundTex = null;
+            Texture2D overlayTex = null;
 
             switch (background)
             {
@@ -275,8 +287,20 @@ namespace Cluck
                     break;
             }
 
+            switch (overlay)
+            {
+                case MenuOverLay.mainTitle:
+                    overlayTex = ScreenManager.GameTitleTexture;
+                    break;
+                case MenuOverLay.nothing:
+                    break;
+                default:
+                    break;
+            }
+
             Viewport viewport = ScreenManager.GraphicsDevice.Viewport;
             Rectangle fullscreen = new Rectangle(0, 0, viewport.Width, viewport.Height);
+            Rectangle title = new Rectangle(viewport.Width/4 - (int)(10 * titleSize), 0, (int)(3 * viewport.Width / 5 * titleSize), (int)(3 * viewport.Height / 5 * titleSize));
 
 
             spriteBatch.Begin();
@@ -311,6 +335,33 @@ namespace Cluck
             spriteBatch.DrawString(font, menuTitle, titlePosition, titleColor, 0,
                                    titleOrigin, titleScale, SpriteEffects.None, 0);
 
+            if (overlayTex != null)
+            {
+                spriteBatch.Draw(overlayTex, title, new Color(TransitionAlpha, TransitionAlpha, TransitionAlpha));
+            }
+
+            if (enlarge)
+            {
+                if (titleSize < 1.15f)
+                {
+                    titleSize += 0.02f;
+                }
+                else
+                {
+                    enlarge = false;
+                }
+            }
+            else
+            {
+                if (titleSize > 0.90f)
+                {
+                    titleSize -= 0.02f;
+                }
+                else
+                {
+                    enlarge = true;
+                }
+            }
             spriteBatch.End();
         }
 

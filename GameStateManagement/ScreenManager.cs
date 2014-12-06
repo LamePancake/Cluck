@@ -32,6 +32,12 @@ namespace GameStateManagement
         white
     }
 
+    public enum MenuOverLay
+    {
+        mainTitle,
+        nothing
+    }
+
     /// <summary>
     /// The screen manager is a component which manages one or more GameScreen
     /// instances. It maintains a stack of screens, calls their Update and Draw
@@ -56,6 +62,9 @@ namespace GameStateManagement
         Texture2D betweenLevelTexture;
         Texture2D lostCampaignTexture;
         Texture2D wonCampaignTexture;
+
+        Texture2D gameTitleTexture;
+        Texture2D nothingTexture;
 
         bool isInitialized;
 
@@ -138,6 +147,14 @@ namespace GameStateManagement
             get { return blankTexture; }
         }
 
+        /// <summary>
+        /// Gets the Game title overlay texture.
+        /// </summary>
+        public Texture2D GameTitleTexture
+        {
+            get { return gameTitleTexture; }
+        }
+
 
         #endregion
 
@@ -183,6 +200,8 @@ namespace GameStateManagement
             betweenLevelTexture = content.Load<Texture2D>("betweenlevels");
             lostCampaignTexture = content.Load<Texture2D>("lostcampaign");
             wonCampaignTexture = content.Load<Texture2D>("woncampaign");
+
+            gameTitleTexture = content.Load<Texture2D>("mainmenuoverlay");
 
             // Tell each of the screens to load their content.
             foreach (GameScreen screen in screens)

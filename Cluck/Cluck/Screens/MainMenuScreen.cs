@@ -9,6 +9,7 @@
 
 #region Using Statements
 using Microsoft.Xna.Framework;
+using GameStateManagement;
 #endregion
 
 namespace Cluck
@@ -25,14 +26,15 @@ namespace Cluck
         /// Constructor fills in the menu contents.
         /// </summary>
         public MainMenuScreen()
-            : base("Cluck!")
+            : base("")
         {
+            Overlay = MenuOverLay.mainTitle;
             // Create our menu entries.
-            MenuEntry playTutorialMenuEntry = new MenuEntry("Tutorial");
-            MenuEntry playGameMenuEntry = new MenuEntry("Campaign");
-            MenuEntry playArcadeMenuEntry = new MenuEntry("Arcade");
-            MenuEntry optionsMenuEntry = new MenuEntry("Options");
-            MenuEntry exitMenuEntry = new MenuEntry("Exit");
+            MenuEntry playTutorialMenuEntry = new MenuEntry("\n\n\n\n\n\nTutorial");
+            MenuEntry playGameMenuEntry = new MenuEntry("\n\n\n\n\n\n\nCampaign");
+            MenuEntry playArcadeMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\nArcade");
+            MenuEntry optionsMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\nOptions");
+            MenuEntry exitMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\nExit");
 
             // Hook up menu event handlers.
             playTutorialMenuEntry.Selected += PlayTutorialMenuEntrySelected;
