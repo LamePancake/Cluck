@@ -133,13 +133,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\Lacrimosa Dominae.mp3">
-      <Name>Lacrimosa Dominae</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Models\fence_side.fbx">
       <Name>fence_side</Name>
       <Importer>FbxImporter</Importer>
@@ -250,16 +243,6 @@
       <Importer>Mp3Importer</Importer>
       <Processor>SoundEffectProcessor</Processor>
     </Compile>
-    <Compile Include="Audio\yoshi.mp3">
-      <Name>yoshi</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-    <Compile Include="Audio\Yoshi_looped.mp3">
-      <Name>Yoshi_looped</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\chicken_anim.fbx">
@@ -368,13 +351,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\Yoshi_looped_fast.mp3">
-      <Name>Yoshi_looped_fast</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Models\tree.fbx">
       <Name>tree</Name>
       <Importer>FbxImporter</Importer>
@@ -396,24 +372,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Audio\ending.mp3">
-      <Name>ending</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Models\cluck_win.fbx">
       <Name>cluck_win</Name>
       <Importer>FbxImporter</Importer>
       <Processor>SkinnedModelProcessor</Processor>
-    </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Audio\win.mp3">
-      <Name>win</Name>
-      <Importer>Mp3Importer</Importer>
-      <Processor>SongProcessor</Processor>
     </Compile>
   </ItemGroup>
   <ItemGroup>
