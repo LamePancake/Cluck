@@ -69,7 +69,12 @@ namespace Cluck
         private Model penBase;
         private Model chickenPen;
         private Model cluck;
-        private Song testSong;
+        private Cue testSong;
+        private Cue currentSong;
+        private AudioCategory musicCategory;
+        private AudioEngine engine;
+        private SoundBank soundBank;
+        private WaveBank waveBank;
         private Matrix boundingSphereSize;
         private int boundingSize;
         private SpriteFont timerFont;
@@ -324,7 +329,19 @@ namespace Cluck
                 penBase = content.Load<Model>(@"Models\pen_base_large");
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
 
-                testSong = content.Load<Song>(@"Audio\Yoshi_looped");
+                // Initialize audio objects.
+                engine = new AudioEngine("Content\\Audio\\Yoshi_dynamic.xgs");
+                soundBank = new SoundBank(engine, "Content\\Audio\\CluckSound.xsb");
+                waveBank = new WaveBank(engine, "Content\\Audio\\CluckWave.xwb");
+
+                // Get the category.
+                musicCategory = engine.GetCategory("Music");
+
+                // Get the different songs for playback.
+                testSong = soundBank.GetCue("Yoshi_looped_xact");
+                currentSong = testSong;
+                currentSong.Play();
+
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -450,10 +467,6 @@ namespace Cluck
                         part.Effect = SkySphereEffect;
                     }
                 }
-                // Plays  Yoshi's island
-                MediaPlayer.Play(testSong);
-                MediaPlayer.IsRepeating = true;
-                MediaPlayer.Volume = 0.45f;
 
                 qteButtons[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\x");
                 qteButtons[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\y");
@@ -593,10 +606,7 @@ namespace Cluck
             {
                 timeStart = true;
 
-                if (MediaPlayer.State == MediaState.Paused)
-                {
-                    MediaPlayer.Resume();
-                }
+                UpdateAudio(gameTime);
 
                 // Allows the game to exit
                 //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
@@ -694,6 +704,28 @@ namespace Cluck
         }
 
         /// <summary>
+        /// Update the audio as necessary.
+        /// </summary>
+        private void UpdateAudio(GameTime gameTime)
+        {
+            if (IsActive)
+            {
+                // Adjust the song's pitch (and thus playback speed)
+                if (currentSong.IsStopped && timer.TotalSeconds > 0 && winState == 0)
+                {
+                    testSong = soundBank.GetCue("Yoshi_looped_xact");
+                    currentSong = testSong;
+                    currentSong.Play();
+                }
+                if (currentSong.IsPaused)
+                {
+                    currentSong.Resume();
+                }
+                engine.Update();
+            }
+        }
+
+        /// <summary>
         /// Updates the current high score.
         /// </summary>
         /// <param name="gameTime">The total time until the chickens were all caught.</param>
@@ -738,9 +770,9 @@ namespace Cluck
 
             PlayerIndex player;
 
-            if (winState != 0)
+            if (winState != 0 && (currentSong.IsStopped || currentSong.IsStopping))
             {
-                MediaPlayer.Stop();
+                currentSong.Stop(AudioStopOptions.AsAuthored);
                 ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
             }
 
@@ -748,7 +780,7 @@ namespace Cluck
             {
                 if (instructionStage < instructionCount)
                 {
-                    MediaPlayer.Pause();
+                    currentSong.Pause();
                     ScreenManager.AddScreen(new InstructionScreen(instructionStage), ControllingPlayer);
                     instructionStage++;
                 }
@@ -759,7 +791,7 @@ namespace Cluck
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
-                MediaPlayer.Pause();
+                currentSong.Pause();
                 //ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif

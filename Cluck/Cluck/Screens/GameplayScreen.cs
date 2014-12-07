@@ -81,11 +81,11 @@ namespace Cluck
         private Model chickenPen;
         private Model cluck;
         private Model cluckWin;
-        private Song testSong;
-        private Song fastSong;
-        private Song endSong;
-        private Song winSong;
+        private Cue testSong;
+        private Cue endSong;
+        private Cue winSong;
         private Cue currentSong;
+        private float pitchAdjustment;
         private float currentSongPitch;
         private AudioCategory musicCategory;
         private AudioEngine engine;
@@ -250,6 +250,11 @@ namespace Cluck
                 secondsAllotted = 0;
                 minutesAllotted = 0 + (level / 5);
             }
+
+            // Determine amount by which the pitch must be increased every millisecond to
+            // reach the max speedup by the end of the level
+            pitchAdjustment = 6.0f /(minutesAllotted * 60 + secondsAllotted);
+
             deathSecondsAlotted = 18;
             winSecondsAlotted = 18;
 
@@ -384,13 +389,16 @@ namespace Cluck
                 // Get the category.
                 musicCategory = engine.GetCategory("Music");
 
-                // Play the sound.
-                currentSong = soundBank.GetCue("Yoshi_looped_xact");
-                currentSong.SetVariable("Pitch", currentSongPitch);
-                //currentSong.Play();
+                // Get the different songs for playback.
+                testSong = soundBank.GetCue("Yoshi_looped_xact");
+                testSong.SetVariable("Pitch", currentSongPitch);
 
-                endSong = content.Load<Song>(@"Audio\ending");
-                winSong = content.Load<Song>(@"Audio\win");
+                endSong = soundBank.GetCue("ending_xact");
+                winSong = soundBank.GetCue("Win_xact");
+
+                currentSong = testSong;
+                currentSong.Play();
+
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -540,12 +548,6 @@ namespace Cluck
                         part.Effect = SkySphereEffect;
                     }
                 }
-
-                // Plays  Yoshi's island
-                //currentSong = testSong;
-                ////MediaPlayer.Play(testSong);
-                //MediaPlayer.IsRepeating = true;
-                //MediaPlayer.Volume = 0.45f;
                 
                 qteButtons[(int)Cluck.buttons.xq] = content.Load<Texture2D>(@"Textures\x");
                 qteButtons[(int)Cluck.buttons.ye] = content.Load<Texture2D>(@"Textures\y");
@@ -683,7 +685,6 @@ namespace Cluck
                                                        bool coveredByOtherScreen)
         {
             base.Update(gameTime, otherScreenHasFocus, false);
-            engine.Update();
             if (startTime < 0)
             {
                 startTime = (int)gameTime.TotalGameTime.TotalMilliseconds;
@@ -697,51 +698,9 @@ namespace Cluck
 
             if (IsActive)
             {
-                if (MediaPlayer.State == MediaState.Paused)
-                {
-                    //MediaPlayer.Resume();
-                }
-
-                if (winState == 1)
-                {
-                    if (!MediaPlayer.Equals(currentSong, winSong))
-                    {
-                        //MediaPlayer.Stop();
-                        ////MediaPlayer.Play(winSong);
-                        //currentSong = winSong;
-                    }
-                }
-                else if (timer <= TimeSpan.Zero)
-                {
-                    if (!MediaPlayer.Equals(currentSong, endSong))
-                    {
-                        //MediaPlayer.Stop();
-                       // //MediaPlayer.Play(endSong);
-                        //currentSong = endSong;
-                    }
-                }
-                else
-                {
-                    if (!MediaPlayer.Equals(currentSong, testSong))
-                    {
-                        //MediaPlayer.Stop();
-                        //MediaPlayer.Play(testSong);
-                        //currentSong = testSong;
-                    }
-                }
-
-
-
+                UpdateAudio(gameTime);
+ 
                 timeStart = true;
-
-                // Allows the game to exit
-                //if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed)
-                //    this.Exit();
-
-                //if (Keyboard.GetState().IsKeyDown(Keys.Escape))
-                //    this.Exit();
-
-                //winState = 0;
                 curKeyState = Keyboard.GetState();
 
                 if (timer > TimeSpan.Zero && timeStart && winState != 1)
@@ -848,6 +807,56 @@ namespace Cluck
             }
 
             //CheckWinState(winState);
+        }
+
+        /// <summary>
+        /// Update the audio as necessary.
+        /// </summary>
+        private void UpdateAudio(GameTime gameTime)
+        {
+            if (IsActive)
+            {
+                // Adjust the song's pitch (and thus playback speed)
+                if (currentSong == testSong)
+                {
+                    if (currentSong.IsStopped)
+                    {
+                        testSong = soundBank.GetCue("Yoshi_looped_xact");
+                        currentSong = testSong;
+                        currentSong.Play();
+                    }
+                    float adjustment = pitchAdjustment * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    currentSongPitch += adjustment;
+                    currentSong.SetVariable("Pitch", currentSongPitch);
+                }
+                if (currentSong.IsPaused)
+                {
+                    currentSong.Resume();
+                }
+
+                if (winState == 1 && currentSong != winSong)
+                {
+                    // Can add a transition later for more polish
+                    if(!currentSong.IsStopping && !currentSong.IsStopped && currentSong != winSong)
+                        currentSong.Stop(AudioStopOptions.AsAuthored);
+                    else if (currentSong.IsStopped)
+                    {
+                        currentSong = winSong;
+                        currentSong.Play();
+                    }
+                }
+                else if (timer <= TimeSpan.Zero)
+                {
+                    if (!currentSong.IsStopping && !currentSong.IsStopped && currentSong != endSong)
+                        currentSong.Stop(AudioStopOptions.AsAuthored);
+                    else if (currentSong.IsStopped)
+                    {
+                        currentSong = endSong;
+                        currentSong.Play();
+                    }
+                }
+                engine.Update();
+            }
         }
 
         /// <summary>
@@ -1026,12 +1035,12 @@ namespace Cluck
 
             if (winState == -1 && deathTimer <= TimeSpan.Zero)
             {
-                //MediaPlayer.Stop();
+                currentSong.Stop(AudioStopOptions.Immediate);
                 ScreenManager.AddScreen(new LossScreen(), ControllingPlayer);
             }
             else if (winState == 1 && winTimer <= TimeSpan.Zero)
             {
-                //MediaPlayer.Stop();
+                currentSong.Stop(AudioStopOptions.Immediate);
                 if (currentLevel == MAX_LEVEL)
                 {
                     ScreenManager.AddScreen(new EndCampaignScreen(score, curHighScore), ControllingPlayer);
@@ -1047,7 +1056,7 @@ namespace Cluck
 #if WINDOWS_PHONE
                 ScreenManager.AddScreen(new PhonePauseScreen(), ControllingPlayer);
 #else
-                //MediaPlayer.Pause();
+                currentSong.Pause();
                 ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
 #endif
             }

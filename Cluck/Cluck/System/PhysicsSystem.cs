@@ -414,6 +414,7 @@ namespace Cluck
             {
                 physicalObjects.ElementAt<GameEntity>(chickenInRange).RemoveComponent<SteeringComponent>(component_flags.aiSteering);
                 physicalObjects.ElementAt<GameEntity>(chickenInRange).AddComponent(new CaughtComponent());
+                physicalObjects.ElementAt<GameEntity>(chickenInRange).GetComponent<KinematicComponent>(component_flags.kinematic).Forces.Clear();
                 camera.chickenCaught = true;
             }
         }
