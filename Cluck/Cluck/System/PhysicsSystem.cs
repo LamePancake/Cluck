@@ -78,10 +78,21 @@ namespace Cluck
                         }
 
                         g.AddComponent(steering);
-                        // Add a force to the chicken in the direction we're looking with the camera
-                        k.Forces.Add(new Force(camera.ViewDirection * 20000, 100));
-                        k.Forces.Add(KinematicComponent.Gravity);
-                        k.IsGrounded = false;
+                        if (camera.DroppedChicken)
+                        {
+                            p.SetPosition(new Vector3(camera.Position.X, 0, camera.Position.Z));
+                            k.IsGrounded = true;
+                            k.Forces.Clear();
+                            k.Velocity = Vector3.Zero;
+                            camera.DroppedChicken = false;
+                        }
+                        else
+                        {
+                            // Add a force to the chicken in the direction we're looking with the camera
+                            k.Forces.Add(new Force(camera.ViewDirection * 20000, 100));
+                            k.Forces.Add(KinematicComponent.Gravity);
+                            k.IsGrounded = false;
+                        }
                     }
                     physicalWorld.Add(g);
                 }

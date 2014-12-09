@@ -140,6 +140,8 @@ namespace Cluck
 
         private SoundEffectInstance walk;
         private SoundEffectInstance slide;
+
+        private bool droppedChicken = false;
         
         public void Reset()
         {
@@ -387,8 +389,13 @@ namespace Cluck
             {
                 if (!qte.update((float)gameTime.ElapsedGameTime.TotalSeconds, i))
                 {
+                    droppedChicken = true;
                     chickenCaught = false;
                     qte.reset();
+                }
+                else
+                {
+                    droppedChicken = false;
                 }
             }
             else
@@ -993,6 +1000,12 @@ namespace Cluck
         }
 
     #region Properties
+
+        public bool DroppedChicken
+        {
+            get { return droppedChicken; }
+            set { droppedChicken = value; }
+        }
 
         public bool Dead
         {
