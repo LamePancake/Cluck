@@ -145,7 +145,7 @@ namespace Cluck
         public const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
         public const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
         public const float PEN_BOTTOM_BOUND = (PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_YCOORD + PEN_TRANS;
-        public const float PEN_HEIGHT = 39.38924f;
+        public const float PEN_HEIGHT = 5;//39.38924f;
         public FirstPersonCamera camera;
 
         private int windowWidth;
@@ -817,7 +817,7 @@ namespace Cluck
             if (IsActive)
             {
                 // Adjust the song's pitch (and thus playback speed)
-                if (currentSong == testSong)
+                if (currentSong == testSong && winState != 1 && timer > TimeSpan.Zero)
                 {
                     if (currentSong.IsStopped)
                     {
@@ -834,10 +834,10 @@ namespace Cluck
                     currentSong.Resume();
                 }
 
-                if (winState == 1 && currentSong != winSong)
+                if (winState == 1)
                 {
                     // Can add a transition later for more polish
-                    if(!currentSong.IsStopping && !currentSong.IsStopped && currentSong != winSong)
+                    if (!currentSong.IsStopping && !currentSong.IsStopped && currentSong != winSong)
                         currentSong.Stop(AudioStopOptions.AsAuthored);
                     else if (currentSong.IsStopped)
                     {
@@ -1665,12 +1665,13 @@ namespace Cluck
 
                 PositionComponent topPos;
                 PositionComponent bottomPos;
-
+                Renderable r;
                 penEntityTop.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + (PEN_WIDTH * x) + PEN_XCOORD,
                     0,
                     (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), 0f));
                 topPos = penEntityTop.GetComponent<PositionComponent>(component_flags.position);
-                penEntityTop.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation()), ToonEffectNoAnimation));
+                r = new Renderable(pen, texture, calBoundingBox(pen, topPos.GetPosition(), topPos.GetOrientation()), ToonEffectNoAnimation);
+                penEntityTop.AddComponent(r);
                 penEntityTop.AddComponent(new FenceComponent());
                 penEntityTop.AddComponent(new PenComponent());
 
@@ -1678,7 +1679,8 @@ namespace Cluck
                     0,
                     (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD), (float)Math.PI));
                 bottomPos = penEntityBottom.GetComponent<PositionComponent>(component_flags.position);
-                penEntityBottom.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation()), ToonEffectNoAnimation));
+                r = new Renderable(pen, texture, calBoundingBox(pen, bottomPos.GetPosition(), bottomPos.GetOrientation()), ToonEffectNoAnimation);
+                penEntityBottom.AddComponent(r);
                 penEntityBottom.AddComponent(new FenceComponent());
                 penEntityBottom.AddComponent(new PenComponent());
 
@@ -1694,11 +1696,14 @@ namespace Cluck
                 PositionComponent leftPos;
                 PositionComponent rightPos;
 
+                Renderable r;
+
                 penEntityLeft.AddComponent(new PositionComponent(new Vector3((-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_XCOORD,
                     0,
                     (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2));
                 leftPos = penEntityLeft.GetComponent<PositionComponent>(component_flags.position);
-                penEntityLeft.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation()), ToonEffectNoAnimation));
+                r = new Renderable(pen, texture, calBoundingBox(pen, leftPos.GetPosition(), leftPos.GetOrientation()), ToonEffectNoAnimation);
+                penEntityLeft.AddComponent(r);
                 penEntityLeft.AddComponent(new FenceComponent());
                 penEntityLeft.AddComponent(new PenComponent());
 
@@ -1706,7 +1711,8 @@ namespace Cluck
                     0,
                     (-PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + (PEN_WIDTH * y) + PEN_YCOORD), (float)Math.PI / 2 + (float)Math.PI));
                 rightPos = penEntityRight.GetComponent<PositionComponent>(component_flags.position);
-                penEntityRight.AddComponent(new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation()), ToonEffectNoAnimation));
+                r = new Renderable(pen, texture, calBoundingBox(pen, rightPos.GetPosition(), rightPos.GetOrientation()), ToonEffectNoAnimation);
+                penEntityRight.AddComponent(r);
                 penEntityRight.AddComponent(new FenceComponent());
                 penEntityRight.AddComponent(new PenComponent());
 

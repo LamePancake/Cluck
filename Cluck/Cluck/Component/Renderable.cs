@@ -21,6 +21,9 @@ namespace Cluck
         private float ambientIntensity;
         private Vector4 ambientColor;
 
+        public bool HasSphere { get; private set; }
+        public bool HasBox { get; private set; }
+
         private AnimationPlayer animationPlayer;
 
         public Renderable(Model model, Texture2D texture, BoundingSphere sphere, AnimationPlayer a, Effect effect)
@@ -36,6 +39,7 @@ namespace Cluck
             lineColor = new Vector4(0, 0, 0, 1);
             ambientIntensity = 0.1f;
             ambientColor = new Vector4(1, 1, 1, 1);
+            HasSphere = true;
         }
 
         public Renderable(Model model, Texture2D texture, BoundingSphere sphere, Effect effect)
@@ -51,6 +55,7 @@ namespace Cluck
             lineColor = new Vector4(0, 0, 0, 1);
             ambientIntensity = 0.1f;
             ambientColor = new Vector4(1, 1, 1, 1);
+            HasSphere = true;
         }
 
         public Renderable(Model model, Texture2D texture, BoundingBox box, Effect effect)
@@ -66,6 +71,7 @@ namespace Cluck
             lineColor = new Vector4(0, 0, 0, 1);
             ambientIntensity = 0.1f;
             ambientColor = new Vector4(1, 1, 1, 1);
+            HasBox = true;
         }
 
         public Model GetModel()
@@ -106,11 +112,13 @@ namespace Cluck
         public void SetBoundingBox(BoundingBox bb)
         {
             entityBox = bb;
+            HasBox = true;
         }
 
         public void SetBoundingSphere(BoundingSphere boundsphere)
         {
             entitySphere = boundsphere;
+            HasSphere = true;
         }
 
         public BoundingBox GetBoundingBox()

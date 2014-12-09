@@ -286,10 +286,8 @@ namespace Cluck
                     if(cur.HasComponent((int)component_flags.renderable))
                     {
                         Renderable r = cur.GetComponent<Renderable>(component_flags.renderable);
-                        BoundingBox b = r.GetBoundingBox();
-                        BoundingSphere s = r.GetBoundingSphere();
-                        if(b != null || s != null)
-                            radius = (b != null) ? ((b.Max.Y + b.Min.Y) / 2) : s.Radius;
+                        if (r.HasSphere)
+                            radius = r.GetBoundingSphere().Radius;
                     }
                     newPos += velocity * (float)gameTime.ElapsedGameTime.TotalSeconds;
 
@@ -429,11 +427,17 @@ namespace Cluck
         private void ClampPos(ref Vector3 prev, ref Vector3 desiredPos, ref Vector3 forwards, float radius, out Vector3 finalPos)
         {
             Vector3 newPos = desiredPos;
-            float penRight = GameplayScreen.PEN_RIGHT_BOUND + radius;
-            float penLeft = GameplayScreen.PEN_LEFT_BOUND + radius;
-            float penTop = GameplayScreen.PEN_TOP_BOUND + radius;
-            float penBottom = GameplayScreen.PEN_BOTTOM_BOUND + radius;
+            float penRight = GameplayScreen.PEN_RIGHT_BOUND;
+            float penLeft = GameplayScreen.PEN_LEFT_BOUND;
+            float penTop = GameplayScreen.PEN_TOP_BOUND;
+            float penBottom = GameplayScreen.PEN_BOTTOM_BOUND;
             const float penHeight = GameplayScreen.PEN_HEIGHT;
+
+            // Whether it's possible that we're colliding with the pen
+            bool possible = (desiredPos.X + radius >= penLeft && desiredPos.X - radius <= penRight) && // The chicken is between the right and left pen walls
+                            (desiredPos.Z + radius >= penTop && desiredPos.Z - radius <= penBottom) && // The chicken is between the top and bottom pen walls
+                            (desiredPos.Y - radius < penHeight);                                       // The desired position is somewhere between the ground and the top of the wall
+
 
             #region Stay in Bounds
             newPos.X = MathHelper.Clamp(newPos.X, -1070, 1070);
@@ -442,37 +446,44 @@ namespace Cluck
             #endregion
             #region Collide with Pen Walls
             // If they're about to go into the pen and their path would have them collide with a wall
-            if (desiredPos.X < penRight && desiredPos.X > penLeft &&
-                desiredPos.Z < penBottom && desiredPos.Z > penTop &&
-                prev.Y + radius <= penHeight && desiredPos.Y + radius <= penHeight)
+            if (possible)
             {
-                bool wasInZ = prev.Z < penBottom && prev.Z > penTop;
-                bool wasInX = prev.X < penRight && prev.X > penLeft;
-
-                if (!wasInZ)
+                #region Collide with Right and Left walls
+                // Touching the left wall?
+                if ((desiredPos.X + radius >= penLeft) && (desiredPos.X - radius < penLeft))
                 {
-                    // If they're moving positively along Z, then they came from the top part of the pen
-                    if (forwards.Z > 0)
-                        newPos.Z = penTop;
-                    // Otherwise they're coming from the bottom part of the pen
+                    if (forwards.X < 0)
+                        newPos.X = penLeft + radius;
                     else
-                        newPos.Z = penBottom;
+                        newPos.X = penLeft - radius;
                 }
-                else if (!wasInX)
+                // Touching the right wall?
+                else if ((desiredPos.X + radius >= penRight) && (desiredPos.X - radius < penRight))
                 {
                     if (forwards.X > 0)
-                        newPos.X = penLeft;
+                        newPos.X = penRight - radius;
                     else
-                        newPos.X = penRight;
+                        newPos.X = penRight + radius;
                 }
-            }
-            // If the object was already in the pen but is about to go out, stop them
-            else if (prev.X <= penRight && prev.X >= penLeft &&
-                     prev.Z <= penBottom && prev.Z >= penTop &&
-                     prev.Y + radius <= penHeight && desiredPos.Y + radius <= penHeight)
-            {
-                newPos.X = MathHelper.Clamp(newPos.X, penLeft, penRight);
-                newPos.Z = MathHelper.Clamp(newPos.Z, penTop, penBottom);
+                #endregion
+                #region Collide with Top and Bottom Walls
+                // Touching the top wall?
+                if ((desiredPos.Z + radius >= penTop) && (desiredPos.Z - radius < penTop))
+                {
+                    if (forwards.Z > 0)
+                        newPos.Z = penTop - radius;
+                    else
+                        newPos.Z = penTop + radius;
+                }
+                // Touching the bottom wall?
+                else if ((desiredPos.Z + radius >= penBottom) && (desiredPos.Z - radius < penBottom))
+                {
+                    if (forwards.Z < 0)
+                        newPos.Z = penBottom + radius;
+                    else
+                        newPos.Z = penBottom - radius;
+                }
+                #endregion
             }
             #endregion
             finalPos = newPos;
