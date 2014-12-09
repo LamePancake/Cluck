@@ -175,8 +175,6 @@ namespace Cluck
         }
 
         IAsyncResult result;
-
-        float scoreMultiplier = 1;
         bool chickenWasCaught;
 
         private bool scored = false;
@@ -185,6 +183,8 @@ namespace Cluck
 
         private AnimatedTexture sprintTexture;
         private AnimatedTexture slideTexture;
+
+        Vector3 thrownPosition = new Vector3();
 
         #endregion
 
@@ -712,9 +712,9 @@ namespace Cluck
                 oldKeyState = curKeyState;
 
 
-                if (chickenWasCaught && !camera.chickenCaught && !chickenCaught)
+                if (chickenWasCaught && !camera.chickenCaught)
                 {
-                    scoreMultiplier = 1;
+                    thrownPosition = camera.Position;
                 }
 
                 if (chickenCaught)
@@ -724,8 +724,7 @@ namespace Cluck
                     caughtChickens++;
                     chickenCaught = false;
                     scored = true;
-                    score += (int)(100 * scoreMultiplier);
-                    scoreMultiplier += 0.5f;
+                    score += (int)(Vector3.Distance(thrownPosition, new Vector3(500, 0, 500)) / 10);
                 }
                 
                 if (timer <= TimeSpan.Zero)
@@ -1079,14 +1078,14 @@ namespace Cluck
 
             if (scored)
             {
-                tempVector = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - ((int)timerFont.MeasureString("+" + (int)(100 * (scoreMultiplier - 0.5f))).X / 2), (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f + 60));
+                tempVector = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2 - ((int)timerFont.MeasureString("+" + (int)(Vector3.Distance(thrownPosition, new Vector3(500, 0, 500)) / 10)).X / 2), (int)(graphics.GraphicsDevice.Viewport.Height * 0.01f + 60));
                 for (int layer = 0; layer < 4; layer++)
                 {
                     tempVector.X += layer;
                     tempVector.Y += layer;
-                    spriteBatch.DrawString(timerFont, "+" + (int)(100 * (scoreMultiplier - 0.5f)), tempVector, Color.Black, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
+                    spriteBatch.DrawString(timerFont, "+" + (int)(Vector3.Distance(thrownPosition, new Vector3(500, 0, 500)) / 10), tempVector, Color.Black, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
                 }
-                spriteBatch.DrawString(timerFont, "+" + (int)(100 * (scoreMultiplier - 0.5f)), tempVector, Color.GreenYellow, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
+                spriteBatch.DrawString(timerFont, "+" + (int)(Vector3.Distance(thrownPosition, new Vector3(500, 0, 500)) / 10), tempVector, Color.GreenYellow, 0, new Vector2(0, 0), scoreScale, new SpriteEffects(), 0);
 
                 scoreScale += scoreScaleAmount;
                 if (scoreScale >= 2.2)
