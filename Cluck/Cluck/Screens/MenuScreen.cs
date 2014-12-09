@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Audio;
 using GameStateManagement;
 #endregion
 
@@ -34,6 +35,7 @@ namespace Cluck
         Boolean enlarge;
         BackgroundTexture background;
         MenuOverLay overlay;
+        Cue backgroundSong;
 
         InputAction menuUp;
         InputAction menuDown;

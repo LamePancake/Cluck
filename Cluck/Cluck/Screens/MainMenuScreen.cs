@@ -31,6 +31,7 @@ namespace Cluck
             Overlay = MenuOverLay.mainTitle;
             // Create our menu entries.
             MenuEntry playTutorialMenuEntry = new MenuEntry("\n\n\n\n\n\nTutorial");
+            playTutorialMenuEntry.Position += new Vector2(500, 50000);
             MenuEntry playGameMenuEntry = new MenuEntry("\n\n\n\n\n\n\nCampaign");
             MenuEntry playArcadeMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\nArcade");
             MenuEntry optionsMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\nOptions");

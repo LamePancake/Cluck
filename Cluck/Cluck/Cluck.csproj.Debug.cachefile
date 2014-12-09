@@ -57,7 +57,6 @@ Content\Models\arm_right_extended.xnb
 Content\SkySphere.xnb
 Content\Effects\Toon.xnb
 Content\Effects\ToonNoAnimation.xnb
-Content\Audio\Lacrimosa Dominae.xnb
 Content\Audio\Cluck1.xnb
 Content\Audio\Cluck2.xnb
 Content\Audio\Cluck3.xnb
@@ -66,29 +65,18 @@ Content\Audio\Cluck5.xnb
 Content\Audio\Cluck6.xnb
 Content\Audio\Cluck7.xnb
 Content\Audio\Cluck8.xnb
-Content\Audio\yoshi.xnb
-Content\Audio\Yoshi_looped.xnb
-Content\Audio\Yoshi_looped_fast.xnb
-Content\Audio\ending.xnb
-Content\Audio\win.xnb
 Content\Audio\Cluckzilla.xnb
 Content\Audio\crash.xnb
-Content\Audio\Yoshi_looped_xact.xnb
 Content\chicken_diffuse_0.xnb
 Content\chicken_diffuse_1.xnb
 Content\chicken_diffuse_2.xnb
 Content\chicken_diffuse_3.xnb
 Content\chicken_diffuse_4.xnb
+Content\Audio\Yoshi_looped_xact.xnb
 Content\Audio\slide.xnb
 Content\Audio\walk.xnb
 Content\Audio\ending_xact.xnb
 Content\Audio\Win_xact.xnb
-Content\Audio\Lacrimosa Dominae.wma
-Content\Audio\yoshi.wma
-Content\Audio\Yoshi_looped.wma
-Content\Audio\Yoshi_looped_fast.wma
-Content\Audio\ending.wma
-Content\Audio\win.wma
 Content\Audio\Yoshi_dynamic.xgs
 Content\Audio\CluckWave.xwb
 Content\Audio\CluckSound.xsb

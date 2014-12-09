@@ -154,7 +154,7 @@ namespace Cluck
 
             //float scale = 1 + pulsate * 0.05f * selectionFade;
 
-            float scale = 1;// + 6 * 0.05f * selectionFade;
+            float scale = 1 + 1 * 0.05f * selectionFade;
 
             // Modify the alpha to fade text out during transitions.
             color *= screen.TransitionAlpha;
