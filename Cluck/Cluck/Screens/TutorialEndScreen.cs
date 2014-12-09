@@ -27,7 +27,7 @@ namespace Cluck
         public TutorialEndScreen()
             : base("You have completed the tutorial!")
         {
-            Background = BackgroundTexture.cluckScene;
+            Background = BackgroundTexture.black;
             // Create our menu entries.
             MenuEntry mainMenuGameMenuEntry = new MenuEntry("Go To Back Main Menu");
 
@@ -36,6 +36,7 @@ namespace Cluck
 
             // Add entries to the menu.
             MenuEntries.Add(mainMenuGameMenuEntry);
+
         }
 
 

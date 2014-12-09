@@ -700,6 +700,12 @@ namespace Cluck
 
             }
 
+            //if (winState != 0)
+            //{
+            //    ScreenManager.AddScreen(new PauseMenuScreen(), ControllingPlayer);
+            //}
+            // && (currentSong.IsStopped || currentSong.IsStopping)
+
             //CheckWinState(winState);
         }
 
@@ -770,11 +776,7 @@ namespace Cluck
 
             PlayerIndex player;
 
-            if (winState != 0 && (currentSong.IsStopped || currentSong.IsStopping))
-            {
-                currentSong.Stop(AudioStopOptions.AsAuthored);
-                ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
-            }
+
 
             if (tutorialOn)
             {
@@ -818,6 +820,13 @@ namespace Cluck
                 movement.X += thumbstick.X;
                 movement.Y -= thumbstick.Y;
 
+            }
+
+
+            if (winState != 0)
+            {
+                currentSong.Stop(AudioStopOptions.AsAuthored);
+                ScreenManager.AddScreen(new TutorialEndScreen(), ControllingPlayer);
             }
         }
 
