@@ -31,17 +31,17 @@ namespace Cluck
             if (Cluck.currentLevel >= 1 && Cluck.currentLevel < 5)
             {
                 MAX_NUM_PRESSES = 8;
-                MAX_TIME = 3;
+                MAX_TIME = 2.5f;
             }
             else if (Cluck.currentLevel >= 5 && Cluck.currentLevel < 10)
             {
-                MAX_NUM_PRESSES = 9;
-                MAX_TIME = 3;
+                MAX_NUM_PRESSES = 8;
+                MAX_TIME = 2.25f;
             }
             else
             {
-                MAX_NUM_PRESSES = 10;
-                MAX_TIME = 3;
+                MAX_NUM_PRESSES = 8;
+                MAX_TIME = 2f;
             }
 
             if (currentButton == -1)
