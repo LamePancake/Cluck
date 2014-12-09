@@ -33,7 +33,7 @@ namespace Cluck
             + "\n\nThis year a meddling chicken herder keeps releasing the chickens.\n\nIt is up to you to save Cluckmas!")
         {
             // Create our menu entries.
-            MenuEntry startGameMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\n\nBegin your journey...");
+            MenuEntry startGameMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\n\nBegin your journey...Press Enter/A");
 
             // Hook up menu event handlers.
             startGameMenuEntry.Selected += StartGameMenuEntrySelected;
