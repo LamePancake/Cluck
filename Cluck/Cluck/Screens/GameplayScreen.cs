@@ -208,7 +208,7 @@ namespace Cluck
         private float scoreScale = 0.1f;
         private float scoreScaleAmount = 0.08f;
 
-        private float amountOfTimeToAdd = 2;
+        private float amountOfTimeToAdd = 4;
 
         private AnimatedTexture sprintTexture;
         private AnimatedTexture slideTexture;
