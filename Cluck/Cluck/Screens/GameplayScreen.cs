@@ -231,8 +231,8 @@ namespace Cluck
 
             currentLevel = level;
             baseScore = 100;
-            int secondsPerChicken = 6;
-            targetTime = level * secondsPerChicken + 10;
+            int secondsPerChicken = 5;
+            targetTime = level * secondsPerChicken + 20;
             startTime = -1;
 
             secondsAllotted = (int)targetTime % 60;
