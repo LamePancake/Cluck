@@ -242,7 +242,7 @@ namespace Cluck
             
             // Determine amount by which the pitch must be increased every millisecond to
             // reach the max speedup by the end of the level
-            pitchAdjustment = 6.0f /(minutesAllotted * 60 + secondsAllotted);
+            pitchAdjustment = 0.6f;
 
             deathSecondsAlotted = 18;
             winSecondsAlotted = 18;
@@ -814,9 +814,12 @@ namespace Cluck
                         currentSong = testSong;
                         currentSong.Play();
                     }
-                    float adjustment = pitchAdjustment * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                    currentSongPitch += adjustment;
-                    currentSong.SetVariable("Pitch", currentSongPitch);
+                    if (timer <= new TimeSpan(0, 0, 10))
+                    {
+                        float adjustment = pitchAdjustment * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                        currentSongPitch += adjustment;
+                        currentSong.SetVariable("Pitch", currentSongPitch);
+                    }
                 }
                 if (currentSong.IsPaused)
                 {

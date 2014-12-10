@@ -229,7 +229,7 @@ namespace Cluck
             timer = new TimeSpan(0, minutesAllotted, 0);
 
             // Determine the pitch adjustment per frame
-            pitchAdjustment = 6.0f / (minutesAllotted * 60);
+            pitchAdjustment = 0.6f;
 
             camera.PositionUpdate = KeepCameraInBounds;
             camera.EyeHeightStanding = CAMERA_PLAYER_EYE_HEIGHT;
@@ -756,9 +756,12 @@ namespace Cluck
                     currentSong = testSong;
                     currentSong.Play();
                 }
-                float adjustment = pitchAdjustment * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                currentSongPitch += adjustment;
-                currentSong.SetVariable("Pitch", currentSongPitch);
+                if (timer <= new TimeSpan(0, 0, 10))
+                {
+                    float adjustment = pitchAdjustment * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                    currentSongPitch += adjustment;
+                    currentSong.SetVariable("Pitch", currentSongPitch);
+                }
 
                 if (currentSong.IsPaused)
                 {
