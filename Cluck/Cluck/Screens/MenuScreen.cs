@@ -385,7 +385,7 @@ namespace Cluck
             {
                 if (titleSize < 1.15f)
                 {
-                    titleSize += 0.02f;
+                    titleSize += 0.005f;
                 }
                 else
                 {
@@ -396,7 +396,7 @@ namespace Cluck
             {
                 if (titleSize > 0.90f)
                 {
-                    titleSize -= 0.02f;
+                    titleSize -= 0.005f;
                 }
                 else
                 {
