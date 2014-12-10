@@ -208,7 +208,7 @@ namespace Cluck
         private float scoreScale = 0.1f;
         private float scoreScaleAmount = 0.08f;
 
-        private float amountOfTimeToAdd = 10;
+        private float amountOfTimeToAdd = 2;
 
         private AnimatedTexture sprintTexture;
         private AnimatedTexture slideTexture;
@@ -231,26 +231,13 @@ namespace Cluck
 
             currentLevel = level;
             baseScore = 100;
-            int secondsPerChicken = 10;
-            targetTime = level * secondsPerChicken;
+            int secondsPerChicken = 6;
+            targetTime = level * secondsPerChicken + 10;
             startTime = -1;
 
-            if (level < 12)
-            {
-                secondsAllotted = 5 * level;
-                minutesAllotted = 1 + (level / 5);
-            }
-            else if (level > 12)
-            {
-                secondsAllotted = 0;
-                minutesAllotted = 2 + (level / 5);
-            }
-            else
-            {
-                secondsAllotted = 0;
-                minutesAllotted = 0 + (level / 5);
-            }
-
+            secondsAllotted = (int)targetTime % 60;
+            minutesAllotted = (int)targetTime / 60;
+            
             // Determine amount by which the pitch must be increased every millisecond to
             // reach the max speedup by the end of the level
             pitchAdjustment = 6.0f /(minutesAllotted * 60 + secondsAllotted);

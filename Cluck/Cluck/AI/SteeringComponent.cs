@@ -14,15 +14,15 @@ namespace Cluck.AI
         private GameEntity scaryEntity;
         private Vector3 scaryPos;
         public Vector3 wanderTarget;
-        public float wanderOffset = 900;
-        public float wanderRadius = 50;
+        public float wanderOffset = 550;
+        public float wanderRadius = 150;
         public float wanderJitter = 3.5f;
         private bool wanderOn;
         private bool fleeOn;
         private bool flyOn;
         private bool seekOn;
         public Ray[] feelers;
-        public float feelerLength = 60;
+        public float feelerLength = 40;
         public bool flying;
 
         /// <summary>

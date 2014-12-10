@@ -131,7 +131,7 @@ namespace Cluck
             MaxAngularAcceleration = maxAngularAccel;
 
             MaxWalkSpeed = maximumSpeed;
-            MaxRunSpeed = maximumSpeed * 2.5f;
+            MaxRunSpeed = maximumSpeed * 3f;
             MaxFlySpeed = MaxRunSpeed;
 
             Velocity = Vector3.Zero;
