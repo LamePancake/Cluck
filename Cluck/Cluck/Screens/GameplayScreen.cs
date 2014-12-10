@@ -370,24 +370,6 @@ namespace Cluck
                 penBase = content.Load<Model>(@"Models\pen_base_large");
                 chickenPen = content.Load<Model>(@"Models\chicken_pen_side_large");
 
-                // Initialize audio objects.
-                engine = new AudioEngine("Content\\Audio\\Yoshi_dynamic.xgs");
-                soundBank = new SoundBank(engine, "Content\\Audio\\CluckSound.xsb");
-                waveBank = new WaveBank(engine, "Content\\Audio\\CluckWave.xwb");
-
-                // Get the category.
-                musicCategory = engine.GetCategory("Music");
-
-                // Get the different songs for playback.
-                testSong = soundBank.GetCue("Yoshi_looped_xact");
-                testSong.SetVariable("Pitch", currentSongPitch);
-
-                endSong = soundBank.GetCue("ending_xact");
-                winSong = soundBank.GetCue("Win_xact");
-
-                currentSong = testSong;
-                currentSong.Play();
-
                 CHICKEN_SOUNDS[0] = content.Load<SoundEffect>(@"Audio\Cluck1");
                 CHICKEN_SOUNDS[1] = content.Load<SoundEffect>(@"Audio\Cluck2");
                 CHICKEN_SOUNDS[2] = content.Load<SoundEffect>(@"Audio\Cluck3");
@@ -567,7 +549,24 @@ namespace Cluck
 
                 LoadHighScore();
                 ScreenManager.Game.ResetElapsedTime();
-                
+
+                // Initialize audio objects.
+                engine = new AudioEngine("Content\\Audio\\Yoshi_dynamic.xgs");
+                soundBank = new SoundBank(engine, "Content\\Audio\\CluckSound.xsb");
+                waveBank = new WaveBank(engine, "Content\\Audio\\CluckWave.xwb");
+
+                // Get the category.
+                musicCategory = engine.GetCategory("Music");
+
+                // Get the different songs for playback.
+                testSong = soundBank.GetCue("Yoshi_looped_xact");
+                testSong.SetVariable("Pitch", currentSongPitch);
+
+                endSong = soundBank.GetCue("ending_xact");
+                winSong = soundBank.GetCue("Win_xact");
+
+                currentSong = testSong;
+                currentSong.Play();
             }
 
 #if WINDOWS_PHONE

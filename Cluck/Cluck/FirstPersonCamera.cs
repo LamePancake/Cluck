@@ -563,19 +563,22 @@ namespace Cluck
 
             if ((direction.X != 0 || direction.Z != 0))
             {
-                if (walk != null && !walk.IsDisposed && walk.State == SoundState.Paused)
-                    walk.Resume();
-                else if (walk != null && !walk.IsDisposed && walk.State != SoundState.Playing)
-                    walk.Play();
-                else
-                    walk.Pause();
+                if (walk != null && !walk.IsDisposed)
+                {
+                    if(walk.State == SoundState.Paused)
+                        walk.Resume();
+                    else if (walk.State != SoundState.Playing)
+                        walk.Play();
+                    else
+                        walk.Pause();
 
-                if (isSprinting)
-                    walk.Pitch = 0.55f;
-                else if (i.IsCrouching())
-                    walk.Pitch = -0.05f;
-                else
-                    walk.Pitch = 0.05f;
+                    if (isSprinting)
+                        walk.Pitch = 0.55f;
+                    else if (i.IsCrouching())
+                        walk.Pitch = -0.05f;
+                    else 
+                        walk.Pitch = 0.05f;
+                }
             }
             else
             {
