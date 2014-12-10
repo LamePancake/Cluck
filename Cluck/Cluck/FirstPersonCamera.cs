@@ -743,11 +743,11 @@ namespace Cluck
             if(!dead)
             {
 			    direction = GetMovementDirection(direction, i);
-
                 Rotate(i.GetViewX(), i.GetViewY()); 
-			    UpdateVelocity(ref direction, elapsedTimeSec);
-                UpdatePosition(ref direction, elapsedTimeSec);
             }
+
+            UpdateVelocity(ref direction, elapsedTimeSec);
+            UpdatePosition(ref direction, elapsedTimeSec);
         }
 
         /// <summary>
