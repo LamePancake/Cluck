@@ -447,9 +447,9 @@ namespace Cluck
             const float penHeight = GameplayScreen.PEN_HEIGHT;
 
             // Whether it's possible that we're colliding with the pen
-            bool possible = (desiredPos.X + radius >= penLeft && desiredPos.X - radius <= penRight) && // The chicken is between the right and left pen walls
-                            (desiredPos.Z + radius >= penTop && desiredPos.Z - radius <= penBottom) && // The chicken is between the top and bottom pen walls
-                            (desiredPos.Y - radius < penHeight);                                       // The desired position is somewhere between the ground and the top of the wall
+            bool colliding = (desiredPos.X + radius >= penLeft && desiredPos.X - radius <= penRight) && // The chicken is between the right and left pen walls
+                             (desiredPos.Z + radius >= penTop && desiredPos.Z - radius <= penBottom) && // The chicken is between the top and bottom pen walls
+                             (desiredPos.Y - radius < penHeight);                                       // The desired position is somewhere between the ground and the top of the wall
 
 
             #region Stay in Bounds
@@ -459,7 +459,7 @@ namespace Cluck
             #endregion
             #region Collide with Pen Walls
             // If they're about to go into the pen and their path would have them collide with a wall
-            if (possible)
+            if (colliding)
             {
                 #region Collide with Right and Left walls
                 // Touching the left wall?

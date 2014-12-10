@@ -25,7 +25,8 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public EndCampaignScreen(int score, int highscore)
-            : base("Cluck has been satisfied! Your village is safe for the rest of the year!\n Your Score: " + score + "\n High-Score: " + highscore)
+            : base("Cluck has been satisfied! Your village is safe for the rest of the year!\n Your Score: " + score + "\n High-Score: " + highscore,
+                   MenuSong.nothing)
         {
             Background = BackgroundTexture.wonCampaign;
             // Create our menu entries.

@@ -25,7 +25,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public WinScreen(int score, int highscore)
-            : base("You managed to prevent Cluck's wrath for today! \n Your Score: " + score + "\n High-Score: " + highscore)
+            : base("You managed to prevent Cluck's wrath for today! \n Your Score: " + score + "\n High-Score: " + highscore, MenuSong.nothing)
         {
             Background = BackgroundTexture.betweenLevel;
             // Create our menu entries.

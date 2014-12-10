@@ -52,7 +52,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public OptionsMenuScreen()
-            : base("Options")
+            : base("Options", GameStateManagement.MenuSong.nothing)
         {
             // Create our menu entries.
             ungulateMenuEntry = new MenuEntry(string.Empty);

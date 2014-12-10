@@ -27,7 +27,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public PauseMenuScreen()
-            : base("Paused")
+            : base("Paused", MenuSong.nothing)
         {
             // Create our menu entries.
             Background = BackgroundTexture.black;

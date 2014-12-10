@@ -30,7 +30,7 @@ namespace Cluck
         public IntroductionScreen()
             : base("\n\n\n\n\n\n\n\nOnce upon a time, there was a village of chicken herders.\n\nEvery year the deity Cluck comes for the tribute of chickens\nduring the 10 days of Cluckmas."
             + "\n\nIf not sated, he may unleash his wrath upon the village."
-            + "\n\nThis year a meddling chicken herder keeps releasing the chickens.\n\nIt is up to you to save Cluckmas!")
+            + "\n\nThis year a meddling chicken herder keeps releasing the chickens.\n\nIt is up to you to save Cluckmas!", GameStateManagement.MenuSong.nothing)
         {
             // Create our menu entries.
             MenuEntry startGameMenuEntry = new MenuEntry("\n\n\n\n\n\n\n\n\n\nBegin your journey...Press Enter/A");

@@ -15,6 +15,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input.Touch;
+using Microsoft.Xna.Framework.Audio;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Xml.Linq;
@@ -38,6 +39,11 @@ namespace GameStateManagement
         nothing
     }
 
+    public enum MenuSong
+    {
+        titleTheme,
+        nothing
+    }
     /// <summary>
     /// The screen manager is a component which manages one or more GameScreen
     /// instances. It maintains a stack of screens, calls their Update and Draw
@@ -65,6 +71,11 @@ namespace GameStateManagement
 
         Texture2D gameTitleTexture;
         Texture2D nothingTexture;
+
+        AudioEngine engine;
+        WaveBank wave;
+        SoundBank sound;
+        Cue kakarikoVillage;
 
         bool isInitialized;
 
@@ -101,6 +112,29 @@ namespace GameStateManagement
         public Texture2D Background
         {
             get { return backgroundTexture; }
+        }
+
+        /// <summary>
+        /// The background song to be played.
+        /// </summary>
+        public Cue MainBackgroundMusic
+        {
+            get { return kakarikoVillage; }
+        }
+
+        public AudioEngine Engine
+        {
+            get { return engine; }
+        }
+
+        public WaveBank Wave
+        {
+            get { return wave; }
+        }
+
+        public SoundBank Sound
+        {
+            get { return sound; }
         }
 
         /// <summary>
@@ -203,6 +237,13 @@ namespace GameStateManagement
 
             gameTitleTexture = content.Load<Texture2D>("mainmenuoverlay");
 
+            // Initialize audio objects.
+            engine = new AudioEngine("Content\\Audio\\Yoshi_dynamic.xgs");
+            sound = new SoundBank(engine, "Content\\Audio\\CluckSound.xsb");
+            wave = new WaveBank(engine, "Content\\Audio\\CluckWave.xwb");
+
+            kakarikoVillage = sound.GetCue("menu_theme_xact");
+
             // Tell each of the screens to load their content.
             foreach (GameScreen screen in screens)
             {
@@ -210,7 +251,11 @@ namespace GameStateManagement
             }
         }
 
-
+        public void ReloadMusic()
+        {
+            if (kakarikoVillage.IsStopped)
+                kakarikoVillage = sound.GetCue("menu_theme_xact");
+        }
         /// <summary>
         /// Unload your graphics content.
         /// </summary>

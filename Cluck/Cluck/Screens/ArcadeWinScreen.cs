@@ -27,7 +27,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public ArcadeWinScreen(int score, int highscore)
-            : base( "\n Your Score: " + score + "\n High-Score: " + highscore)
+            : base( "\n Your Score: " + score + "\n High-Score: " + highscore, MenuSong.nothing)
         {
             Background = BackgroundTexture.wonCampaign;
             // Create our menu entries.

@@ -110,6 +110,7 @@ namespace Cluck
         private Texture2D cluckDiffuse;
         private KeyboardState oldKeyState;
         private KeyboardState curKeyState;
+        private bool movedOn;
         private static int winState;
         private float boundingArmScale;
         private float boundingPenScale;
@@ -145,7 +146,7 @@ namespace Cluck
         public const float PEN_RIGHT_BOUND = (PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_XCOORD + PEN_TRANS;
         public const float PEN_TOP_BOUND = (-PEN_LINKS_WIDTH * PEN_WIDTH / 2) + PEN_YCOORD - PEN_TRANS;
         public const float PEN_BOTTOM_BOUND = (PEN_LINKS_HEIGHT * PEN_WIDTH / 2) + PEN_YCOORD + PEN_TRANS;
-        public const float PEN_HEIGHT = 5;//39.38924f;
+        public const float PEN_HEIGHT = 5;
         public FirstPersonCamera camera;
 
         private int windowWidth;
@@ -223,6 +224,7 @@ namespace Cluck
         /// </summary>
         public GameplayScreen(int level)
         {
+            movedOn = false;
             camera = Cluck.camera;
             camera.Reset();
             graphics = Cluck.graphics;
@@ -826,8 +828,9 @@ namespace Cluck
                     // Can add a transition later for more polish
                     if (!currentSong.IsStopping && !currentSong.IsStopped && currentSong != winSong)
                         currentSong.Stop(AudioStopOptions.AsAuthored);
-                    else if (currentSong.IsStopped)
+                    else if (currentSong.IsStopped && !movedOn)
                     {
+                        movedOn = true;
                         currentSong = winSong;
                         currentSong.Play();
                     }
@@ -836,8 +839,9 @@ namespace Cluck
                 {
                     if (!currentSong.IsStopping && !currentSong.IsStopped && currentSong != endSong)
                         currentSong.Stop(AudioStopOptions.AsAuthored);
-                    else if (currentSong.IsStopped)
+                    else if (currentSong.IsStopped && !movedOn)
                     {
+                        movedOn = true;
                         currentSong = endSong;
                         currentSong.Play();
                     }

@@ -25,7 +25,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public TutorialEndScreen()
-            : base("You have completed the tutorial!")
+            : base("You have completed the tutorial!", MenuSong.nothing)
         {
             Background = BackgroundTexture.black;
             // Create our menu entries.

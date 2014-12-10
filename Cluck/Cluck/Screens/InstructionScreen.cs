@@ -29,7 +29,7 @@ namespace Cluck
         /// Constructor.
         /// </summary>
         public InstructionScreen(int stage)
-            : base("")
+            : base("", MenuSong.nothing)
         {
             Background = BackgroundTexture.black;
             MenuEntry nextInstructionMenuEntry;

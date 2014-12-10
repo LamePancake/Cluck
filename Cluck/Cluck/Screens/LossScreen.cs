@@ -26,7 +26,7 @@ namespace Cluck
         /// </summary>
         public LossScreen()
             : base("You Lost!\n Cluck showed up and there weren't enough chickens to "
-             + "appease him!\nYour entire village was turned into goats!")
+             + "appease him!\nYour entire village was turned into goats!", MenuSong.nothing)
         {
             // Create our menu entries.
             Background = BackgroundTexture.lostCampaign;

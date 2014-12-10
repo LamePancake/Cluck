@@ -35,7 +35,9 @@ namespace Cluck
         Boolean enlarge;
         BackgroundTexture background;
         MenuOverLay overlay;
+        MenuSong song;
         Cue backgroundSong;
+        bool requestedStop;
 
         InputAction menuUp;
         InputAction menuDown;
@@ -76,7 +78,7 @@ namespace Cluck
         /// <summary>
         /// Constructor.
         /// </summary>
-        public MenuScreen(string menuTitle)
+        public MenuScreen(string menuTitle, MenuSong bgSong)
         {
             background = BackgroundTexture.black;
             overlay = MenuOverLay.nothing;
@@ -103,6 +105,8 @@ namespace Cluck
                 true);
 
             enlarge = true;
+
+            song = bgSong;
         }
 
 
@@ -157,6 +161,13 @@ namespace Cluck
                     ScreenManager.Game.Exit();
                 }
             }
+        }
+
+        protected void StopMusic()
+        {
+            requestedStop = true;
+            if (backgroundSong != null)
+                backgroundSong.Stop(AudioStopOptions.Immediate);
         }
 
         /// <summary>
@@ -244,6 +255,8 @@ namespace Cluck
         {
             base.Update(gameTime, otherScreenHasFocus, coveredByOtherScreen);
 
+            UpdateAudio();
+
             // Update each nested MenuEntry object.
             for (int i = 0; i < menuEntries.Count; i++)
             {
@@ -253,6 +266,22 @@ namespace Cluck
             }
         }
 
+        private void UpdateAudio()
+        {
+            if (backgroundSong == null)
+                return;
+
+            ScreenManager.Engine.Update();
+
+            if(backgroundSong.IsPrepared)
+            {
+                backgroundSong.Play();
+            }
+            else if(backgroundSong.IsStopped && !requestedStop)
+            {
+                ScreenManager.ReloadMusic();
+            }
+        }
 
         /// <summary>
         /// Draws the menu.
@@ -297,6 +326,16 @@ namespace Cluck
                 case MenuOverLay.nothing:
                     break;
                 default:
+                    break;
+            }
+
+            switch(song)
+            {
+                case MenuSong.titleTheme:
+                    backgroundSong = ScreenManager.MainBackgroundMusic;
+                    break;
+                case MenuSong.nothing:
+                    backgroundSong = null;
                     break;
             }
 

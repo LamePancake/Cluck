@@ -10,6 +10,7 @@
 #region Using Statements
 using Microsoft.Xna.Framework;
 using GameStateManagement;
+using Microsoft.Xna.Framework.Audio;
 #endregion
 
 namespace Cluck
@@ -21,12 +22,12 @@ namespace Cluck
     {
         #region Initialization
 
-
+        bool transitioned = false;
         /// <summary>
         /// Constructor fills in the menu contents.
         /// </summary>
         public MainMenuScreen()
-            : base("")
+            : base("", MenuSong.titleTheme)
         {
             Overlay = MenuOverLay.mainTitle;
             // Create our menu entries.
@@ -41,7 +42,6 @@ namespace Cluck
             playTutorialMenuEntry.Selected += PlayTutorialMenuEntrySelected;
             playGameMenuEntry.Selected += PlayGameMenuEntrySelected;
             playArcadeMenuEntry.Selected += PlayArcadeMenuEntrySelected;
-            optionsMenuEntry.Selected += OptionsMenuEntrySelected;
             exitMenuEntry.Selected += OnCancel;
 
             // Add entries to the menu.
@@ -65,6 +65,7 @@ namespace Cluck
         void PlayTutorialMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex, new TutorialScreen());
+            StopMusic();
         }
 
         /// <summary>
@@ -74,23 +75,15 @@ namespace Cluck
         {
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
                                new GameplayScreen(Cluck.currentLevel));
+            StopMusic();
         }
 
         void PlayArcadeMenuEntrySelected(object sender, PlayerIndexEventArgs e)
         {
             LoadingScreen.Load(ScreenManager, true, e.PlayerIndex,
                                new ArcadeScreen());
+            StopMusic();
         }
-
-
-        /// <summary>
-        /// Event handler for when the Options menu entry is selected.
-        /// </summary>
-        void OptionsMenuEntrySelected(object sender, PlayerIndexEventArgs e)
-        {
-            ScreenManager.AddScreen(new OptionsMenuScreen(), e.PlayerIndex);
-        }
-
 
         /// <summary>
         /// When the user cancels the main menu, ask if they want to exit the sample.
