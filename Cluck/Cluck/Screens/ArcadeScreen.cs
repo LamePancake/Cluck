@@ -185,6 +185,8 @@ namespace Cluck
         private AnimatedTexture slideTexture;
 
         Vector3 thrownPosition = new Vector3();
+        public static Vector3 chickenScorePosition = new Vector3();
+        public static float chickenScoreOrientation = 0.0f;
 
         #endregion
 
@@ -581,7 +583,7 @@ namespace Cluck
             GameEntity chickenEntity = new GameEntity();
 
             Random rand = new Random();
-            Vector3 chickenPosition = new Vector3(500 + rand.Next(-100, 100), 0, 500 + rand.Next(-100, 100));
+            Vector3 chickenPosition = chickenScorePosition;//new Vector3(500 + rand.Next(-100, 100), 0, 500 + rand.Next(-100, 100));
 
             SkinningData skinningData = chicken.Tag as SkinningData;
 
@@ -591,7 +593,7 @@ namespace Cluck
 
             AnimationClip clip = skinningData.AnimationClips["Take 001"];
 
-            PositionComponent chickenPos = new PositionComponent(chickenPosition, (float)(Util.RandomClamped() * Math.PI));
+            PositionComponent chickenPos = new PositionComponent(chickenPosition, chickenScoreOrientation);
 
             Renderable chickenRenderable = new Renderable(chicken, chickenDiffuse, calBoundingSphere(chicken, boundingChickenScale), new AnimationPlayer(skinningData), ToonEffect);
 

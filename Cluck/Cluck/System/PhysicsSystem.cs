@@ -178,7 +178,7 @@ namespace Cluck
                             {
                                 pos = physicalObjects.ElementAt<GameEntity>(i).GetComponent<PositionComponent>(component_flags.position);
                                 // Check if the chicken is actually in the pen
-                                if (pos.GetPosition().Y > GameplayScreen.PEN_HEIGHT)
+                                if (pos.GetPosition().Y > 3)
                                     continue;
                                 physicalObjects.ElementAt<GameEntity>(i).RemoveComponent<FreeComponent>(component_flags.free);
                                 chickenCaughtIndex = i;
@@ -187,7 +187,7 @@ namespace Cluck
                             {
                                 pos = physicalObjects.ElementAt<GameEntity>(j).GetComponent<PositionComponent>(component_flags.position);
                                 // Check if the chicken is actually in the pen
-                                if (pos.GetPosition().Y > GameplayScreen.PEN_HEIGHT)
+                                if (pos.GetPosition().Y > 3)
                                     continue;
                                 physicalObjects.ElementAt<GameEntity>(j).RemoveComponent<FreeComponent>(component_flags.free);
                                 chickenCaughtIndex = j;
@@ -198,6 +198,8 @@ namespace Cluck
                             GameplayScreen.addTime = true;
                             GameplayScreen.remainingChickens--;
                             ArcadeScreen.chickenCaught = true;
+                            ArcadeScreen.chickenScorePosition = pos.GetPosition();
+                            ArcadeScreen.chickenScoreOrientation = pos.GetOrientation();
                         }
                         else
                         {
